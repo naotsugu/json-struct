@@ -1,6 +1,6 @@
 package com.mammb.code.jsonstruct;
 
-public enum JsonToken {
+public enum TokenType {
     CURLYOPEN,
     SQUAREOPEN,
     COLON,

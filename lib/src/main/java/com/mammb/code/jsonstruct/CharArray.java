@@ -46,8 +46,16 @@ public class CharArray implements Serializable {
         return elements[index];
     }
 
-    public char[] get() {
+    public char[] array() {
         return Arrays.copyOf(elements, length);
+    }
+
+    public SubArray subArray(int start, int end) {
+        return new SubArray(this, start, end);
+    }
+
+    public SubArray subArray(int start) {
+        return new SubArray(this, start, length);
     }
 
     public void clear() {
@@ -74,11 +82,9 @@ public class CharArray implements Serializable {
         }
     }
 
-    private static final int SOFT_MAX_ARRAY_LENGTH = Integer.MAX_VALUE - 8;
-
-    public static int newCapacity(int oldLength, int minGrowth, int prefGrowth) {
+    private static int newCapacity(int oldLength, int minGrowth, int prefGrowth) {
         int prefLength = oldLength + Math.max(minGrowth, prefGrowth);
-        if (0 < prefLength && prefLength <= SOFT_MAX_ARRAY_LENGTH) {
+        if (0 < prefLength && prefLength <= Integer.MAX_VALUE - 8) {
             return prefLength;
         } else {
             int minLength = oldLength + minGrowth;
@@ -86,7 +92,18 @@ public class CharArray implements Serializable {
                 throw new OutOfMemoryError(
                         "Required array length %d %d is too large".formatted(oldLength, minGrowth));
             }
-            return Math.max(minLength, SOFT_MAX_ARRAY_LENGTH);
+            return Math.max(minLength, Integer.MAX_VALUE - 8);
+        }
+    }
+
+    record SubArray(CharArray source, int start, int end) implements CharSource {
+        @Override
+        public char[] chars() {
+            return Arrays.copyOfRange(source.elements, start, end);
+        }
+        @Override
+        public String toString() {
+            return new String(chars());
         }
     }
 

@@ -3,88 +3,94 @@ package com.mammb.code.jsonstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.math.BigDecimal;
 
-import static com.mammb.code.jsonstruct.TokenType.*;
+import static com.mammb.code.jsonstruct.Token.Type.*;
 
 public class Tokenizer {
 
     private final Reader reader;
-    private int prev = -2;
+    private final CharArray ca;
+    private Integer prev;
 
-    Tokenizer(Reader reader) {
+    Tokenizer(Reader reader, CharArray ca) {
         this.reader = reader.markSupported() ? reader : new BufferedReader(reader);
+        this.ca = ca;
+        this.prev = null;
     }
 
-    Token<?> next() {
+    static Tokenizer of(Reader reader) {
+        return new Tokenizer(reader, CharArray.of());
+    }
+
+    Token next() {
         int ch = read();
         return switch (ch) {
             case '"' -> readString();
-            case '{' -> Token.type(CURLYOPEN);
-            case '[' -> Token.type(SQUAREOPEN);
-            case ':' -> Token.type(COLON);
-            case ',' -> Token.type(COMMA);
+            case '{' -> Token.of(CURLYOPEN);
+            case '[' -> Token.of(SQUAREOPEN);
+            case ':' -> Token.of(COLON);
+            case ',' -> Token.of(COMMA);
             case 't' -> readTrue();
             case 'f' -> readFalse();
             case 'n' -> readNull();
-            case ']' -> Token.type(SQUARECLOSE);
-            case '}' -> Token.type(CURLYCLOSE);
+            case ']' -> Token.of(SQUARECLOSE);
+            case '}' -> Token.of(CURLYCLOSE);
             case '0','1','2','3','4','5','6','7','8','9','-' -> readNumber(ch);
             case ' ', '\t', '\r', '\n' -> next();
-            case -1 -> Token.type(EOF);
+            case -1 -> Token.of(EOF);
             default -> throw unexpectedChar(ch);
         };
     }
 
 
-    private Token<CharSequence> readString() {
-        StringBuilder sb = new StringBuilder();
+    private Token readString() {
+        int start = ca.length();
         for (;;) {
             int ch = read();
             if (ch == '"') {
                 break;
             } else if (ch == '\\') {
-                sb.append((char) unescape());
+                ca.add((char) unescape());
             } else if (ch >= 0x20) {
-                sb.append((char) ch);
+                ca.add((char) ch);
             } else {
                 throw unexpectedChar(ch);
             }
         }
-        return Token.cs(sb); // TODO lazy
+        return TokenString.of(ca.subArray(start));
     }
 
-    private Token<Number> readNumber(int ch)  {
+    private Token readNumber(int ch)  {
 
-        boolean minus = false;
-        boolean fracOrExp = false;
-        StringBuilder sb = new StringBuilder();
+        int start = ca.length();
+
+        boolean frac = false;
+        boolean exp = false;
 
         // sign
         if (ch == '-') {
-            minus = true;
-            sb.append((char) ch);
+            ca.add((char) ch);
             ch = read();
-            if (ch < '0' || ch >'9') throw unexpectedChar(ch);
+            if (ch < '0' || ch > '9') throw unexpectedChar(ch);
         }
 
         // int
         if (ch == '0') {
-            sb.append((char) ch);
+            ca.add((char) ch);
             ch = read();
         } else {
             do {
-                sb.append((char) ch);
+                ca.add((char) ch);
                 ch = read();
             } while (ch >= '0' && ch <= '9');
         }
 
         // frac
         if (ch == '.') {
-            fracOrExp = true;
+            frac = true;
             int count = 0;
             do {
-                sb.append((char) ch);
+                ca.add((char) ch);
                 ch = read();
                 count++;
             } while (ch >= '0' && ch <= '9');
@@ -93,16 +99,16 @@ public class Tokenizer {
 
         // exp
         if (ch == 'e' || ch == 'E') {
-            fracOrExp = true;
-            sb.append((char) ch);
+            exp = true;
+            ca.add((char) ch);
             ch = read();
             if (ch == '+' || ch == '-') {
-                sb.append((char) ch);
+                ca.add((char) ch);
                 ch = read();
             }
             int count;
             for (count = 0; ch >= '0' && ch <= '9'; count++) {
-                sb.append((char) ch);
+                ca.add((char) ch);
                 ch = read();
             }
             if (count == 0) throw unexpectedChar(ch);
@@ -110,45 +116,31 @@ public class Tokenizer {
 
         prev = ch;
 
-        if (!fracOrExp && (sb.length() <= 9 || (minus && sb.length() <= 10))) {
-            int num = 0;
-            for (int i = minus ? 1 : 0; i < sb.length(); i++) {
-                num = num * 10 + (sb.charAt(i) - '0');
-            }
-            return Token.number(minus ? -num : num);
-        }
-        if (!fracOrExp && (sb.length() <= 18 || (minus && sb.length() <= 19))) {
-            long num = 0;
-            for (int i = minus ? 1 : 0; i < sb.length(); i++) {
-                num = num * 10 + (sb.charAt(i) - '0');
-            }
-            return Token.number(minus ? -num : num);
-        }
-        var bd = new BigDecimal(sb.toString()); // TODO lazy
-        return Token.number(bd);
+        return TokenNumber.of(ca.subArray(start), frac, exp);
+
     }
 
 
-    private Token<Void> readTrue() {
+    private Token readTrue() {
         if (read() != 'r') throw unexpectedChar('r');
         if (read() != 'u') throw unexpectedChar('u');
         if (read() != 'e') throw unexpectedChar('e');
-        return Token.type(TRUE);
+        return Token.of(TRUE);
     }
 
-    private Token<Void> readFalse() {
+    private Token readFalse() {
         if (read() != 'a') throw unexpectedChar('a');
         if (read() != 'l') throw unexpectedChar('l');
         if (read() != 's') throw unexpectedChar('s');
         if (read() != 'e') throw unexpectedChar('e');
-        return Token.type(FALSE);
+        return Token.of(FALSE);
     }
 
-    private Token<Void> readNull() {
+    private Token readNull() {
         if (read() != 'u') throw unexpectedChar('u');
         if (read() != 'l') throw unexpectedChar('l');
         if (read() != 'l') throw unexpectedChar('l');
-        return Token.type(NULL);
+        return Token.of(NULL);
     }
 
     private RuntimeException unexpectedChar(int ch) {
@@ -168,7 +160,7 @@ public class Tokenizer {
                 int unicode = 0;
                 for (int i = 0; i < 4; i++) {
                     int ch3 = read();
-                    int digit = (ch3 >= 0 && ch3 < Hex.TBL.length) ? Hex.TBL[ch3] : -1;
+                    int digit = Hex.digit(ch3);
                     if (digit < 0) throw unexpectedChar(ch3);
                     unicode = (unicode << 4) | digit;
                 }
@@ -181,9 +173,9 @@ public class Tokenizer {
 
     int read() {
         try {
-            if (prev != -2) {
+            if (prev != null) {
                 int ret = prev;
-                prev = -2;
+                prev = null;
                 return ret;
             }
             return reader.read();

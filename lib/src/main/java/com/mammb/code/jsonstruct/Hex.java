@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class Hex {
 
-    final static int[] TBL = new int[128];
+    private static final int[] TBL = new int[128];
     static {
         Arrays.fill(TBL, -1);
         for (int i = '0'; i <= '9'; i++) {
@@ -16,6 +16,23 @@ public class Hex {
         for (int i = 'a'; i <= 'f'; i++) {
             TBL[i] = 10 + i - 'a';
         }
+    }
+
+    public static int digit(int ch) {
+        return (ch >= 0 && ch < Hex.TBL.length) ? Hex.TBL[ch] : -1;
+    }
+
+    public static int deHex(char c) {
+        if (c >= '0' && c <= '9') {
+            return c - '0';
+        }
+        if (c >= 'A' && c <= 'F') {
+            return c - ('A' - 10);
+        }
+        if (c >= 'a' && c <= 'f') {
+            return c - ('a' - 10);
+        }
+        return -1;
     }
 
 }

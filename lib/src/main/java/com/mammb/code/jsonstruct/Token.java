@@ -40,7 +40,10 @@ public class Token {
     private static final Token SQUARECLOSE = new Token(Type.SQUARECLOSE);
 
     public enum Type {
-        CURLYOPEN, SQUAREOPEN, COLON, COMMA, STRING, NUMBER, TRUE, FALSE, NULL, CURLYCLOSE, SQUARECLOSE, EOF;
+        CURLYOPEN, SQUAREOPEN, COLON, COMMA,
+        STRING, NUMBER, TRUE, FALSE, NULL,
+        CURLYCLOSE, SQUARECLOSE,
+        EOF;
     }
 
 

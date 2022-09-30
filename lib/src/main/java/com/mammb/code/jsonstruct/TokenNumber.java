@@ -2,12 +2,13 @@ package com.mammb.code.jsonstruct;
 
 import java.math.BigDecimal;
 
-public class TokenNumber extends Token implements CharSource {
+public class TokenNumber extends Token implements CharSource, NumberSource {
 
     private final CharSource source;
     private final boolean frac;
     private final boolean exp;
     private char[] chars;
+    private BigDecimal bd;
 
 
     TokenNumber(CharSource source, boolean frac, boolean exp) {
@@ -25,7 +26,8 @@ public class TokenNumber extends Token implements CharSource {
         return new TokenNumber(source, frac, exp);
     }
 
-    int asInt() {
+    @Override
+    public int getInt() {
         char[] ca = chars();
         boolean minus = ca.length > 0 && ca[0] == '-';
 
@@ -36,11 +38,12 @@ public class TokenNumber extends Token implements CharSource {
             }
             return minus ? -num : num;
         } else {
-            return new BigDecimal(ca).intValue();
+            return getBigDecimal().intValue();
         }
     }
 
-    long asLong() {
+    @Override
+    public long getLong() {
         char[] ca = chars();
         boolean minus = ca.length > 0 && ca[0] == '-';
 
@@ -51,9 +54,16 @@ public class TokenNumber extends Token implements CharSource {
             }
             return minus ? -num : num;
         } else {
-            return new BigDecimal(ca).longValue();
+            return getBigDecimal().longValue();
         }
     }
+
+
+    @Override
+    public BigDecimal getBigDecimal() {
+        return (bd == null) ? bd = new BigDecimal(chars()) : bd;
+    }
+
 
     @Override
     public char[] chars() {

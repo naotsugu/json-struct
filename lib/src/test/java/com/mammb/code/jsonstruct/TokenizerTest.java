@@ -38,7 +38,7 @@ class TokenizerTest {
         assertEquals(COLON, tokenizer.next().type());
         token = tokenizer.next();
         assertEquals(NUMBER, token.type());
-        assertEquals(2300, ((TokenNumber)token).asInt());
+        assertEquals(2300, ((TokenNumber)token).getInt());
         assertEquals(COMMA, tokenizer.next().type());
 
         token = tokenizer.next();

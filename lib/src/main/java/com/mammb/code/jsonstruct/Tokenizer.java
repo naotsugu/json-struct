@@ -6,7 +6,7 @@ import java.io.Reader;
 
 import static com.mammb.code.jsonstruct.Token.Type.*;
 
-public class Tokenizer {
+class Tokenizer {
 
     private final Reader reader;
     private final CharArray ca;
@@ -26,15 +26,15 @@ public class Tokenizer {
         int ch = read();
         return switch (ch) {
             case '"' -> readString();
-            case '{' -> Token.of(CURLYOPEN);
-            case '[' -> Token.of(SQUAREOPEN);
+            case '{' -> Token.of(CURLY_OPEN);
+            case '[' -> Token.of(SQUARE_OPEN);
             case ':' -> Token.of(COLON);
             case ',' -> Token.of(COMMA);
             case 't' -> readTrue();
             case 'f' -> readFalse();
             case 'n' -> readNull();
-            case ']' -> Token.of(SQUARECLOSE);
-            case '}' -> Token.of(CURLYCLOSE);
+            case ']' -> Token.of(SQUARE_CLOSE);
+            case '}' -> Token.of(CURLY_CLOSE);
             case '0','1','2','3','4','5','6','7','8','9','-' -> readNumber(ch);
             case ' ', '\t', '\r', '\n' -> next();
             case -1 -> Token.of(EOF);
@@ -57,7 +57,7 @@ public class Tokenizer {
                 throw unexpectedChar(ch);
             }
         }
-        return TokenString.of(ca.subArray(start));
+        return Token.string(ca.subArray(start));
     }
 
     private Token readNumber(int ch)  {
@@ -116,7 +116,7 @@ public class Tokenizer {
 
         prev = ch;
 
-        return TokenNumber.of(ca.subArray(start), frac, exp);
+        return Token.number(ca.subArray(start), frac, exp);
 
     }
 

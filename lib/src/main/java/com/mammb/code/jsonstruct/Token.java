@@ -1,6 +1,8 @@
 package com.mammb.code.jsonstruct;
 
-public class Token {
+import java.math.BigDecimal;
+
+class Token {
 
     public final Type type;
 
@@ -8,24 +10,28 @@ public class Token {
         this.type = type;
     }
 
-    public static Token of(Type type) {
-        return switch (type) {
-            case CURLYOPEN -> Token.CURLYOPEN;
-            case SQUAREOPEN -> Token.SQUAREOPEN;
-            case COLON -> Token.COLON;
-            case COMMA -> Token.COMMA;
-            case TRUE -> Token.TRUE;
-            case FALSE -> Token.FALSE;
-            case NULL -> Token.NULL;
-            case CURLYCLOSE -> Token.CURLYCLOSE;
-            case SQUARECLOSE -> Token.SQUARECLOSE;
-            case EOF -> Token.EOF;
-            default -> throw new IllegalArgumentException();
-        };
+    public static Token string(CharSource source) {
+        return new Str(source);
     }
 
-    public Type type() {
-        return type;
+    public static Token number(CharSource source, boolean frac, boolean exp) {
+        return new Num(source, frac, exp);
+    }
+
+    public static Token of(Type type) {
+        return switch (type) {
+            case CURLY_OPEN   -> Token.CURLY_OPEN;
+            case SQUARE_OPEN  -> Token.SQUARE_OPEN;
+            case CURLY_CLOSE  -> Token.CURLY_CLOSE;
+            case SQUARE_CLOSE -> Token.SQUARE_CLOSE;
+            case COLON -> Token.COLON;
+            case COMMA -> Token.COMMA;
+            case TRUE  -> Token.TRUE;
+            case FALSE -> Token.FALSE;
+            case NULL  -> Token.NULL;
+            case EOF   -> Token.EOF;
+            default -> throw new IllegalArgumentException();
+        };
     }
 
     private static final Token TRUE  = new Token(Type.TRUE);
@@ -34,18 +40,112 @@ public class Token {
     private static final Token EOF   = new Token(Type.EOF);
     private static final Token COLON = new Token(Type.COLON);
     private static final Token COMMA = new Token(Type.COMMA);
-    private static final Token CURLYOPEN   = new Token(Type.CURLYOPEN);
-    private static final Token CURLYCLOSE  = new Token(Type.CURLYCLOSE);
-    private static final Token SQUAREOPEN  = new Token(Type.SQUAREOPEN);
-    private static final Token SQUARECLOSE = new Token(Type.SQUARECLOSE);
+    private static final Token CURLY_OPEN = new Token(Type.CURLY_OPEN);
+    private static final Token CURLY_CLOSE = new Token(Type.CURLY_CLOSE);
+    private static final Token SQUARE_OPEN = new Token(Type.SQUARE_OPEN);
+    private static final Token SQUARE_CLOSE = new Token(Type.SQUARE_CLOSE);
 
     public enum Type {
-        CURLYOPEN, SQUAREOPEN, COLON, COMMA,
-        STRING, NUMBER, TRUE, FALSE, NULL,
-        CURLYCLOSE, SQUARECLOSE,
-        EOF;
+        CURLY_OPEN, SQUARE_OPEN, COLON, COMMA, STRING, NUMBER, TRUE, FALSE, NULL, CURLY_CLOSE, SQUARE_CLOSE, EOF;
     }
 
 
+    static class Str extends Token implements CharSource {
+
+        private final CharSource source;
+        private char[] chars;
+
+        private Str(CharSource source) {
+            super(Type.STRING);
+            this.source = source;
+        }
+
+        @Override
+        public char[] chars() {
+            char[] ret = chars;
+            if (ret == null) {
+                chars = ret = source.chars();
+                return ret;
+            }
+            return ret;
+        }
+
+        @Override
+        public String toString() {
+            return new String(chars());
+        }
+
+    }
+
+
+    static class Num extends Token implements CharSource, NumberSource {
+
+        private final CharSource source;
+        private final boolean frac;
+        private final boolean exp;
+        private char[] chars;
+        private BigDecimal bd;
+
+        private Num(CharSource source, boolean frac, boolean exp) {
+            super(Type.NUMBER);
+            this.source = source;
+            this.frac = frac;
+            this.exp = exp;
+        }
+
+        @Override
+        public int getInt() {
+            char[] ca = chars();
+            boolean minus = ca.length > 0 && ca[0] == '-';
+
+            if (!(frac || exp) && (ca.length <= 9 || (minus && ca.length == 10))) {
+                int num = 0;
+                for (int i = minus ? 1 : 0; i < ca.length; i++) {
+                    num = num * 10 + (ca[i] - '0');
+                }
+                return minus ? -num : num;
+            } else {
+                return getBigDecimal().intValue();
+            }
+        }
+
+        @Override
+        public long getLong() {
+            char[] ca = chars();
+            boolean minus = ca.length > 0 && ca[0] == '-';
+
+            if (!(frac || exp) && (ca.length <= 18 || (minus && ca.length == 19))) {
+                long num = 0;
+                for(int i = minus ? 1 : 0; i < ca.length; i++) {
+                    num = num * 10 + (ca[i] - '0');
+                }
+                return minus ? -num : num;
+            } else {
+                return getBigDecimal().longValue();
+            }
+        }
+
+
+        @Override
+        public BigDecimal getBigDecimal() {
+            return (bd == null) ? bd = new BigDecimal(chars()) : bd;
+        }
+
+        @Override
+        public char[] chars() {
+            char[] ret = chars;
+            if (ret == null) {
+                chars = ret = source.chars();
+                return ret;
+            }
+            return ret;
+        }
+
+        @Override
+        public String toString() {
+            return new String(chars());
+        }
+
+    }
 
 }

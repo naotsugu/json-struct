@@ -1,5 +1,6 @@
 package com.mammb.code.jsonstruct;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface JsonArray extends JsonStructure {
@@ -8,7 +9,7 @@ public interface JsonArray extends JsonStructure {
 
     static JsonArray of() {
         return new JsonArray() {
-            private List<JsonValue> values;
+            private List<JsonValue> values = new ArrayList<>();
             @Override
             public void add(JsonValue value) {
                 values.add(value);

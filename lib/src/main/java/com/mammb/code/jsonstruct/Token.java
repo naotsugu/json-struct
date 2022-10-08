@@ -78,7 +78,7 @@ class Token {
     }
 
 
-    static class Num extends Token implements CharSource, NumberSource {
+    static class Num extends Token implements NumberSource {
 
         private final CharSource source;
         private final boolean frac;

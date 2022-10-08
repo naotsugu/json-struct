@@ -50,11 +50,11 @@ public class CharArray implements Serializable {
         return Arrays.copyOf(elements, length);
     }
 
-    public SubArray subArray(int start, int end) {
+    public CharSource subArray(int start, int end) {
         return new SubArray(this, start, end);
     }
 
-    public SubArray subArray(int start) {
+    public CharSource subArray(int start) {
         return new SubArray(this, start, length);
     }
 
@@ -96,15 +96,19 @@ public class CharArray implements Serializable {
         }
     }
 
-    record SubArray(CharArray source, int start, int end) implements CharSource {
+
+    private record SubArray(CharArray source, int start, int end) implements CharSource, Serializable {
+
         @Override
         public char[] chars() {
             return Arrays.copyOfRange(source.elements, start, end);
         }
+
         @Override
         public String toString() {
             return new String(chars());
         }
+
     }
 
 }

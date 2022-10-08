@@ -2,7 +2,9 @@ package com.mammb.code.jsonstruct;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.function.Consumer;
 
+import static com.mammb.code.jsonstruct.Token.Type.COLON;
 import static com.mammb.code.jsonstruct.Token.Type.STRING;
 import static com.mammb.code.jsonstruct.Token.Type.TRUE;
 
@@ -39,45 +41,26 @@ public class Parser {
         for (;;) {
             prev = curr;
             curr = tokenizer.next();
+            if (prev == null || prev.type != COLON) {
+                key = "";
+            }
             switch (curr.type) {
-                case CURLY_OPEN -> {
-                    if (!key.isEmpty()) {
-                        obj.put(key, parseObject(JsonObject.of()));
-                        key = "";
-                    }
-                }
-                case SQUARE_OPEN -> {
-                    if (!key.isEmpty()) {
-                        obj.put(key, parseArray(JsonArray.of()));
-                        key = "";
-                    }
-                }
+                case CURLY_OPEN ->
+                    keying(key, k -> obj.put(k, parseObject(JsonObject.of())));
+                case SQUARE_OPEN ->
+                    keying(key, k -> obj.put(k, parseArray(JsonArray.of())));
+                case NUMBER ->
+                    keying(key, k -> obj.put(k, JsonNumber.of((NumberSource) curr)));
+                case TRUE, FALSE ->
+                    keying(key, k -> obj.put(k, (curr.type == TRUE) ? JsonValue.TRUE : JsonValue.FALSE));
+                case NULL ->
+                    keying(key, k -> obj.put(k, JsonValue.NULL));
                 case STRING -> {
-                    if (!key.isEmpty()) {
+                    if (!key.isEmpty())
                         obj.put(key, JsonString.of((CharSource) curr));
-                        key = "";
-                    }
-                }
-                case NUMBER -> {
-                    if (!key.isEmpty()) {
-                        obj.put(key, JsonNumber.of((NumberSource) curr));
-                        key = "";
-                    }
-                }
-                case TRUE, FALSE -> {
-                    if (!key.isEmpty()) {
-                        obj.put(key, (curr.type == TRUE) ? JsonValue.TRUE : JsonValue.FALSE);
-                        key = "";
-                    }
-                }
-                case NULL -> {
-                    if (!key.isEmpty()) {
-                        obj.put(key, JsonValue.NULL);
-                        key = "";
-                    }
                 }
                 case COLON -> {
-                    if (prev.type == STRING) key = prev.toString();
+                    if (prev != null && prev.type == STRING) key = prev.toString();
                     else throw new RuntimeException();
                 }
                 case COMMA -> {
@@ -90,6 +73,13 @@ public class Parser {
             }
 
         }
+    }
+
+    private void keying(String key, Consumer<String> consumer) {
+        if (key.isEmpty()) {
+            throw new RuntimeException();
+        }
+        consumer.accept(key);
     }
 
 

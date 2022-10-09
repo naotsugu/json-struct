@@ -54,7 +54,7 @@ public class JsonStructProcessor extends AbstractProcessor {
             Boolean.parseBoolean(env.getOptions().getOrDefault(JsonStructProcessor.DEBUG_OPTION, "false")));
 
         var version = getClass().getPackage().getImplementationVersion();
-        context.logInfo("JpaModelProcessor {}", (Objects.isNull(version) ? "" : version));
+        context.logInfo("JsonStructProcessor {}", (Objects.isNull(version) ? "" : version));
 
     }
 

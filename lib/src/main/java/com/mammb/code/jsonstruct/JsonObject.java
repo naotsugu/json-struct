@@ -9,19 +9,23 @@ public interface JsonObject extends JsonStructure {
     JsonValue get(String name);
 
     static JsonObject of() {
-        return new JsonObject() {
-            private Map<String, JsonValue> values = new HashMap<>();
-
-            @Override
-            public void put(String name, JsonValue value) {
-                values.put(name, value);
-            }
-
-            @Override
-            public JsonValue get(String name) {
-                return values.get(name);
-            }
-
-        };
+        return new JsonObjectImpl();
     }
+
+    
+    class JsonObjectImpl implements JsonObject {
+
+        private final Map<String, JsonValue> values = new HashMap<>();
+
+        @Override
+        public void put(String name, JsonValue value) {
+            values.put(name, value);
+        }
+
+        @Override
+        public JsonValue get(String name) {
+            return values.get(name);
+        }
+    }
+
 }

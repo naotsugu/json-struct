@@ -23,13 +23,13 @@ public class Hex {
     }
 
     public static int deHex(char c) {
-        if (c >= '0' && c <= '9') {
+        if (c <= '9' && c >= '0') {
             return c - '0';
         }
-        if (c >= 'A' && c <= 'F') {
+        if (c <= 'F' && c >= 'A') {
             return c - ('A' - 10);
         }
-        if (c >= 'a' && c <= 'f') {
+        if (c <= 'f' && c >= 'a') {
             return c - ('a' - 10);
         }
         return -1;

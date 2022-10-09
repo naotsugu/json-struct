@@ -12,10 +12,16 @@ class Tokenizer {
     private final CharArray ca;
     private Integer prev;
 
+    private int line;
+    private int colm;
+
+
     Tokenizer(Reader reader, CharArray ca) {
         this.reader = reader.markSupported() ? reader : new BufferedReader(reader);
         this.ca = ca;
         this.prev = null;
+        this.line = 1;
+        this.colm = 0;
     }
 
     static Tokenizer of(Reader reader) {
@@ -59,6 +65,7 @@ class Tokenizer {
         }
         return Token.string(ca.subArray(start));
     }
+
 
     private Token readNumber(int ch)  {
 
@@ -128,6 +135,7 @@ class Tokenizer {
         return Token.of(TRUE);
     }
 
+
     private Token readFalse() {
         if (read() != 'a') throw unexpectedChar('a');
         if (read() != 'l') throw unexpectedChar('l');
@@ -136,6 +144,7 @@ class Tokenizer {
         return Token.of(FALSE);
     }
 
+
     private Token readNull() {
         if (read() != 'u') throw unexpectedChar('u');
         if (read() != 'l') throw unexpectedChar('l');
@@ -143,9 +152,6 @@ class Tokenizer {
         return Token.of(NULL);
     }
 
-    private RuntimeException unexpectedChar(int ch) {
-        return new RuntimeException("Unexpected char");
-    }
 
     private int unescape() {
         int ch = read();
@@ -171,17 +177,39 @@ class Tokenizer {
     }
 
 
-    int read() {
+    private int read() {
         try {
             if (prev != null) {
                 int ret = prev;
                 prev = null;
                 return ret;
             }
-            return reader.read();
+            int ret = reader.read();
+            if (ret == '\n') {
+                line++;
+                colm = 0;
+            } else {
+                colm++;
+            }
+            return ret;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    private RuntimeException unexpectedChar(int ch) {
+        return new RuntimeException("Unexpected char");
+    }
+
+
+    int getLine() {
+        return line;
+    }
+
+
+    int getColm() {
+        return colm;
     }
 
 }

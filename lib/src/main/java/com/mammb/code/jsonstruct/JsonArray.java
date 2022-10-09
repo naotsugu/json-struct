@@ -8,12 +8,18 @@ public interface JsonArray extends JsonStructure {
     void add(JsonValue value);
 
     static JsonArray of() {
-        return new JsonArray() {
-            private List<JsonValue> values = new ArrayList<>();
-            @Override
-            public void add(JsonValue value) {
-                values.add(value);
-            }
-        };
+        return new JsonArrayImpl();
     }
+
+
+    class JsonArrayImpl implements JsonArray {
+
+        private final List<JsonValue> values = new ArrayList<>();
+
+        @Override
+        public void add(JsonValue value) {
+            values.add(value);
+        }
+    }
+
 }

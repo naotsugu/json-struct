@@ -27,8 +27,8 @@ public interface Json {
      * Construct the given class instance from json.
      * @param clazz the class
      * @param reader Reader
-     * @return the class instance
      * @param <T> the type of class
+     * @return the class instance
      */
     <T> T as(Class<T> clazz, Reader reader);
 
@@ -36,9 +36,13 @@ public interface Json {
      * Construct the given class instance from json.
      * @param clazz the class
      * @param cs the char sequence of json
-     * @return the class instance
      * @param <T> the type of class
+     * @return the class instance
      */
     <T> T as(Class<T> clazz, CharSequence cs);
+
+    static Json of() {
+        return new Json_();
+    }
 
 }

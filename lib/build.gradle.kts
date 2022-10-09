@@ -14,3 +14,7 @@ dependencies {
 tasks.named<Test>("test") {
     useJUnitPlatform()
 }
+
+tasks.jar {
+    exclude("com/mammb/code/jsonstruct/Json_.class")
+}

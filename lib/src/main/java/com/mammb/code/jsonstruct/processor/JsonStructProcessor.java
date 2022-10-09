@@ -67,6 +67,20 @@ public class JsonStructProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+
+        if (Objects.isNull(context) || annotations.isEmpty() ||
+            roundEnv.errorRaised() || roundEnv.processingOver()) {
+            return false;
+        }
+
+        try {
+
+            JsonStructClassWriter.of(context).writeJsonClass();
+
+        } catch (Exception e) {
+            context.logError("Exception : {}", e.getMessage());
+        }
+
         return false;
     }
 

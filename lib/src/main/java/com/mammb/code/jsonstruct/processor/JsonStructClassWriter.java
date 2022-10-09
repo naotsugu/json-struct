@@ -46,12 +46,12 @@ public class JsonStructClassWriter {
     }
 
     /**
-     * Write a RootSource class file.
+     * Write a class file.
      */
-    private void writeRootSourceClass() {
+    void writeJsonClass() {
 
         var packageName = "com.mammb.code.jsonstruct";
-        var className = "JsonImpl";
+        var className = "Json_";
         try {
 
             FileObject fo = context.getFiler().createSourceFile(packageName + "." + className);
@@ -60,7 +60,8 @@ public class JsonStructClassWriter {
 
                 pw.println("package " + packageName + ";");
                 pw.println();
-                pw.println("");
+                pw.println("import java.io.Reader;");
+                pw.println("import javax.annotation.processing.Generated;");
                 pw.println();
 
                 pw.println("@Generated(value = \"%s\")".formatted(JsonStructProcessor.class.getName()));

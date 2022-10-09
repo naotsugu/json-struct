@@ -23,8 +23,22 @@ import java.io.Reader;
  */
 public interface Json {
 
+    /**
+     * Construct the given class instance from json.
+     * @param clazz the class
+     * @param reader Reader
+     * @return the class instance
+     * @param <T> the type of class
+     */
     <T> T as(Class<T> clazz, Reader reader);
 
+    /**
+     * Construct the given class instance from json.
+     * @param clazz the class
+     * @param cs the char sequence of json
+     * @return the class instance
+     * @param <T> the type of class
+     */
     <T> T as(Class<T> clazz, CharSequence cs);
 
 }

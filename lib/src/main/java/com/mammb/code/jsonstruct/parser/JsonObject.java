@@ -1,4 +1,4 @@
-package com.mammb.code.jsonstruct;
+package com.mammb.code.jsonstruct.parser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +12,7 @@ public interface JsonObject extends JsonStructure {
         return new JsonObjectImpl();
     }
 
-    
+
     class JsonObjectImpl implements JsonObject {
 
         private final Map<String, JsonValue> values = new HashMap<>();

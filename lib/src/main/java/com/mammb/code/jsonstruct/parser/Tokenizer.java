@@ -1,10 +1,10 @@
-package com.mammb.code.jsonstruct;
+package com.mammb.code.jsonstruct.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 
-import static com.mammb.code.jsonstruct.Token.Type.*;
+import static com.mammb.code.jsonstruct.parser.Token.Type.*;
 
 class Tokenizer {
 

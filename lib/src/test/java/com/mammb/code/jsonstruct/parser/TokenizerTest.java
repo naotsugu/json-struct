@@ -1,9 +1,9 @@
-package com.mammb.code.jsonstruct;
+package com.mammb.code.jsonstruct.parser;
 
 import org.junit.jupiter.api.Test;
 import java.io.StringReader;
 import static org.junit.jupiter.api.Assertions.*;
-import static com.mammb.code.jsonstruct.Token.Type.*;
+import static com.mammb.code.jsonstruct.parser.Token.Type.*;
 
 class TokenizerTest {
 

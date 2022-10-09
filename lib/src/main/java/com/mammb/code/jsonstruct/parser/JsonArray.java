@@ -1,4 +1,4 @@
-package com.mammb.code.jsonstruct;
+package com.mammb.code.jsonstruct.parser;
 
 import java.util.ArrayList;
 import java.util.List;

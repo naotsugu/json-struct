@@ -1,4 +1,4 @@
-package com.mammb.code.jsonstruct;
+package com.mammb.code.jsonstruct.parser;
 
 public interface JsonString extends JsonValue, CharSource {
 

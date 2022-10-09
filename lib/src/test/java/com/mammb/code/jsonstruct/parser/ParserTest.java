@@ -1,8 +1,7 @@
-package com.mammb.code.jsonstruct;
+package com.mammb.code.jsonstruct.parser;
 
 import org.junit.jupiter.api.Test;
 
-import static com.mammb.code.jsonstruct.Token.Type.STRING;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ParserTest {

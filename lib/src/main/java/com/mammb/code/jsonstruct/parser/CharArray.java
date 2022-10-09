@@ -1,4 +1,4 @@
-package com.mammb.code.jsonstruct;
+package com.mammb.code.jsonstruct.parser;
 
 import java.io.Serializable;
 import java.util.Arrays;

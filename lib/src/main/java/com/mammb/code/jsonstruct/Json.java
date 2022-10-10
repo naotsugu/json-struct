@@ -21,28 +21,24 @@ import java.io.Reader;
  * Json.
  * @author Naotsugu Kobayashi
  */
-public interface Json {
+public interface Json<T> {
 
     /**
      * Construct the given class instance from json.
-     * @param clazz the class
      * @param reader Reader
-     * @param <T> the type of class
      * @return the class instance
      */
-    <T> T as(Class<T> clazz, Reader reader);
+    T from(Reader reader);
 
     /**
      * Construct the given class instance from json.
-     * @param clazz the class
      * @param cs the char sequence of json
-     * @param <T> the type of class
      * @return the class instance
      */
-    <T> T as(Class<T> clazz, CharSequence cs);
+    T from(CharSequence cs);
 
-    static Json of() {
-        return new Json_();
+    static <T> Json<T> of(Class<T> clazz) {
+        return Json_.of(clazz);
     }
 
 }

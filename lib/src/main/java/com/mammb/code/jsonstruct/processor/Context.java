@@ -20,11 +20,12 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * Context of annotation processing.
- *
  * @author Naotsugu Kobayashi
  */
 public class Context {
@@ -35,6 +36,9 @@ public class Context {
     /** Mode of debug. */
     private final boolean debug;
 
+    /** Generated model classes holder. */
+    private final Collection<JsonStructEntity> generatedClasses;
+
 
     /**
      * Private constructor.
@@ -44,6 +48,7 @@ public class Context {
     public Context(ProcessingEnvironment pe, boolean debug) {
         this.pe = pe;
         this.debug = debug;
+        this.generatedClasses = new ArrayList<>();
     }
 
 

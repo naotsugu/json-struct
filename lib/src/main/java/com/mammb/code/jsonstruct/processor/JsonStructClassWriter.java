@@ -15,76 +15,9 @@
  */
 package com.mammb.code.jsonstruct.processor;
 
-import javax.tools.FileObject;
-import java.io.PrintWriter;
-
 /**
  * JsonStructClassWriter.
- *
  * @author Naotsugu Kobayashi
  */
 public class JsonStructClassWriter {
-
-    /** Context of processing. */
-    private final Context context;
-
-    /**
-     * Constructor.
-     * @param context the context of processing
-     */
-    private JsonStructClassWriter(Context context) {
-        this.context = context;
-    }
-
-    /**
-     * Create a criteria {@link JsonStructClassWriter} instance.
-     * @param context the context of processing
-     * @return the class writer
-     */
-    public static JsonStructClassWriter of(Context context) {
-        return new JsonStructClassWriter(context);
-    }
-
-    /**
-     * Write a class file.
-     */
-    void writeJsonClass() {
-
-        var packageName = "com.mammb.code.jsonstruct";
-        var className = "Json_";
-        try {
-
-            FileObject fo = context.getFiler().createSourceFile(packageName + "." + className);
-
-            try (PrintWriter pw = new PrintWriter(fo.openOutputStream())) {
-
-                pw.println("package " + packageName + ";");
-                pw.println();
-                pw.println("import java.io.Reader;");
-                pw.println("import javax.annotation.processing.Generated;");
-                pw.println();
-
-                pw.println("@Generated(value = \"%s\")".formatted(JsonStructProcessor.class.getName()));
-                pw.println("""
-                    public class %s implements Json {
-                        @Override
-                        public <T> T as(Class<T> clazz, Reader reader) {
-                            return null;
-                        }
-                        @Override
-                        public <T> T as(Class<T> clazz, CharSequence cs) {
-                            return null;
-                        }
-                    }
-                    """.formatted(className));
-
-                pw.flush();
-            }
-
-        } catch (Exception e) {
-            context.logError("Problem opening file to write {} class : {}", packageName, e.getMessage());
-        }
-
-    }
-
 }

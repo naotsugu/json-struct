@@ -15,6 +15,8 @@
  */
 package com.mammb.code.jsonstruct.processor;
 
+import com.mammb.code.jsonstruct.JsonStruct;
+
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
@@ -23,15 +25,17 @@ import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * Main annotation processor.
- *
  * @author Naotsugu Kobayashi
  */
 @SupportedAnnotationTypes({
-    "com.mammb.code.jsonstruct.JsonStruct",
+    JsonStructEntity.ANNOTATION_TYPE,
 })
 @SupportedOptions({
     JsonStructProcessor.DEBUG_OPTION,
@@ -75,7 +79,14 @@ public class JsonStructProcessor extends AbstractProcessor {
 
         try {
 
-            JsonStructClassWriter.of(context).writeJsonClass();
+            var models = roundEnv.getElementsAnnotatedWith(JsonStruct.class).stream()
+                .map(elm -> JsonStructEntity.of(context, elm))
+                .flatMap(Optional::stream)
+                .collect(Collectors.toMap(JsonStructEntity::getQualifiedName, UnaryOperator.identity()));
+
+            models.entrySet().forEach(e -> context.logInfo(e.getValue().getQualifiedName()));
+
+            JsonClassWriter.of(context).write();
 
         } catch (Exception e) {
             context.logError("Exception : {}", e.getMessage());

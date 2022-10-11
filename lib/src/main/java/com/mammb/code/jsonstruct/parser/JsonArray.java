@@ -24,7 +24,7 @@ import java.util.List;
  * @author Naotsugu Kobayashi
  */
 public interface JsonArray extends JsonStructure {
-
+    JsonValue get(int index);
     void add(JsonValue value);
 
     static JsonArray of() {
@@ -35,6 +35,10 @@ public interface JsonArray extends JsonStructure {
     class JsonArrayImpl implements JsonArray {
 
         private final List<JsonValue> values = new ArrayList<>();
+        @Override
+        public JsonValue get(int index) {
+            return values.get(index);
+        }
 
         @Override
         public void add(JsonValue value) {

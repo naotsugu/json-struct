@@ -18,6 +18,7 @@ package com.mammb.code.jsonstruct.parser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * JsonPointer.
@@ -28,6 +29,7 @@ public class JsonPointer {
     private final List<String> tokens;
     private final CharSequence val;
 
+
     private JsonPointer(CharSequence val) {
         this.val = Objects.requireNonNull(val);
         this.tokens = split(val);
@@ -36,39 +38,42 @@ public class JsonPointer {
         }
     }
 
+
     public static JsonPointer of(CharSequence val) {
         return new JsonPointer(val);
     }
 
+
     private static List<String> split(CharSequence cs) {
-        int off = 0;
+        int offset = 0;
         int next = 0;
         var str = cs.toString();
         var list = new ArrayList<String>();
-        while ((next = str.indexOf('/', off)) != -1) {
-            list.add(unescape(str.substring(off, next)));
-            off = next + 1;
+        while ((next = str.indexOf('/', offset)) != -1) {
+            list.add(unescape(str.substring(offset, next)));
+            offset = next + 1;
         }
-        list.add(unescape(str.substring(off)));
+        list.add(unescape(str.substring(offset)));
         return list;
     }
 
 
-    private static String unescape(String str) {
-        return (str.indexOf('~') != -1)
-            ? str.replace("~1", "/").replace("~0", "~")
-            : str;
+    public boolean containsValue(JsonStructure structure) {
+        return asValue(structure).isPresent();
     }
 
-
     public JsonValue getValue(JsonStructure structure) {
+        return asValue(structure).orElseThrow(RuntimeException::new);
+    }
+
+    public Optional<JsonValue> asValue(JsonStructure structure) {
         if (tokens.size() == 1) {
-            return structure;
+            return Optional.of(structure);
         }
         JsonValue value = structure;
         for (int i = 1; i < tokens.size(); i++) {
             if (value instanceof JsonObject object) {
-                value = object.get(tokens.get(i).toString());
+                value = object.get(tokens.get(i));
 
             } else if (value instanceof JsonArray array) {
                 int index = asIndex(tokens.get(i));
@@ -77,11 +82,12 @@ public class JsonPointer {
                 throw new RuntimeException();
             }
             if (value == null) {
-                throw new RuntimeException();
+                return Optional.empty();
             }
         }
-        return value;
+        return Optional.of(value);
     }
+
 
     public CharSequence token(int index) {
         return tokens.get(index);
@@ -105,7 +111,6 @@ public class JsonPointer {
         return val.hashCode();
     }
 
-
     static private int asIndex(String token) {
         if (token == null || token.isBlank()) {
             throw new RuntimeException();
@@ -124,6 +129,12 @@ public class JsonPointer {
         } catch (NumberFormatException ex) {
             throw new RuntimeException();
         }
+    }
+
+    private static String unescape(String str) {
+        return (str.indexOf('~') != -1)
+            ? str.replace("~1", "/").replace("~0", "~")
+            : str;
     }
 
 }

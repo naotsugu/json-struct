@@ -16,19 +16,16 @@
 package com.mammb.code.jsonstruct.processor;
 
 import com.mammb.code.jsonstruct.JsonStruct;
-
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 /**
  * Main annotation processor.
@@ -79,13 +76,14 @@ public class JsonStructProcessor extends AbstractProcessor {
 
         try {
 
-            var models = roundEnv.getElementsAnnotatedWith(JsonStruct.class).stream()
-                .map(elm -> JsonStructEntity.of(context, elm))
-                .flatMap(Optional::stream)
-                .collect(Collectors.toMap(JsonStructEntity::getQualifiedName, UnaryOperator.identity()));
-
-            models.entrySet().forEach(e -> context.logInfo(e.getValue().getQualifiedName()));
-
+            var writer = JsonStructClassWriter.of(context);
+            for (Element element : roundEnv.getElementsAnnotatedWith(JsonStruct.class)) {
+                var entity = JsonStructEntity.of(context, element);
+                if (entity.isPresent() && !context.getGenerated().contains(entity.get())) {
+                    writer.write(entity.get());
+                    context.addGenerated(entity.get());
+                }
+            }
             JsonClassWriter.of(context).write();
 
         } catch (Exception e) {

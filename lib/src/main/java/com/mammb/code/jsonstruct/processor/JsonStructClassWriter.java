@@ -15,9 +15,75 @@
  */
 package com.mammb.code.jsonstruct.processor;
 
+import javax.tools.FileObject;
+import java.io.PrintWriter;
+
 /**
  * JsonStructClassWriter.
  * @author Naotsugu Kobayashi
  */
 public class JsonStructClassWriter {
+
+    /** Context of processing. */
+    private final Context context;
+
+    /**
+     * Constructor.
+     */
+    private JsonStructClassWriter(Context context) {
+        this.context = context;
+    }
+
+
+    /**
+     * Create a criteria {@link JsonStructClassWriter} instance.
+     * @param context the context of processing
+     * @return the class writer
+     */
+    public static JsonStructClassWriter of(Context context) {
+        return new JsonStructClassWriter(context);
+    }
+
+
+    /**
+     * Write a class file.
+     */
+    void write(JsonStructEntity entity) {
+
+        var name = entity.getSimpleName() + "_";
+        try {
+
+            FileObject fo = context.getFiler().createSourceFile(entity.getPackageName() + "." + name);
+            try (PrintWriter pw = new PrintWriter(fo.openOutputStream())) {
+
+                pw.println("package " + entity.getPackageName() + ";");
+                pw.println();
+                pw.println("import com.mammb.code.jsonstruct.Json;");
+                pw.println("import javax.annotation.processing.Generated;");
+                pw.println("import java.io.Reader;");
+                pw.println();
+
+                pw.println("@Generated(value = \"%s\")".formatted(JsonStructProcessor.class.getName()));
+                pw.println("""
+                    public class %1$s implements Json<%2$s> {
+                        @Override
+                        public %2$s from(Reader reader) {
+                            return null;
+                        }
+                        @Override
+                        public %2$s from(CharSequence cs) {
+                            return null;
+                        }
+                    }
+                    """.formatted(
+                    name,
+                    entity.getSimpleName()));
+
+                pw.flush();
+            }
+        } catch (Exception e) {
+            context.logError("Problem opening file to write {} class : {}", entity.getSimpleName(), e.getMessage());
+        }
+    }
+
 }

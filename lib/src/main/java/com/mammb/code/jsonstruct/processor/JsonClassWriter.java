@@ -17,6 +17,7 @@ package com.mammb.code.jsonstruct.processor;
 
 import javax.tools.FileObject;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * JsonStructClassWriter.
@@ -68,12 +69,14 @@ public class JsonClassWriter {
                     public class %s {
                         public static <T> Json<T> of(Class<T> clazz) {
                             return switch (clazz.getCanonicalName()) {
-                                case "" -> null;
+                                %s
                                 default -> throw new RuntimeException();
                             };
                         }
                     }
-                    """.formatted(className));
+                    """.formatted(
+                        className,
+                        caseExpression(context.getGenerated())));
 
                 pw.flush();
             }
@@ -82,6 +85,18 @@ public class JsonClassWriter {
             context.logError("Problem opening file to write {} class : {}", packageName, e.getMessage());
         }
 
+    }
+
+    private static String caseExpression(List<JsonStructEntity> entities) {
+        var sb = new StringBuilder();
+        for (JsonStructEntity entity : entities) {
+            if (sb.length() > 0) sb.append("            ");
+            sb.append("""
+            case \"%s\" ->
+                            (Json<T>) new %s();
+            """.formatted(entity.getQualifiedName(), entity.getQualifiedName() + "_"));
+        }
+        return sb.toString();
     }
 
 }

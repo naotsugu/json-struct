@@ -101,12 +101,16 @@ public class JsonStructEntity {
 
 
     /**
-     * Get qualified name of the static metamodel class.
-     * e.g. {@code foo.bar.BuzEntity_}
+     * Get qualified name of the entity class.
+     * e.g. {@code foo.bar.Person}
      * @return qualified name of the static metamodel class
      */
     public String getQualifiedName() {
         return element.getQualifiedName().toString();
+    }
+
+    public String getPackageName() {
+        return context.getElementUtils().getPackageOf(element).getQualifiedName().toString();
     }
 
     static Element foo(Context context, Element element) {

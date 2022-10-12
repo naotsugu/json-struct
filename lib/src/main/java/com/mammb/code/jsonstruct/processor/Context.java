@@ -23,6 +23,7 @@ import javax.tools.Diagnostic;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Context of annotation processing.
@@ -85,6 +86,24 @@ public class Context {
      */
     public Types getTypeUtils() {
         return pe.getTypeUtils();
+    }
+
+
+    /**
+     * Add the given entity as generated.
+     * @param entity the {@link JsonStructEntity}
+     */
+    public void addGenerated(JsonStructEntity entity) {
+        generatedClasses.add(entity);
+    }
+
+
+    /**
+     * Gets the generated entities.
+     * @return the generated entities
+     */
+    public List<JsonStructEntity> getGenerated() {
+        return List.copyOf(generatedClasses);
     }
 
 

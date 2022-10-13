@@ -61,6 +61,7 @@ public class JsonStructClassWriter {
                 pw.println("import com.mammb.code.jsonstruct.Json;");
                 pw.println("import javax.annotation.processing.Generated;");
                 pw.println("import java.io.Reader;");
+                pw.println("import java.io.StringReader;");
                 pw.println();
 
                 pw.println("@Generated(value = \"%s\")".formatted(JsonStructProcessor.class.getName()));
@@ -72,7 +73,7 @@ public class JsonStructClassWriter {
                         }
                         @Override
                         public %2$s from(CharSequence cs) {
-                            return null;
+                            return from(new StringReader(cs.toString()));
                         }
                     }
                     """.formatted(

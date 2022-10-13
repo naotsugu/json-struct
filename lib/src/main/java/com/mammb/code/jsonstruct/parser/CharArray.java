@@ -20,7 +20,6 @@ import java.util.Arrays;
 
 /**
  * CharArray.
- *
  * @author Naotsugu Kobayashi
  */
 public class CharArray implements Serializable {

@@ -48,7 +48,7 @@ public class Parser {
     }
 
 
-    JsonStructure parse() {
+    public JsonStructure parse() {
         Token token = tokenizer.next();
         return switch (token.type) {
             case CURLY_OPEN  -> parseObject(JsonObject.of());

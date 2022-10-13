@@ -52,35 +52,32 @@ public class JsonClassWriter {
 
         var packageName = "com.mammb.code.jsonstruct";
         var className = "Json_";
-        try {
 
-            FileObject fo = context.getFiler().createSourceFile(packageName + "." + className);
+        CodeTemplate code = CodeTemplate.of(packageName,
+            """
+            import java.io.Reader;
+            import javax.annotation.processing.Generated;
 
-            try (PrintWriter pw = new PrintWriter(fo.openOutputStream())) {
-
-                pw.println("package " + packageName + ";");
-                pw.println();
-                pw.println("import java.io.Reader;");
-                pw.println("import javax.annotation.processing.Generated;");
-                pw.println();
-
-                pw.println("@Generated(value = \"%s\")".formatted(JsonStructProcessor.class.getName()));
-                pw.println("""
-                    public class %s {
-                        public static <T> Json<T> of(Class<T> clazz) {
-                            return switch (clazz.getCanonicalName()) {
-                                %s
-                                default -> throw new RuntimeException();
-                            };
-                        }
-                    }
-                    """.formatted(
-                        className,
-                        caseExpression(context.getGenerated())));
-
-                pw.flush();
+            @SuppressWarnings("unchecked")
+            @Generated(value = "#{processorName}")
+            public class #{className} {
+                public static <T> Json<T> of(Class<T> clazz) {
+                    return switch (clazz.getCanonicalName()) {
+                        #{cases}
+                        default -> throw new RuntimeException();
+                    };
+                }
             }
+            """)
+            .bind("#{processorName}", JsonStructProcessor.class.getName())
+            .bind("#{className}", className)
+            .bind("#{cases}", caseExpression(context.getGenerated()));
 
+        try {
+            FileObject fo = context.getFiler().createSourceFile(packageName + "." + className);
+            try (PrintWriter pw = new PrintWriter(fo.openOutputStream())) {
+                code.writeTo(pw);
+            }
         } catch (Exception e) {
             context.logError("Problem opening file to write {} class : {}", packageName, e.getMessage());
         }
@@ -90,11 +87,9 @@ public class JsonClassWriter {
     private static String caseExpression(List<JsonStructEntity> entities) {
         var sb = new StringBuilder();
         for (JsonStructEntity entity : entities) {
-            if (sb.length() > 0) sb.append("            ");
-            sb.append("""
-            case \"%s\" ->
-                            (Json<T>) new %s();
-            """.formatted(entity.getQualifiedName(), entity.getQualifiedName() + "_"));
+            sb.append("case \"%s\" -> (Json<T>) new %s();\n".formatted(
+                entity.getQualifiedName(),
+                entity.getQualifiedName() + "_"));
         }
         return sb.toString();
     }

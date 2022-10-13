@@ -18,6 +18,7 @@ package com.mammb.code.jsonstruct.parser;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HexFormat;
 
 import static com.mammb.code.jsonstruct.parser.Token.Type.*;
 
@@ -185,10 +186,8 @@ class Tokenizer {
             case 'u' -> {
                 int unicode = 0;
                 for (int i = 0; i < 4; i++) {
-                    int ch3 = read();
-                    int digit = Hex.digit(ch3);
-                    if (digit < 0) throw unexpectedChar(ch3);
-                    unicode = (unicode << 4) | digit;
+                    int c = read();
+                    unicode = (unicode << 4) | HexFormat.fromHexDigit(c);
                 }
                 yield unicode;
             }

@@ -55,16 +55,25 @@ public class JsonStructClassWriter {
         CodeTemplate code = CodeTemplate.of(entity.getPackageName(),
             """
             import com.mammb.code.jsonstruct.Json;
+            import com.mammb.code.jsonstruct.converter.Converters;
             import javax.annotation.processing.Generated;
             import java.io.Reader;
             import java.io.StringReader;
 
             @Generated(value = "#{processorName}")
             public class #{className} implements Json<#{entityName}> {
+
+                private final Converters converters;
+
+                public #{className}(Converters converters) {
+                    this.converters = converters;
+                }
+
                 @Override
                 public #{entityName} from(Reader reader) {
                     return null;
                 }
+
                 @Override
                 public #{entityName} from(CharSequence cs) {
                     return from(new StringReader(cs.toString()));

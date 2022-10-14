@@ -57,6 +57,7 @@ public class JsonClassWriter {
             """
             import java.io.Reader;
             import javax.annotation.processing.Generated;
+            import com.mammb.code.jsonstruct.converter.Converters;
 
             @SuppressWarnings("unchecked")
             @Generated(value = "#{processorName}")
@@ -87,7 +88,7 @@ public class JsonClassWriter {
     private static String caseExpression(List<JsonStructEntity> entities) {
         var sb = new StringBuilder();
         for (JsonStructEntity entity : entities) {
-            sb.append("case \"%s\" -> (Json<T>) new %s();\n".formatted(
+            sb.append("case \"%s\" -> (Json<T>) new %s(Converters.of());\n".formatted(
                 entity.getQualifiedName(),
                 entity.getQualifiedName() + "_"));
         }

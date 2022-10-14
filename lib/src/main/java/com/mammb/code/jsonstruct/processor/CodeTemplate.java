@@ -112,6 +112,25 @@ public class CodeTemplate {
 
 
     /**
+     * Add code(maybe methods).
+     * @param code Code to be added
+     * @return this template
+     */
+    public CodeTemplate addCode(String code) {
+        for (int i = codes.size() - 1; i > 0; i--) {
+            if (codes.get(i).trim().endsWith("}")) {
+                var lines = code.split(LF);
+                for (int j = 1; j < lines.length; j++) {
+                    codes.add(i, " ".repeat(4) + lines[j]);
+                }
+                break;
+            }
+        }
+        return this;
+    }
+
+
+    /**
      * Write the contents of this template.
      * @param pw the {@link PrintWriter} to write to.
      */

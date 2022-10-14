@@ -21,6 +21,7 @@ import com.mammb.code.jsonstruct.parser.JsonStructure;
 import com.mammb.code.jsonstruct.parser.JsonValue;
 import com.mammb.code.jsonstruct.parser.NumberSource;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,11 +31,25 @@ import java.util.Map;
  */
 public class Converters {
 
-    private final Map<Class<?>, Converter<?, ?>> map;
+    private static final Map<Class<?>, Converter<?, ?>> map = builtin();
+    private Map<Class<?>, Converter<?, ?>> opt;
 
-    public Converters() {
-        this.map = builtin();
+
+    private Converters() {
+        this.opt = Collections.emptyMap();
     }
+
+    public static Converters of() {
+        return new Converters();
+    }
+
+    public void add(Class<?> clazz, Converter<?, ?> converter) {
+        if (opt == Collections.EMPTY_MAP) {
+            opt = new HashMap<>();
+        }
+        opt.put(clazz, converter);
+    }
+
 
     @SuppressWarnings("unchecked")
     private <T> T to(Class<T> clazz, JsonValue value) {
@@ -43,7 +58,6 @@ public class Converters {
 
     public <T> T to(Class<T> clazz, String point, JsonStructure json) {
         return to(clazz, JsonPointer.of(point).getValue(json));
-
     }
 
     private static Map<Class<?>, Converter<?, ?>> builtin() {

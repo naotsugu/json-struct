@@ -17,8 +17,10 @@ package com.mammb.code.jsonstruct.processor;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -28,9 +30,12 @@ import java.util.Set;
  */
 public class CodeTemplate {
 
+    private static final String LF = "\n";
+
     private String packageName;
     private Set<String> imports;
     private List<String> codes;
+    private Map<String, String> map;
 
     /**
      * Create a {@link CodeTemplate} instance.
@@ -40,6 +45,7 @@ public class CodeTemplate {
         this.packageName = Objects.requireNonNull(packageName);
         this.imports = new HashSet<>();
         this.codes = new ArrayList<>();
+        this.map = new HashMap<>();
     }
 
     /**
@@ -80,6 +86,7 @@ public class CodeTemplate {
         return ret;
     }
 
+
     /**
      * Bind value to the template by the given key.
      * @param key the key name
@@ -87,10 +94,48 @@ public class CodeTemplate {
      * @return this template
      */
     public CodeTemplate bind(String key, String value) {
+        map.put(key, value);
+        return this;
+    }
+
+
+    /**
+     * Bind the fqcn of type to the template by the given key.
+     * @param key the key name
+     * @param fqcn the fqcn of type
+     * @return this template
+     */
+    public CodeTemplate bindType(String key, String fqcn) {
+        map.put(key, applyImport(fqcn));
+        return this;
+    }
+
+
+    /**
+     * Write the contents of this template.
+     * @param pw the {@link PrintWriter} to write to.
+     */
+    public void writeTo(PrintWriter pw) {
+        if (!packageName.isBlank()) {
+            pw.println("package " + packageName + ";");
+            pw.println();
+        }
+        var importList = normalizeImports();
+        if (!importList.isEmpty()) {
+            importList.forEach(s -> pw.println("import " + s + ";"));
+            pw.println();
+        }
+        map.forEach(this::applySubstitution);
+        codes.forEach(pw::println);
+        pw.flush();
+    }
+
+
+    private void applySubstitution(String key, String value) {
         for (int i = 0; i < codes.size(); i++) {
-            if (codes.get(i).trim().equals(key) && value.contains("\n")) {
+            if (codes.get(i).trim().equals(key) && value.contains(LF)) {
                 var indent = codes.get(i).indexOf(key);
-                var lines = value.split("\n");
+                var lines = value.split(LF);
                 codes.set(i, codes.get(i).replace(key, lines[0]));
                 for (int j = 1; j < lines.length; j++) {
                     codes.add(i + j, " ".repeat(indent) + lines[j]);
@@ -99,32 +144,11 @@ public class CodeTemplate {
                 codes.set(i, codes.get(i).replace(key, value));
             }
         }
-        return this;
-    }
-
-
-    public CodeTemplate bindType(String key, String fqcn) {
-        for (int i = 0; i < codes.size(); i++) {
-            if (codes.get(i).contains(key)) {
-                codes.set(i, codes.get(i).replace(key, applyImport(fqcn)));
-            }
-        }
-        return this;
-    }
-
-
-    public void writeTo(PrintWriter pw) {
-        pw.println("package " + packageName + ";");
-        pw.println();
-        normalizeImports().forEach(s -> pw.println("import " + s + ";"));
-        pw.println();
-        codes.forEach(pw::println);
-        pw.flush();
     }
 
 
     private String applyImport(String fqcn) {
-        if (fqcn.isBlank() || fqcn.contains(" ") || fqcn.contains("\n")) {
+        if (fqcn.isBlank() || fqcn.contains(" ") || fqcn.contains(LF)) {
             throw new IllegalArgumentException();
         }
         var index = fqcn.lastIndexOf('.');

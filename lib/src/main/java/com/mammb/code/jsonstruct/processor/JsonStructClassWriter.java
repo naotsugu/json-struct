@@ -50,37 +50,36 @@ public class JsonStructClassWriter {
      */
     void write(JsonStructEntity entity) {
 
-        var name = entity.getSimpleName() + "_";
+        var className = entity.getSimpleName() + "_";
+
+        CodeTemplate code = CodeTemplate.of(entity.getPackageName(),
+            """
+            import com.mammb.code.jsonstruct.Json;
+            import javax.annotation.processing.Generated;
+            import java.io.Reader;
+            import java.io.StringReader;
+
+            @Generated(value = "#{processorName}")
+            public class #{className} implements Json<#{entityName}> {
+                @Override
+                public #{entityName} from(Reader reader) {
+                    return null;
+                }
+                @Override
+                public #{entityName} from(CharSequence cs) {
+                    return from(new StringReader(cs.toString()));
+                }
+            }
+            """)
+            .bind("#{processorName}", JsonStructProcessor.class.getName())
+            .bind("#{className}", className)
+            .bind("#{entityName}", entity.getSimpleName());
+
+
         try {
-
-            FileObject fo = context.getFiler().createSourceFile(entity.getPackageName() + "." + name);
+            FileObject fo = context.getFiler().createSourceFile(entity.getPackageName() + "." + className);
             try (PrintWriter pw = new PrintWriter(fo.openOutputStream())) {
-
-                pw.println("package " + entity.getPackageName() + ";");
-                pw.println();
-                pw.println("import com.mammb.code.jsonstruct.Json;");
-                pw.println("import javax.annotation.processing.Generated;");
-                pw.println("import java.io.Reader;");
-                pw.println("import java.io.StringReader;");
-                pw.println();
-
-                pw.println("@Generated(value = \"%s\")".formatted(JsonStructProcessor.class.getName()));
-                pw.println("""
-                    public class %1$s implements Json<%2$s> {
-                        @Override
-                        public %2$s from(Reader reader) {
-                            return null;
-                        }
-                        @Override
-                        public %2$s from(CharSequence cs) {
-                            return from(new StringReader(cs.toString()));
-                        }
-                    }
-                    """.formatted(
-                    name,
-                    entity.getSimpleName()));
-
-                pw.flush();
+                code.writeTo(pw);
             }
         } catch (Exception e) {
             context.logError("Problem opening file to write {} class : {}", entity.getSimpleName(), e.getMessage());

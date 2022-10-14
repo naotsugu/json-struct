@@ -32,29 +32,60 @@ public class CodeTemplate {
     private Set<String> imports;
     private List<String> codes;
 
-    public CodeTemplate(String packageName, Set<String> imports, List<String> codes) {
+    /**
+     * Create a {@link CodeTemplate} instance.
+     * @param packageName ths package name
+     */
+    CodeTemplate(String packageName) {
         this.packageName = Objects.requireNonNull(packageName);
-        this.imports = Objects.requireNonNull(imports);
-        this.codes = Objects.requireNonNull(codes);
+        this.imports = new HashSet<>();
+        this.codes = new ArrayList<>();
     }
 
+    /**
+     * Create a {@link CodeTemplate} instance.
+     * @param packageName ths package name
+     * @param code  ths string code lines
+     * @return a {@link CodeTemplate} instance
+     */
     public static CodeTemplate of(String packageName, String code) {
-        var tmpl = new CodeTemplate(packageName, new HashSet<>(), new ArrayList<>());
+
+        var ret = new CodeTemplate(packageName);
+
         code.lines().forEach(line -> {
+
             var trimmed = line.trim();
+
             if (trimmed.startsWith("package ") && trimmed.endsWith(";")) {
-                if (tmpl.packageName.isEmpty()) {
-                    tmpl.packageName = trimmed.substring(8, trimmed.length() - 1);
+                // if contains the package statement, overwrite the package name
+                if (ret.packageName.isEmpty()) {
+                    ret.packageName = trimmed.substring(
+                        "package ".length(),
+                        trimmed.length() - 1);
                 }
+
             } else if (trimmed.startsWith("import ") && trimmed.endsWith(";")) {
-                tmpl.imports.add(trimmed.substring(7, trimmed.length() - 1));
+                // if contains the import statement, add to the imports holder
+                ret.imports.add(trimmed.substring(
+                    "import ".length(),
+                    trimmed.length() - 1));
+
             } else {
-                tmpl.codes.add(line);
+                // add as a code line
+                ret.codes.add(line);
+
             }
         });
-        return tmpl;
+
+        return ret;
     }
 
+    /**
+     * Bind value to the template by the given key.
+     * @param key the key name
+     * @param value the bind value
+     * @return this template
+     */
     public CodeTemplate bind(String key, String value) {
         for (int i = 0; i < codes.size(); i++) {
             if (codes.get(i).trim().equals(key) && value.contains("\n")) {
@@ -71,6 +102,17 @@ public class CodeTemplate {
         return this;
     }
 
+
+    public CodeTemplate bindType(String key, String fqcn) {
+        for (int i = 0; i < codes.size(); i++) {
+            if (codes.get(i).contains(key)) {
+                codes.set(i, codes.get(i).replace(key, applyImport(fqcn)));
+            }
+        }
+        return this;
+    }
+
+
     public void writeTo(PrintWriter pw) {
         pw.println("package " + packageName + ";");
         pw.println();
@@ -80,10 +122,25 @@ public class CodeTemplate {
         pw.flush();
     }
 
+
+    private String applyImport(String fqcn) {
+        if (fqcn.isBlank() || fqcn.contains(" ") || fqcn.contains("\n")) {
+            throw new IllegalArgumentException();
+        }
+        var index = fqcn.lastIndexOf('.');
+        if (index <= 0) {
+            throw new IllegalArgumentException();
+        }
+        imports.add(fqcn.substring(0, index));
+        return fqcn.substring(index + 1);
+    }
+
+
     private List<String> normalizeImports() {
         return imports.stream()
             .filter(s -> !s.startsWith("java.lang."))
             .filter(s -> !s.equals(packageName))
+            .filter(s -> !s.isBlank())
             .sorted()
             .toList();
     }

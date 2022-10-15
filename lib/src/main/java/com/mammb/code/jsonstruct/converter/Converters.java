@@ -16,11 +16,8 @@
 package com.mammb.code.jsonstruct.converter;
 
 import com.mammb.code.jsonstruct.parser.CharSource;
-import com.mammb.code.jsonstruct.parser.JsonPointer;
-import com.mammb.code.jsonstruct.parser.JsonStructure;
 import com.mammb.code.jsonstruct.parser.JsonValue;
 import com.mammb.code.jsonstruct.parser.NumberSource;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +28,7 @@ import java.util.Map;
  */
 public class Converters {
 
-    private static final Map<Class<?>, Converter<?, ?>> map = builtin();
+    private static final Map<Class<?>, Converter<JsonValue, ?>> map = builtin();
     private Map<Class<?>, Converter<?, ?>> opt;
 
 
@@ -43,7 +40,7 @@ public class Converters {
         return new Converters();
     }
 
-    public void add(Class<?> clazz, Converter<?, ?> converter) {
+    public void add(Class<?> clazz, Converter<JsonValue, ?> converter) {
         if (opt == Collections.EMPTY_MAP) {
             opt = new HashMap<>();
         }
@@ -59,14 +56,30 @@ public class Converters {
     }
 
 
-    private static Map<Class<?>, Converter<?, ?>> builtin() {
-        Map<Class<?>, Converter<?, ?>> map = new HashMap<>();
-        map.put(String.class,  (CharSource s) -> new String(s.chars()));
-        map.put(Integer.class, (NumberSource s) -> s.getInt());
-        map.put(Integer.TYPE,  (NumberSource s) -> s.getInt());
-        map.put(Long.class,    (NumberSource s) -> s.getLong());
-        map.put(Long.TYPE,     (NumberSource s) -> s.getLong());
+    private static Map<Class<?>, Converter<JsonValue, ?>> builtin() {
+        Map<Class<?>, Converter<JsonValue, ?>> map = new HashMap<>();
+        map.put(String.class,  v -> new String(asCs(v).chars()));
+        map.put(Integer.class, v -> asNs(v).getInt());
+        map.put(Integer.TYPE,  v -> asNs(v).getInt());
+        map.put(Long.class,    v -> asNs(v).getLong());
+        map.put(Long.TYPE,     v -> asNs(v).getLong());
         return map;
+    }
+
+    private static CharSource asCs(JsonValue val) {
+        if (val instanceof CharSource cs) {
+            return cs;
+        } else {
+            throw new RuntimeException();
+        }
+    }
+
+    private static NumberSource asNs(JsonValue val) {
+        if (val instanceof NumberSource ns) {
+            return ns;
+        } else {
+            throw new RuntimeException();
+        }
     }
 
 }

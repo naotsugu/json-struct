@@ -15,6 +15,8 @@
  */
 package com.mammb.code.jsonstruct.processor;
 
+import com.mammb.code.jsonstruct.entity.JsonStructEntity;
+
 import javax.tools.FileObject;
 import java.io.PrintWriter;
 
@@ -56,6 +58,8 @@ public class JsonStructClassWriter {
             """
             import com.mammb.code.jsonstruct.Json;
             import com.mammb.code.jsonstruct.converter.Converters;
+            import com.mammb.code.jsonstruct.parser.JsonPointer;
+            import com.mammb.code.jsonstruct.parser.Parser;
             import javax.annotation.processing.Generated;
             import java.io.Reader;
             import java.io.StringReader;
@@ -63,14 +67,16 @@ public class JsonStructClassWriter {
             @Generated(value = "#{processorName}")
             public class #{className} implements Json<#{entityName}> {
 
-                private final Converters converters;
+                private final Converters convert;
 
                 public #{className}(Converters converters) {
-                    this.converters = converters;
+                    this.convert = converters;
                 }
 
                 @Override
                 public #{entityName} from(Reader reader) {
+                    var json = Parser.of(reader).parse();
+                    //return new Book(json.as("/name", convert.to(String.class)));
                     return null;
                 }
 

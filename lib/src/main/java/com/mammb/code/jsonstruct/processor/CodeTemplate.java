@@ -78,8 +78,9 @@ public class CodeTemplate {
 
             } else {
                 // add as a code line
-                ret.codes.add(line);
-
+                if (!trimmed.isBlank() || !ret.codes.isEmpty()) {
+                    ret.codes.add(line);
+                }
             }
         });
 

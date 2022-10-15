@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.processor;
+package com.mammb.code.jsonstruct.entity;
+
+import com.mammb.code.jsonstruct.processor.Context;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;

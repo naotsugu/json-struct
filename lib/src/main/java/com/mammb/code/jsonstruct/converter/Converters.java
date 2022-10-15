@@ -52,13 +52,12 @@ public class Converters {
 
 
     @SuppressWarnings("unchecked")
-    private <T> T to(Class<T> clazz, JsonValue value) {
-        return ((Converter<JsonValue, T>) map.get(clazz)).apply(value);
+    public <T> Converter<JsonValue, T> to(Class<?> clazz) {
+        return opt.containsKey(clazz)
+            ? (Converter<JsonValue, T>) opt.get(clazz)
+            : (Converter<JsonValue, T>) map.get(clazz);
     }
 
-    public <T> T to(Class<T> clazz, String point, JsonStructure json) {
-        return to(clazz, JsonPointer.of(point).getValue(json));
-    }
 
     private static Map<Class<?>, Converter<?, ?>> builtin() {
         Map<Class<?>, Converter<?, ?>> map = new HashMap<>();
@@ -69,6 +68,5 @@ public class Converters {
         map.put(Long.TYPE,     (NumberSource s) -> s.getLong());
         return map;
     }
-
 
 }

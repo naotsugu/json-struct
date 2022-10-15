@@ -15,10 +15,21 @@
  */
 package com.mammb.code.jsonstruct.parser;
 
+import com.mammb.code.jsonstruct.converter.Converter;
+
 /**
  * JsonStructure.
  *
  * @author Naotsugu Kobayashi
  */
 public interface JsonStructure extends JsonValue {
+
+    default JsonValue at(String pointer) {
+        return JsonPointer.of(pointer).getValue(this);
+    }
+
+    default <T> T as(String pointer, Converter<JsonValue, T> conv) {
+        return conv.apply(at(pointer));
+    }
+
 }

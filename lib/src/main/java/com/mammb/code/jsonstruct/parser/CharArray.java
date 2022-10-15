@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * CharArray.
+ * Growable char array.
  * @author Naotsugu Kobayashi
  */
 public class CharArray implements Serializable {
@@ -34,14 +34,28 @@ public class CharArray implements Serializable {
         this.length = length;
     }
 
+    /**
+     * Create empty char array.
+     * @return CharArray
+     */
     public static CharArray of() {
         return new CharArray(EMPTY, 0);
     }
 
+    /**
+     * Create char array from given value.
+     * @param value char
+     * @return CharArray
+     */
     public static CharArray of(char value) {
         return new CharArray(new char[] { value }, 1);
     }
 
+    /**
+     * Create char array from given values.
+     * @param values the initial chars
+     * @return CharArray
+     */
     public static CharArray of(char[] values) {
         return new CharArray(Arrays.copyOf(values, values.length), values.length);
     }
@@ -61,34 +75,42 @@ public class CharArray implements Serializable {
         elements[length++] = value;
     }
 
+
     public int get(char index) {
         return elements[index];
     }
+
 
     public char[] array() {
         return Arrays.copyOf(elements, length);
     }
 
+
     public CharSource subArray(int start, int end) {
         return new SubArray(this, start, end);
     }
 
+
     public CharSource subArray(int start) {
         return new SubArray(this, start, length);
     }
+
 
     public void clear() {
         elements = EMPTY;
         length = 0;
     }
 
+
     public int length() {
         return length;
     }
 
+
     public int capacity() {
         return elements.length;
     }
+
 
     private char[] grow(int minCapacity) {
         int oldCapacity = elements.length;
@@ -100,6 +122,7 @@ public class CharArray implements Serializable {
                     Math.min(512, oldCapacity >> 1)));
         }
     }
+
 
     private static int newCapacity(int oldLength, int minGrowth, int prefGrowth) {
         int prefLength = oldLength + Math.max(minGrowth, prefGrowth);

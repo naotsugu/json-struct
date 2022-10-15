@@ -15,6 +15,8 @@
  */
 package com.mammb.code.jsonstruct.processor;
 
+import com.mammb.code.jsonstruct.entity.JsonStructEntity;
+
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.util.Elements;

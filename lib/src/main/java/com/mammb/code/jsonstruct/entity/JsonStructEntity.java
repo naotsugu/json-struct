@@ -23,7 +23,6 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import java.util.Comparator;
 import java.util.Optional;
 
 /**
@@ -41,9 +40,7 @@ public class JsonStructEntity {
     /** The target type element. */
     private final TypeElement element;
 
-    /** The constructor element. */
-    private final ExecutableElement execElement;
-
+    private final ObjectEntity entity;
 
     /**
      * Constructor.
@@ -52,9 +49,8 @@ public class JsonStructEntity {
             TypeElement element, ExecutableElement execElement) {
         this.context = context;
         this.element = element;
-        this.execElement = execElement;
+        this.entity = new ObjectEntity(context, execElement);
     }
-
 
     public static Optional<JsonStructEntity> of(Context context, Element element) {
 
@@ -66,7 +62,7 @@ public class JsonStructEntity {
             return Optional.of(new JsonStructEntity(
                 context,
                 (TypeElement) element,
-                getPrimaryConstructor(element).orElseThrow()));
+                Utils.getConstructor(element).orElseThrow()));
         }
 
         if (element.getKind() == ElementKind.CONSTRUCTOR &&
@@ -91,12 +87,16 @@ public class JsonStructEntity {
         return Optional.empty();
     }
 
+    public String code() {
+        return """
+            @Override
+            public %s from(Reader reader) {
+                var json = Parser.of(reader).parse();
+                return %s;
+            }
+            """.formatted(getSimpleName(), entity.code());
+    }
 
-    /**
-     * Get name of the static metamodel class.
-     * e.g. {@code FooEntity_}
-     * @return name of the static metamodel class
-     */
     public String getSimpleName() {
         return element.getSimpleName().toString();
     }
@@ -111,20 +111,9 @@ public class JsonStructEntity {
         return element.getQualifiedName().toString();
     }
 
+
     public String getPackageName() {
         return context.getElementUtils().getPackageOf(element).getQualifiedName().toString();
-    }
-
-    static Element foo(Context context, Element element) {
-        context.logInfo("element.getKind() " + element.getKind());
-        if (element.getKind().isClass()) {
-            return element;
-        } else if (element.getKind() == ElementKind.CONSTRUCTOR) {
-            return element.getEnclosingElement();
-        } else if (element.getKind() == ElementKind.METHOD) {
-            return element.getEnclosingElement();
-        }
-        return null;
     }
 
 
@@ -133,15 +122,6 @@ public class JsonStructEntity {
             .map(AnnotationMirror::getAnnotationType)
             .map(Object::toString)
             .anyMatch(ANNOTATION_TYPE::equals);
-    }
-
-
-    private static Optional<ExecutableElement> getPrimaryConstructor(Element element) {
-        return element.getEnclosedElements().stream()
-            .filter(e -> e.getKind() == ElementKind.CONSTRUCTOR)
-            .filter(e -> e.getModifiers().contains(Modifier.PUBLIC))
-            .map(ExecutableElement.class::cast)
-            .max(Comparator.comparingInt(e -> e.getParameters().size()));
     }
 
 }

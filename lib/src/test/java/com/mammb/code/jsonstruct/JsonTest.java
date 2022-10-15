@@ -9,13 +9,13 @@ class JsonTest {
 
     @Test
     void test() {
-//        var json = Json.of(Book.class);
-//        var book = json.from("""
-//            {
-//                "name": "bookName"
-//            }
-//            """);
-//        assertEquals("bookName", book.getName());
+        var json = Json.of(Book.class);
+        var book = json.from("""
+            {
+                "name": "bookName"
+            }
+            """);
+        assertEquals("bookName", book.getName());
     }
 
 }

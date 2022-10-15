@@ -73,12 +73,7 @@ public class JsonStructClassWriter {
                     this.convert = converters;
                 }
 
-                @Override
-                public #{entityName} from(Reader reader) {
-                    var json = Parser.of(reader).parse();
-                    //return new Book(json.as("/name", convert.to(String.class)));
-                    return null;
-                }
+                #{fromMethod}
 
                 @Override
                 public #{entityName} from(CharSequence cs) {
@@ -88,7 +83,8 @@ public class JsonStructClassWriter {
             """)
             .bind("#{processorName}", JsonStructProcessor.class.getName())
             .bind("#{className}", className)
-            .bind("#{entityName}", entity.getSimpleName());
+            .bind("#{entityName}", entity.getSimpleName())
+            .bind("#{fromMethod}", entity.code());
 
 
         try {

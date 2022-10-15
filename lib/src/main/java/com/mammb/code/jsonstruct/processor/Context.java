@@ -19,6 +19,7 @@ import com.mammb.code.jsonstruct.entity.JsonStructEntity;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Context of annotation processing.
@@ -149,6 +151,12 @@ public class Context {
     private String formatted(String format, Object... args) {
         return Arrays.stream(args).map(Object::toString)
             .reduce(format, (str, arg) -> str.replaceFirst("\\{}", arg));
+    }
+
+    public boolean isBasic(TypeMirror type) {
+        // TODO
+        return Objects.equals("java.lang.String", type.toString()) ||
+               Objects.equals("int", type.toString());
     }
 
 }

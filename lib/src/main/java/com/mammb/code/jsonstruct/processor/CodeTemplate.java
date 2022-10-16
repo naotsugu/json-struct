@@ -35,7 +35,6 @@ public class CodeTemplate {
     private String packageName;
     private Set<String> imports;
     private List<String> codes;
-    private Map<String, String> map;
 
     /**
      * Create a {@link CodeTemplate} instance.
@@ -45,7 +44,6 @@ public class CodeTemplate {
         this.packageName = Objects.requireNonNull(packageName);
         this.imports = new HashSet<>();
         this.codes = new ArrayList<>();
-        this.map = new HashMap<>();
     }
 
     /**
@@ -95,7 +93,7 @@ public class CodeTemplate {
      * @return this template
      */
     public CodeTemplate bind(String key, String value) {
-        map.put(key, value);
+        applySubstitution(key, value);
         return this;
     }
 
@@ -107,7 +105,7 @@ public class CodeTemplate {
      * @return this template
      */
     public CodeTemplate bindType(String key, String fqcn) {
-        map.put(key, applyImport(fqcn));
+        applySubstitution(key, applyImport(fqcn));
         return this;
     }
 
@@ -145,7 +143,6 @@ public class CodeTemplate {
             importList.forEach(s -> pw.println("import " + s + ";"));
             pw.println();
         }
-        map.forEach(this::applySubstitution);
         codes.forEach(pw::println);
         pw.flush();
     }

@@ -16,20 +16,16 @@
 package com.mammb.code.jsonstruct.entity;
 
 import com.mammb.code.jsonstruct.processor.Context;
-
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
 import java.util.Optional;
 
 /**
  * JsonStructEntity.
  * @author Naotsugu Kobayashi
  */
-public class JsonStructEntity {
+public class JsonStructEntity implements Entity {
 
     /** Annotation type. */
     public static final String ANNOTATION_TYPE = "com.mammb.code.jsonstruct.JsonStruct";
@@ -37,19 +33,16 @@ public class JsonStructEntity {
     /** Context of processing. */
     private final Context context;
 
-    /** The target type element. */
-    private final TypeElement element;
+    /** Root entity. */
+    private final ObjectEntity root;
 
-    private final ObjectEntity entity;
 
     /**
      * Constructor.
      */
-    private JsonStructEntity(Context context,
-            TypeElement element, ExecutableElement execElement) {
+    private JsonStructEntity(Context context, ExecutableElement execElement) {
         this.context = context;
-        this.element = element;
-        this.entity = new ObjectEntity(context, execElement);
+        this.root = new ObjectEntity(context, execElement);
     }
 
     public static Optional<JsonStructEntity> of(Context context, Element element) {
@@ -59,34 +52,19 @@ public class JsonStructEntity {
         }
 
         if (element.getKind().isClass()) {
-            return Optional.of(new JsonStructEntity(
-                context,
-                (TypeElement) element,
-                Utils.getConstructor(element).orElseThrow()));
+            return Optional.of(new JsonStructEntity(context, Utils.getConstructor(element).orElseThrow()));
         }
-
-        if (element.getKind() == ElementKind.CONSTRUCTOR &&
-            element.getModifiers().contains(Modifier.PUBLIC)) {
-            return Optional.of(new JsonStructEntity(
-                context,
-                (TypeElement) element.getEnclosingElement(),
-                (ExecutableElement) element));
+        if (Utils.isConstructor(element)) {
+            return Optional.of(new JsonStructEntity(context, (ExecutableElement) element));
         }
-
-        if (element.getKind() == ElementKind.METHOD &&
-            element.getModifiers().contains(Modifier.PUBLIC)) {
-            TypeElement typeElement = (TypeElement) element.getEnclosingElement();
-            ExecutableElement executableElement = (ExecutableElement) element;
-            if (typeElement.getQualifiedName().toString().equals(executableElement.getReturnType().toString())) {
-                return Optional.of(new JsonStructEntity(
-                    context,
-                    typeElement,
-                    executableElement));
-            }
+        if (Utils.isStaticFactory(element)) {
+            return Optional.of(new JsonStructEntity(context, (ExecutableElement) element));
         }
         return Optional.empty();
     }
 
+
+    @Override
     public String code() {
         return """
             @Override
@@ -94,11 +72,16 @@ public class JsonStructEntity {
                 var json = Parser.of(reader).parse();
                 return %s;
             }
-            """.formatted(getSimpleName(), entity.code());
+            """.formatted(getSimpleName(), root.code());
     }
 
+    /**
+     * Get simple name of the entity.
+     * e.g. {@code Person}
+     * @return simple name of the entity
+     */
     public String getSimpleName() {
-        return element.getSimpleName().toString();
+        return root.getSimpleName();
     }
 
 
@@ -108,12 +91,16 @@ public class JsonStructEntity {
      * @return qualified name of the static metamodel class
      */
     public String getQualifiedName() {
-        return element.getQualifiedName().toString();
+        return root.getQualifiedName();
     }
 
 
+    /**
+     * Get package name of the entity.
+     * @return package name of the entity
+     */
     public String getPackageName() {
-        return context.getElementUtils().getPackageOf(element).getQualifiedName().toString();
+        return root.getPackageName();
     }
 
 

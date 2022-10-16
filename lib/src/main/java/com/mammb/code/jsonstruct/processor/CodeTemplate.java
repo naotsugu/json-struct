@@ -152,14 +152,16 @@ public class CodeTemplate {
 
 
     private void applySubstitution(String key, String value) {
+        var multiLine = value.contains(LF);
         for (int i = 0; i < codes.size(); i++) {
-            if (codes.get(i).trim().equals(key) && value.contains(LF)) {
+            if (codes.get(i).trim().equals(key) && multiLine) {
                 var indent = codes.get(i).indexOf(key);
                 var lines = value.split(LF);
                 codes.set(i, codes.get(i).replace(key, lines[0]));
                 for (int j = 1; j < lines.length; j++) {
                     codes.add(i + j, " ".repeat(indent) + lines[j]);
                 }
+                i += lines.length;
             } else if (codes.get(i).contains(key)) {
                 codes.set(i, codes.get(i).replace(key, value));
             }

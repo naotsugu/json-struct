@@ -19,11 +19,12 @@ public class ObjectEntity implements Entity {
 
     private List<Entity> parameters;
 
+
     public ObjectEntity(Context context, ExecutableElement executable) {
-        this.context = context;
         if (executable.isVarArgs()) {
             throw new IllegalArgumentException("not supported");
         }
+        this.context = context;
         this.typeElement = (TypeElement) executable.getEnclosingElement();
         this.executable = executable;
         this.parameters = asParameters(context, executable.getParameters());
@@ -44,6 +45,7 @@ public class ObjectEntity implements Entity {
         return list;
     }
 
+
     @Override
     public String code() {
         StringBuilder sb = new StringBuilder();
@@ -55,5 +57,33 @@ public class ObjectEntity implements Entity {
         return sb.toString();
     }
 
+
+    /**
+     * Get simple name of the entity.
+     * e.g. {@code Person}
+     * @return simple name of the entity
+     */
+    String getSimpleName() {
+        return typeElement.getSimpleName().toString();
+    }
+
+
+    /**
+     * Get qualified name of the entity.
+     * e.g. {@code foo.bar.Person}
+     * @return qualified name of the entity
+     */
+    String getQualifiedName() {
+        return typeElement.getQualifiedName().toString();
+    }
+
+
+    /**
+     * Get package name of the entity.
+     * @return package name of the entity
+     */
+    String getPackageName() {
+        return Utils.getPackage(typeElement).getQualifiedName().toString();
+    }
 
 }

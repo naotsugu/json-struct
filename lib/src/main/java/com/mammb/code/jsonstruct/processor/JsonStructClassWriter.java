@@ -73,19 +73,18 @@ public class JsonStructClassWriter {
                     this.convert = converters;
                 }
 
-                #{fromMethod}
-
                 @Override
                 public #{entityName} from(CharSequence cs) {
                     return from(new StringReader(cs.toString()));
                 }
+
             }
             """)
             .bind("#{processorName}", JsonStructProcessor.class.getName())
             .bind("#{className}", className)
-            .bind("#{entityName}", entity.getSimpleName())
-            .bind("#{fromMethod}", entity.code());
+            .bind("#{entityName}", entity.getSimpleName());
 
+        entity.writeTo(code);
 
         try {
             FileObject fo = context.getFiler().createSourceFile(entity.getPackageName() + "." + className);

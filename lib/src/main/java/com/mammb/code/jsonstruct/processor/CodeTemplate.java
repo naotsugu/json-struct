@@ -17,10 +17,8 @@ package com.mammb.code.jsonstruct.processor;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -115,11 +113,11 @@ public class CodeTemplate {
      * @param code Code to be added
      * @return this template
      */
-    public CodeTemplate addCode(String code) {
+    public CodeTemplate add(String code) {
         for (int i = codes.size() - 1; i > 0; i--) {
             if (codes.get(i).trim().endsWith("}")) {
                 var lines = code.split(LF);
-                for (int j = 1; j < lines.length; j++) {
+                for (int j = lines.length - 1; j >= 0; j--) {
                     codes.add(i, " ".repeat(4) + lines[j]);
                 }
                 break;
@@ -166,15 +164,15 @@ public class CodeTemplate {
     }
 
 
-    private String applyImport(String fqcn) {
+    public String applyImport(String fqcn) {
         if (fqcn.isBlank() || fqcn.contains(" ") || fqcn.contains(LF)) {
             throw new IllegalArgumentException();
         }
         var index = fqcn.lastIndexOf('.');
         if (index <= 0) {
-            throw new IllegalArgumentException();
+            return fqcn;
         }
-        imports.add(fqcn.substring(0, index));
+        imports.add(fqcn);
         return fqcn.substring(index + 1);
     }
 

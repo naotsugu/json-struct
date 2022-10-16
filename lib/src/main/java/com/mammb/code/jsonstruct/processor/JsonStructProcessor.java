@@ -89,6 +89,7 @@ public class JsonStructProcessor extends AbstractProcessor {
             JsonClassWriter.of(context).write();
 
         } catch (Exception e) {
+            e.printStackTrace();
             context.logError("Exception : {}", e.getMessage());
         }
 

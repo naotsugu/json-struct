@@ -15,6 +15,7 @@
  */
 package com.mammb.code.jsonstruct.entity;
 
+import com.mammb.code.jsonstruct.processor.CodeTemplate;
 import com.mammb.code.jsonstruct.processor.Context;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -25,7 +26,7 @@ import java.util.Optional;
  * JsonStructEntity.
  * @author Naotsugu Kobayashi
  */
-public class JsonStructEntity implements Entity {
+public class JsonStructEntity {
 
     /** Annotation type. */
     public static final String ANNOTATION_TYPE = "com.mammb.code.jsonstruct.JsonStruct";
@@ -42,7 +43,7 @@ public class JsonStructEntity implements Entity {
      */
     private JsonStructEntity(Context context, ExecutableElement execElement) {
         this.context = context;
-        this.root = new ObjectEntity(context, execElement);
+        this.root = new ObjectEntity(context, execElement, "");
     }
 
     public static Optional<JsonStructEntity> of(Context context, Element element) {
@@ -60,19 +61,22 @@ public class JsonStructEntity implements Entity {
         if (Utils.isStaticFactory(element)) {
             return Optional.of(new JsonStructEntity(context, (ExecutableElement) element));
         }
+
         return Optional.empty();
+
     }
 
 
-    @Override
-    public String code() {
-        return """
+    public void writeTo(CodeTemplate code) {
+        code.add("""
             @Override
             public %s from(Reader reader) {
                 var json = Parser.of(reader).parse();
-                return %s;
+                return #{};
             }
-            """.formatted(getSimpleName(), root.code());
+            """.formatted(getSimpleName()));
+        root.writeTo(code, "#{}");
+        code.bind("#{}", "");
     }
 
     /**

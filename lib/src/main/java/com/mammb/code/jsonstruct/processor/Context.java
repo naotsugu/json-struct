@@ -149,7 +149,8 @@ public class Context {
      * @return the formatted string
      */
     private String formatted(String format, Object... args) {
-        return Arrays.stream(args).map(Object::toString)
+        return Arrays.stream(args)
+            .map(arg -> Objects.nonNull(arg) ? arg.toString() : "")
             .reduce(format, (str, arg) -> str.replaceFirst("\\{}", arg));
     }
 

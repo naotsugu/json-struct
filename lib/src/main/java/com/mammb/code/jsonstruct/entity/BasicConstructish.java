@@ -4,7 +4,7 @@ import com.mammb.code.jsonstruct.processor.CodeTemplate;
 import com.mammb.code.jsonstruct.processor.Context;
 import javax.lang.model.element.Element;
 
-public class BasicEntity implements Entity {
+public class BasicConstructish implements Constructish {
 
     /** Context of processing. */
     private final Context context;
@@ -19,15 +19,15 @@ public class BasicEntity implements Entity {
     private String typeName;
 
 
-    public BasicEntity(Context context, Element element, String parentPointer) {
+    public BasicConstructish(Context context, Element element, String parentPointer) {
         this.context = context;
         this.element = element;
         this.pointer = parentPointer + element.getSimpleName().toString();
         this.typeName = element.asType().toString();
     }
 
-    public static BasicEntity of(Context context, Element element, String parentPointer) {
-        return new BasicEntity(context, element, parentPointer);
+    public static BasicConstructish of(Context context, Element element, String parentPointer) {
+        return new BasicConstructish(context, element, parentPointer);
     }
 
     @Override

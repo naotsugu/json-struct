@@ -2,7 +2,7 @@ package com.mammb.code.jsonstruct.entity;
 
 import com.mammb.code.jsonstruct.processor.CodeTemplate;
 
-public class ListEntity implements Entity {
+public class ListConstructish implements Constructish {
     @Override
     public void writeTo(CodeTemplate code, String key) {
     }

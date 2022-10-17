@@ -1,5 +1,7 @@
 package com.mammb.code.jsonstruct.entity;
 
+import com.mammb.code.jsonstruct.JsonStruct;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -8,6 +10,8 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class Utils {
@@ -34,6 +38,7 @@ public class Utils {
                element.getModifiers().contains(Modifier.PUBLIC);
     }
 
+
     public static boolean isStaticFactory(Element element) {
 
         if (element.getKind() == ElementKind.METHOD &&
@@ -49,25 +54,56 @@ public class Utils {
     }
 
 
+    public static boolean isConstructorLike(Element element) {
+        return isConstructor(element) || isStaticFactory(element);
+    }
+
+
     public static String instantiateName(ExecutableElement executable) {
-        if (executable.getKind() == ElementKind.CONSTRUCTOR &&
-            executable.getModifiers().contains(Modifier.PUBLIC)) {
+        if (isConstructor(executable)) {
             // e.g. "new FullName"
             // public record FullName(String givenName, String familyName) { }
             var constructor = executable.toString();
             return "new " + constructor.substring(0, constructor.indexOf('('));
         }
-        if (executable.getKind() == ElementKind.METHOD &&
-            executable.getModifiers().contains(Modifier.PUBLIC) &&
-            executable.getModifiers().contains(Modifier.STATIC)) {
+        if (isStaticFactory(executable)) {
             // e.g. "Pet.of"
             // public class Pet {
             //    public static Pet of(String name) { return new Pet(name); }
             // }
-            DeclaredType declaredType = (DeclaredType) executable.getReturnType();
+            var declaredType = (DeclaredType) executable.getReturnType();
             return declaredType.asElement().getSimpleName() + "." + executable.getSimpleName();
         }
         return "";
+    }
+
+
+    public static ExecutableElement selectConstructorLike(Element element) {
+
+        List<ExecutableElement> candidate = element.getEnclosedElements().stream()
+            .filter(Utils::isConstructorLike)
+            .map(ExecutableElement.class::cast)
+            .toList();
+
+        var ret = candidate.stream()
+            .filter(e -> Objects.nonNull(e.getAnnotation(JsonStruct.class)))
+            .findFirst();
+        if (ret.isPresent()) return ret.get();
+
+        ret = candidate.stream()
+            .filter(Utils::isConstructor)
+            .filter(e -> e.getParameters().size() > 0)
+            .max(Comparator.comparingInt(e -> e.getParameters().size()));
+        if (ret.isPresent()) return ret.get();
+
+        ret = candidate.stream()
+            .filter(Utils::isStaticFactory)
+            .filter(e -> e.getParameters().size() > 0)
+            .max(Comparator.comparingInt(e -> e.getParameters().size()));
+        if (ret.isPresent()) return ret.get();
+
+        return candidate.stream().findFirst().orElseThrow();
+
     }
 
 

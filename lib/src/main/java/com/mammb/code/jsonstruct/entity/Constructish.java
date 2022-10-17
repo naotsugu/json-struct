@@ -2,7 +2,7 @@ package com.mammb.code.jsonstruct.entity;
 
 import com.mammb.code.jsonstruct.processor.CodeTemplate;
 
-public interface Entity {
+public interface Constructish {
 
     void writeTo(CodeTemplate code, String key);
 

@@ -35,7 +35,7 @@ public class JsonStructEntity {
     private final Context context;
 
     /** Root entity. */
-    private final ObjectEntity root;
+    private final ObjectConstructish root;
 
 
     /**
@@ -43,7 +43,7 @@ public class JsonStructEntity {
      */
     private JsonStructEntity(Context context, ExecutableElement execElement) {
         this.context = context;
-        this.root = new ObjectEntity(context, execElement, "");
+        this.root = new ObjectConstructish(context, execElement, "");
     }
 
     public static Optional<JsonStructEntity> of(Context context, Element element) {
@@ -53,7 +53,7 @@ public class JsonStructEntity {
         }
 
         if (element.getKind().isClass()) {
-            return Optional.of(new JsonStructEntity(context, Utils.getConstructor(element).orElseThrow()));
+            return Optional.of(new JsonStructEntity(context, Utils.selectConstructorLike(element)));
         }
         if (Utils.isConstructor(element)) {
             return Optional.of(new JsonStructEntity(context, (ExecutableElement) element));

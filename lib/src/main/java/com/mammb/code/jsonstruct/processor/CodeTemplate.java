@@ -28,11 +28,18 @@ import java.util.Set;
  */
 public class CodeTemplate {
 
+    /** The line feed char. */
     private static final String LF = "\n";
 
+    /** The package name. */
     private String packageName;
+
+    /** The import strings. */
     private Set<String> imports;
+
+    /** The code line strings. */
     private List<String> codes;
+
 
     /**
      * Create a {@link CodeTemplate} instance.
@@ -43,6 +50,7 @@ public class CodeTemplate {
         this.imports = new HashSet<>();
         this.codes = new ArrayList<>();
     }
+
 
     /**
      * Create a {@link CodeTemplate} instance.
@@ -146,12 +154,16 @@ public class CodeTemplate {
     }
 
 
+    /**
+     * Apply value in the code.
+     * @param key the bind key
+     * @param value the value to be bind
+     */
     private void applySubstitution(String key, String value) {
-        var multiLine = value.contains(LF);
+        var lines = value.split(LF);
         for (int i = 0; i < codes.size(); i++) {
-            if (codes.get(i).trim().equals(key) && multiLine) {
+            if (codes.get(i).trim().equals(key) && lines.length > 1) {
                 var indent = codes.get(i).indexOf(key);
-                var lines = value.split(LF);
                 codes.set(i, codes.get(i).replace(key, lines[0]));
                 for (int j = 1; j < lines.length; j++) {
                     codes.add(i + j, " ".repeat(indent) + lines[j]);
@@ -164,6 +176,11 @@ public class CodeTemplate {
     }
 
 
+    /**
+     * Apply import.
+     * @param fqcn the type fqcn
+     * @return the type name applied import
+     */
     public String applyImport(String fqcn) {
         if (fqcn.isBlank() || fqcn.contains(" ") || fqcn.contains(LF)) {
             throw new IllegalArgumentException();
@@ -177,13 +194,26 @@ public class CodeTemplate {
     }
 
 
+    /**
+     * Remove the default import, and package local import.
+     * @return the import strings
+     */
     private List<String> normalizeImports() {
         return imports.stream()
             .filter(s -> !s.startsWith("java.lang."))
-            .filter(s -> !s.equals(packageName))
+            .filter(s -> !s.equals(packageName + "." + simpleName(s)))
             .filter(s -> !s.isBlank())
             .sorted()
             .toList();
+    }
+
+    /**
+     * Get the simple name from the given fqcn.
+     * @param fqcn the fqcn
+     * @return the simple name
+     */
+    private static String simpleName(String fqcn) {
+        return fqcn.substring(fqcn.lastIndexOf('.') + 1);
     }
 
 }

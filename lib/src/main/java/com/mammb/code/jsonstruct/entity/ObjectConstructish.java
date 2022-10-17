@@ -8,7 +8,7 @@ import javax.lang.model.element.VariableElement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ObjectEntity implements Entity {
+public class ObjectConstructish implements Constructish {
 
     /** Context of processing. */
     private final Context context;
@@ -17,12 +17,12 @@ public class ObjectEntity implements Entity {
 
     private ExecutableElement executable;
 
-    private List<Entity> parameters;
+    private List<Constructish> parameters;
 
     /** the json pointer. */
     private String pointer;
 
-    public ObjectEntity(Context context, ExecutableElement executable, String pointer) {
+    public ObjectConstructish(Context context, ExecutableElement executable, String pointer) {
         if (executable.isVarArgs()) {
             throw new IllegalArgumentException("not supported");
         }
@@ -34,17 +34,17 @@ public class ObjectEntity implements Entity {
     }
 
 
-    private static List<Entity> asParameters(
+    private static List<Constructish> asParameters(
         Context context, List<? extends VariableElement> variables, String pointer) {
-        List<Entity> list = new ArrayList<>();
+        List<Constructish> list = new ArrayList<>();
         for (VariableElement e : variables) {
             if (context.isBasic(e.asType())) {
-                list.add(BasicEntity.of(context, e, pointer));
+                list.add(BasicConstructish.of(context, e, pointer));
             } else {
                 var elm = context.getTypeUtils().asElement(e.asType());
-                list.add(new ObjectEntity(
+                list.add(new ObjectConstructish(
                     context,
-                    Utils.getConstructor(elm).get(),
+                    Utils.selectConstructorLike(elm),
                     pointer + e.getSimpleName().toString()));
             }
         }

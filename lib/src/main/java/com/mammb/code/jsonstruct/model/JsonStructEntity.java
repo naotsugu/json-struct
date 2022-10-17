@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.entity;
+package com.mammb.code.jsonstruct.model;
 
 import com.mammb.code.jsonstruct.processor.CodeTemplate;
 import com.mammb.code.jsonstruct.processor.Context;
@@ -35,7 +35,7 @@ public class JsonStructEntity {
     private final Context context;
 
     /** Root entity. */
-    private final ObjectConstructish root;
+    private final ObjectConstructor root;
 
 
     /**
@@ -43,7 +43,7 @@ public class JsonStructEntity {
      */
     private JsonStructEntity(Context context, ExecutableElement execElement) {
         this.context = context;
-        this.root = new ObjectConstructish(context, execElement, "");
+        this.root = new ObjectConstructor(context, execElement, "");
     }
 
     public static Optional<JsonStructEntity> of(Context context, Element element) {

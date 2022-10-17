@@ -1,4 +1,19 @@
-package com.mammb.code.jsonstruct.entity;
+/*
+ * Copyright 2019-2022 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.mammb.code.jsonstruct.model;
 
 import com.mammb.code.jsonstruct.processor.CodeTemplate;
 import com.mammb.code.jsonstruct.processor.Context;
@@ -8,41 +23,38 @@ import javax.lang.model.element.VariableElement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ObjectConstructish implements Constructish {
+public class ObjectConstructor implements Constructor {
 
     /** Context of processing. */
     private final Context context;
 
-    private TypeElement typeElement;
-
     private ExecutableElement executable;
 
-    private List<Constructish> parameters;
+    private List<Constructor> parameters;
 
     /** the json pointer. */
     private String pointer;
 
-    public ObjectConstructish(Context context, ExecutableElement executable, String pointer) {
+    public ObjectConstructor(Context context, ExecutableElement executable, String pointer) {
         if (executable.isVarArgs()) {
             throw new IllegalArgumentException("not supported");
         }
         this.context = context;
-        this.typeElement = (TypeElement) executable.getEnclosingElement();
         this.executable = executable;
         this.pointer = pointer + '/';
         this.parameters = asParameters(context, executable.getParameters(), this.pointer);
     }
 
 
-    private static List<Constructish> asParameters(
+    private static List<Constructor> asParameters(
         Context context, List<? extends VariableElement> variables, String pointer) {
-        List<Constructish> list = new ArrayList<>();
+        List<Constructor> list = new ArrayList<>();
         for (VariableElement e : variables) {
             if (context.isBasic(e.asType())) {
-                list.add(BasicConstructish.of(context, e, pointer));
+                list.add(BasicConstructor.of(context, e, pointer));
             } else {
                 var elm = context.getTypeUtils().asElement(e.asType());
-                list.add(new ObjectConstructish(
+                list.add(new ObjectConstructor(
                     context,
                     Utils.selectConstructorLike(elm),
                     pointer + e.getSimpleName().toString()));
@@ -72,7 +84,7 @@ public class ObjectConstructish implements Constructish {
      * @return simple name of the entity
      */
     String getSimpleName() {
-        return typeElement.getSimpleName().toString();
+        return targetType().getSimpleName().toString();
     }
 
 
@@ -82,7 +94,7 @@ public class ObjectConstructish implements Constructish {
      * @return qualified name of the entity
      */
     String getQualifiedName() {
-        return typeElement.getQualifiedName().toString();
+        return targetType().getQualifiedName().toString();
     }
 
 
@@ -91,7 +103,12 @@ public class ObjectConstructish implements Constructish {
      * @return package name of the entity
      */
     String getPackageName() {
-        return Utils.getPackage(typeElement).getQualifiedName().toString();
+        return Utils.getPackage(targetType()).getQualifiedName().toString();
+    }
+
+
+    private TypeElement targetType() {
+        return (TypeElement) executable.getEnclosingElement();
     }
 
 }

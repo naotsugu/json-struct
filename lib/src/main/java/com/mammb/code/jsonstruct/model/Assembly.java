@@ -17,8 +17,27 @@ package com.mammb.code.jsonstruct.model;
 
 import com.mammb.code.jsonstruct.processor.CodeTemplate;
 
-public class ListConstructor implements Constructor {
-    @Override
-    public void writeTo(CodeTemplate code, String key) {
+public interface Assembly {
+
+    String nameOnJson();
+
+    Assembly parent();
+
+    void writeTo(CodeTemplate code, String key);
+
+
+    default boolean hasParent() {
+        return parent() != null;
     }
+
+    default String namePath() {
+        if (!hasParent()) return nameOnJson();
+        return parent().namePath() + nameOnJson();
+    }
+
+    default int depth() {
+        if (!hasParent()) return 1;
+        return parent().depth() + 1;
+    }
+
 }

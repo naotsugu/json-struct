@@ -19,30 +19,44 @@ import com.mammb.code.jsonstruct.processor.CodeTemplate;
 import com.mammb.code.jsonstruct.processor.Context;
 import javax.lang.model.element.Element;
 
-public class BasicConstructor implements Constructor {
+public class BasicAssembly implements Assembly {
 
     /** Context of processing. */
     private final Context context;
 
-    /** the element. */
-    private Element element;
+    /** The element. */
+    private final Element element;
 
-    /** the json pointer. */
-    private String pointer;
+    /** The name on json. */
+    private final String nameOnJson;
 
-    /** the type name like `java.lang.String` or 'int'. */
-    private String typeName;
+    /** The type name like `java.lang.String` or 'int', etc. */
+    private final String typeName;
+
+    /** The parent assembly. */
+    private final Assembly parent;
 
 
-    public BasicConstructor(Context context, Element element, String parentPointer) {
+    private BasicAssembly(Context context, Element element, Assembly parent) {
         this.context = context;
         this.element = element;
-        this.pointer = parentPointer + element.getSimpleName().toString();
+        this.nameOnJson = element.getSimpleName().toString();
         this.typeName = element.asType().toString();
+        this.parent = parent;
     }
 
-    public static BasicConstructor of(Context context, Element element, String parentPointer) {
-        return new BasicConstructor(context, element, parentPointer);
+    public static BasicAssembly of(Context context, Element element, Assembly parent) {
+        return new BasicAssembly(context, element, parent);
+    }
+
+    @Override
+    public String nameOnJson() {
+        return nameOnJson;
+    }
+
+    @Override
+    public Assembly parent() {
+        return parent;
     }
 
     @Override
@@ -50,7 +64,7 @@ public class BasicConstructor implements Constructor {
         code.bind(key, """
             json.as("%s", convert.to(%s.class))%s"""
             .formatted(
-                pointer,
+                namePath(),
                 code.applyImport(typeName), key));
     }
 

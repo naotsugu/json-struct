@@ -17,7 +17,18 @@ package com.mammb.code.jsonstruct.model;
 
 import com.mammb.code.jsonstruct.processor.CodeTemplate;
 
-public class MapConstructor implements Constructor {
+public class MapAssembly implements Assembly {
+
+    @Override
+    public String nameOnJson() {
+        return null;
+    }
+
+    @Override
+    public Assembly parent() {
+        return null;
+    }
+
     @Override
     public void writeTo(CodeTemplate code, String key) {
     }

@@ -35,7 +35,7 @@ public class JsonStructEntity {
     private final Context context;
 
     /** Root entity. */
-    private final ObjectConstructor root;
+    private final ObjectAssembly root;
 
 
     /**
@@ -43,7 +43,7 @@ public class JsonStructEntity {
      */
     private JsonStructEntity(Context context, ExecutableElement execElement) {
         this.context = context;
-        this.root = new ObjectConstructor(context, execElement, "");
+        this.root = ObjectAssembly.rootOf(context, execElement);
     }
 
     public static Optional<JsonStructEntity> of(Context context, Element element) {

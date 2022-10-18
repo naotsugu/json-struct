@@ -15,6 +15,8 @@
  */
 package com.mammb.code.jsonstruct.parser;
 
+import com.mammb.code.jsonstruct.converter.Converter;
+
 /**
  * JsonValue.
  *
@@ -29,6 +31,9 @@ public interface JsonValue {
     @Override
     String toString();
 
+    default <T> T as(Converter<JsonValue, T> conv) {
+        return conv.apply(this);
+    }
 
     record JsonNull() implements JsonValue { }
     record JsonTrue() implements JsonValue { }

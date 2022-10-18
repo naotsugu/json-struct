@@ -17,7 +17,6 @@ package com.mammb.code.jsonstruct.model;
 
 import com.mammb.code.jsonstruct.JsonStruct;
 import com.mammb.code.jsonstruct.processor.Context;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -30,6 +29,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Utils.
+ * @author Naotsugu Kobayashi
+ */
 public class Utils {
 
     public static PackageElement getPackage(Element element) {

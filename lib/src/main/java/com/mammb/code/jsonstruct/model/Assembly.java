@@ -17,6 +17,10 @@ package com.mammb.code.jsonstruct.model;
 
 import com.mammb.code.jsonstruct.processor.CodeTemplate;
 
+/**
+ * Assembly.
+ * @author Naotsugu Kobayashi
+ */
 public interface Assembly {
 
     String nameOnJson();

@@ -16,6 +16,7 @@
 package com.mammb.code.jsonstruct.parser;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -23,7 +24,7 @@ import java.util.List;
  *
  * @author Naotsugu Kobayashi
  */
-public interface JsonArray extends JsonStructure {
+public interface JsonArray extends JsonStructure, Iterable<JsonValue> {
     JsonValue get(int index);
     void add(JsonValue value);
 
@@ -48,6 +49,11 @@ public interface JsonArray extends JsonStructure {
         @Override
         public int size() {
             return values.size();
+        }
+
+        @Override
+        public Iterator<JsonValue> iterator() {
+            return values.iterator();
         }
     }
 

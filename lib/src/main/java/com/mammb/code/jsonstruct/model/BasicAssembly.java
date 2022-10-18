@@ -20,6 +20,10 @@ import com.mammb.code.jsonstruct.processor.Context;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 
+/**
+ * BasicAssembly.
+ * @author Naotsugu Kobayashi
+ */
 public class BasicAssembly implements Assembly {
 
     /** Context of processing. */
@@ -55,14 +59,19 @@ public class BasicAssembly implements Assembly {
 
     @Override
     public void writeTo(CodeTemplate code, String key, String parent) {
-        String path = nameOnJson.isEmpty()
-            ? "\"/\" + " + parent
-            : "\"" + parent + nameOnJson + "\"";
-        code.bind(key, """
-            json.as(%s, convert.to(%s.class))%s"""
-            .formatted(
-                path,
-                code.applyImport(typeName), key));
+
+        if (nameOnJson.isEmpty()) {
+            code.bind(key, """
+            json.as(convert.to(%s.class))%s"""
+                .formatted(code.applyImport(typeName), key));
+
+        } else {
+            code.bind(key, """
+            json.as("%s", convert.to(%s.class))%s"""
+                .formatted(
+                    parent + nameOnJson,
+                    code.applyImport(typeName), key));
+        }
     }
 
 }

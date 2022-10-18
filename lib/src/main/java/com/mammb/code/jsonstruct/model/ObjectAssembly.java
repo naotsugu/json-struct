@@ -17,7 +17,6 @@ package com.mammb.code.jsonstruct.model;
 
 import com.mammb.code.jsonstruct.processor.CodeTemplate;
 import com.mammb.code.jsonstruct.processor.Context;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -25,6 +24,10 @@ import javax.lang.model.element.VariableElement;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ObjectAssembly.
+ * @author Naotsugu Kobayashi
+ */
 public class ObjectAssembly implements Assembly {
 
     /** Context of processing. */

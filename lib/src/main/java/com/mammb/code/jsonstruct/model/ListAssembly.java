@@ -20,6 +20,10 @@ import com.mammb.code.jsonstruct.processor.Context;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 
+/**
+ * ListAssembly.
+ * @author Naotsugu Kobayashi
+ */
 public class ListAssembly implements Assembly {
 
     /** Context of processing. */
@@ -71,13 +75,14 @@ public class ListAssembly implements Assembly {
         code.applyImport("java.util.ArrayList");
         code.applyImport("com.mammb.code.jsonstruct.parser.JsonStructure");
         code.applyImport("com.mammb.code.jsonstruct.parser.JsonArray");
+        code.applyImport("com.mammb.code.jsonstruct.parser.JsonValue");
 
         var nestKey = key + key;
         code.add("""
 
-            private List<%1$s> %2$s(JsonArray json) {
+            private List<%1$s> %2$s(JsonArray array) {
                 List<%1$s> list = new ArrayList<>();
-                for (int i = 0; i < json.size(); i++) {
+                for (JsonValue json : array) {
                     list.add(%3$s);
                 }
                 return list;
@@ -87,7 +92,7 @@ public class ListAssembly implements Assembly {
                 methodName,
                 nestKey));
 
-          entry.writeTo(code, nestKey, "i");
+          entry.writeTo(code, nestKey, "/");
           code.bind(nestKey, "");
     }
 

@@ -17,6 +17,8 @@ package com.mammb.code.jsonstruct.model;
 
 import com.mammb.code.jsonstruct.processor.CodeTemplate;
 import com.mammb.code.jsonstruct.processor.Context;
+
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -36,10 +38,8 @@ public class ObjectAssembly implements Assembly {
     /** The name on json. */
     private final String nameOnJson;
 
-    private final Assembly parent;
 
-
-    private ObjectAssembly(Context context, ExecutableElement executable, String nameOnJson, Assembly parent) {
+    private ObjectAssembly(Context context, ExecutableElement executable, String nameOnJson) {
         if (executable.isVarArgs()) {
             throw new IllegalArgumentException("not supported");
         }
@@ -47,44 +47,42 @@ public class ObjectAssembly implements Assembly {
         this.constructorLike = executable;
         this.nameOnJson = nameOnJson;
         this.parameters = asParameters(context, constructorLike.getParameters());
-        this.parent = parent;
     }
+
 
     public static ObjectAssembly rootOf(Context context, ExecutableElement executable) {
-        return new ObjectAssembly(context, executable, "/", null);
+        return new ObjectAssembly(context, executable, "/");
     }
 
-    private static ObjectAssembly of(Context context, VariableElement variable, Assembly parent) {
+
+    public static ObjectAssembly of(Context context, Element variable) {
         return new ObjectAssembly(context,
             Utils.selectConstructorLike(context.getTypeUtils().asElement(variable.asType())),
-            variable.getSimpleName().toString() + "/",
-            parent);
+            variable.getSimpleName().toString() + "/");
     }
-
 
     private List<Assembly> asParameters(
         Context context, List<? extends VariableElement> variables) {
         List<Assembly> list = new ArrayList<>();
         for (VariableElement e : variables) {
-            if (context.isBasic(e.asType())) {
-                list.add(BasicAssembly.of(context, e, this));
-            } else {
-                list.add(ObjectAssembly.of(context, e, this));
-            }
+            list.add(Utils.toAssembly(context, e));
         }
         return list;
     }
 
 
     @Override
-    public void writeTo(CodeTemplate code, String key) {
-        String indent = " ".repeat(4 * (depth() + 2));
+    public void writeTo(CodeTemplate code, String key, String parent) {
+
+        String path = parent + nameOnJson();
+
+        String indent = " ".repeat(4 * (depth(path) + 2));
         code.bind(key, Utils.instantiateName(constructorLike) + "(\n" + indent + key);
         for (int i = 0; i < parameters.size(); i++) {
             if (i != 0) {
                 code.bind(key, ",\n" + indent + key);
             }
-            parameters.get(i).writeTo(code, key);
+            parameters.get(i).writeTo(code, key, path);
         }
         code.bind(key, ")" + key);
     }
@@ -92,11 +90,6 @@ public class ObjectAssembly implements Assembly {
     @Override
     public String nameOnJson() {
         return nameOnJson;
-    }
-
-    @Override
-    public Assembly parent() {
-        return parent;
     }
 
 

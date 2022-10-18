@@ -75,7 +75,7 @@ public class JsonStructEntity {
                 return #{};
             }
             """.formatted(getSimpleName()));
-        root.writeTo(code, "#{}");
+        root.writeTo(code, "#{}", "");
         code.bind("#{}", "");
     }
 

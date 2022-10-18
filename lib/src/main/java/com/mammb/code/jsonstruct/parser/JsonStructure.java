@@ -32,4 +32,5 @@ public interface JsonStructure extends JsonValue {
         return conv.apply(at(pointer));
     }
 
+    int size();
 }

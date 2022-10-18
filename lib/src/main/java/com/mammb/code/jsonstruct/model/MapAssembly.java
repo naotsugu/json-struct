@@ -25,11 +25,6 @@ public class MapAssembly implements Assembly {
     }
 
     @Override
-    public Assembly parent() {
-        return null;
-    }
-
-    @Override
-    public void writeTo(CodeTemplate code, String key) {
+    public void writeTo(CodeTemplate code, String key, String parent) {
     }
 }

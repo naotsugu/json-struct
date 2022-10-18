@@ -44,6 +44,11 @@ public interface JsonArray extends JsonStructure {
         public void add(JsonValue value) {
             values.add(value);
         }
+
+        @Override
+        public int size() {
+            return values.size();
+        }
     }
 
 }

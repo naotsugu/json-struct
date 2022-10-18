@@ -46,6 +46,11 @@ public interface JsonObject extends JsonStructure {
         public JsonValue get(String name) {
             return values.get(name);
         }
+
+        @Override
+        public int size() {
+            return values.size();
+        }
     }
 
 }

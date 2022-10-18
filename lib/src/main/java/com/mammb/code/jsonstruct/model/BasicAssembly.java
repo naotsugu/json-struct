@@ -18,6 +18,7 @@ package com.mammb.code.jsonstruct.model;
 import com.mammb.code.jsonstruct.processor.CodeTemplate;
 import com.mammb.code.jsonstruct.processor.Context;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 
 public class BasicAssembly implements Assembly {
 
@@ -33,20 +34,18 @@ public class BasicAssembly implements Assembly {
     /** The type name like `java.lang.String` or 'int', etc. */
     private final String typeName;
 
-    /** The parent assembly. */
-    private final Assembly parent;
 
-
-    private BasicAssembly(Context context, Element element, Assembly parent) {
+    private BasicAssembly(Context context, Element element) {
         this.context = context;
         this.element = element;
-        this.nameOnJson = element.getSimpleName().toString();
+        this.nameOnJson = (element.getKind() == ElementKind.PARAMETER)
+            ? element.getSimpleName().toString()
+            : "";
         this.typeName = element.asType().toString();
-        this.parent = parent;
     }
 
-    public static BasicAssembly of(Context context, Element element, Assembly parent) {
-        return new BasicAssembly(context, element, parent);
+    public static BasicAssembly of(Context context, Element element) {
+        return new BasicAssembly(context, element);
     }
 
     @Override
@@ -55,16 +54,14 @@ public class BasicAssembly implements Assembly {
     }
 
     @Override
-    public Assembly parent() {
-        return parent;
-    }
-
-    @Override
-    public void writeTo(CodeTemplate code, String key) {
+    public void writeTo(CodeTemplate code, String key, String parent) {
+        String path = nameOnJson.isEmpty()
+            ? "\"/\" + " + parent
+            : "\"" + parent + nameOnJson + "\"";
         code.bind(key, """
-            json.as("%s", convert.to(%s.class))%s"""
+            json.as(%s, convert.to(%s.class))%s"""
             .formatted(
-                namePath(),
+                path,
                 code.applyImport(typeName), key));
     }
 

@@ -16,6 +16,8 @@
 package com.mammb.code.jsonstruct.model;
 
 import com.mammb.code.jsonstruct.JsonStruct;
+import com.mammb.code.jsonstruct.processor.Context;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -23,10 +25,10 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 public class Utils {
 
@@ -36,16 +38,6 @@ public class Utils {
         }
         return (PackageElement) element;
     }
-
-
-    public static Optional<ExecutableElement> getConstructor(Element element) {
-        return element.getEnclosedElements().stream()
-            .filter(e -> e.getKind() == ElementKind.CONSTRUCTOR)
-            .filter(e -> e.getModifiers().contains(Modifier.PUBLIC))
-            .map(ExecutableElement.class::cast)
-            .max(Comparator.comparingInt(e -> e.getParameters().size()));
-    }
-
 
     public static boolean isConstructor(Element element) {
         return element.getKind() == ElementKind.CONSTRUCTOR &&
@@ -70,6 +62,27 @@ public class Utils {
 
     public static boolean isConstructorLike(Element element) {
         return isConstructor(element) || isStaticFactory(element);
+    }
+
+    public static boolean isBasicLike(Context context, TypeMirror typeMirror) {
+        return context.isBasic(typeMirror);
+    }
+
+    public static boolean isListLike(Context context, TypeMirror typeMirror) {
+        TypeMirror list = context.getElementUtils().getTypeElement("java.util.List").asType();
+        TypeMirror erasure = context.getTypeUtils().erasure(typeMirror);
+        return context.getTypeUtils().isAssignable(erasure, list);
+    }
+
+
+    public static Assembly toAssembly(Context context, Element element) {
+        if (Utils.isBasicLike(context, element.asType())) {
+            return BasicAssembly.of(context, element);
+        } else if (Utils.isListLike(context, element.asType())) {
+            return ListAssembly.of(context, element);
+        } else {
+            return ObjectAssembly.of(context, element);
+        }
     }
 
 
@@ -119,6 +132,5 @@ public class Utils {
         return candidate.stream().findFirst().orElseThrow();
 
     }
-
 
 }

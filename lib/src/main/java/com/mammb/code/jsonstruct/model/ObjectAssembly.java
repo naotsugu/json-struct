@@ -75,23 +75,31 @@ public class ObjectAssembly implements Assembly {
     public void writeTo(CodeTemplate code, String key, String parent) {
 
         String path = parent + nameOnJson();
+        String indent = indent(path);
 
-        String indent = " ".repeat(4 * (depth(path) + 2));
         code.bind(key, Utils.instantiateName(constructorLike) + "(\n" + indent + key);
+
         for (int i = 0; i < parameters.size(); i++) {
             if (i != 0) {
                 code.bind(key, ",\n" + indent + key);
             }
             parameters.get(i).writeTo(code, key, path);
         }
+
         code.bind(key, ")" + key);
     }
+
 
     @Override
     public String nameOnJson() {
         return nameOnJson;
     }
 
+
+    private String indent(String path) {
+        int depth =  (int) path.chars().filter(c -> c == '/').count();
+        return " ".repeat(4 * (depth + 2));
+    }
 
     /**
      * Get simple name of the entity.

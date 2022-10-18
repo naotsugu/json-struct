@@ -23,7 +23,4 @@ public interface Assembly {
 
     void writeTo(CodeTemplate code, String key, String parent);
 
-    default int depth(String path) {
-        return (int) path.chars().filter(c -> c == '/').count();
-    }
 }

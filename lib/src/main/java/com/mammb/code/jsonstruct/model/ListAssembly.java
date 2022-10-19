@@ -44,9 +44,11 @@ public class ListAssembly implements Assembly {
         this.entry = Utils.toAssembly(context, entryElement);
     }
 
+
     public static ListAssembly of(Context context, Element variable) {
         return new ListAssembly(context, variable);
     }
+
 
     private Element entryElement(Context context, Element element) {
         DeclaredType declaredType = (DeclaredType) element.asType();
@@ -56,6 +58,7 @@ public class ListAssembly implements Assembly {
         }
         return context.getTypeUtils().asElement(typeArguments.get(0));
     }
+
 
     @Override
     public String nameOnJson() {

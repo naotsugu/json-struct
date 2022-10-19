@@ -30,5 +30,6 @@ public class MapAssembly implements Assembly {
 
     @Override
     public void writeTo(CodeTemplate code, String key, String parent) {
+        // TODO
     }
 }

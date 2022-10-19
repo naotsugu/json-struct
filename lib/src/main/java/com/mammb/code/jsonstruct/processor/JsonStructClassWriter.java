@@ -16,7 +16,6 @@
 package com.mammb.code.jsonstruct.processor;
 
 import com.mammb.code.jsonstruct.model.JsonStructEntity;
-
 import javax.tools.FileObject;
 import java.io.PrintWriter;
 
@@ -28,6 +27,7 @@ public class JsonStructClassWriter {
 
     /** Context of processing. */
     private final Context context;
+
 
     /**
      * Constructor.

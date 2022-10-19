@@ -48,29 +48,33 @@ public class BasicAssembly implements Assembly {
         this.typeName = element.asType().toString();
     }
 
+
     public static BasicAssembly of(Context context, Element element) {
         return new BasicAssembly(context, element);
     }
+
 
     @Override
     public String nameOnJson() {
         return nameOnJson;
     }
 
+
     @Override
     public void writeTo(CodeTemplate code, String key, String parent) {
 
         if (nameOnJson.isEmpty()) {
             code.bind(key, """
-            json.as(convert.to(%s.class))%s"""
-                .formatted(code.applyImport(typeName), key));
+            json.as(convert.to(%s.class))%s""".formatted(
+                code.applyImport(typeName),
+                key));
 
         } else {
             code.bind(key, """
-            json.as("%s", convert.to(%s.class))%s"""
-                .formatted(
-                    parent + nameOnJson,
-                    code.applyImport(typeName), key));
+            json.as("%s", convert.to(%s.class))%s""".formatted(
+                parent + nameOnJson,
+                code.applyImport(typeName),
+                key));
         }
     }
 

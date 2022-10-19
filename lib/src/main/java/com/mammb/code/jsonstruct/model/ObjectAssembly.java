@@ -33,6 +33,7 @@ public class ObjectAssembly implements Assembly {
     /** Context of processing. */
     private final Context context;
 
+    /** The constructor like element. */
     private final ExecutableElement constructorLike;
 
     /** The parameters for construction. */
@@ -63,6 +64,7 @@ public class ObjectAssembly implements Assembly {
             Utils.selectConstructorLike(context.getTypeUtils().asElement(variable.asType())),
             variable.getSimpleName().toString() + "/");
     }
+
 
     private List<Assembly> asParameters(
         Context context, List<? extends VariableElement> variables) {

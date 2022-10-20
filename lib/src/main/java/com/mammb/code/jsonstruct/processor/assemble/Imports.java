@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.code;
+package com.mammb.code.jsonstruct.processor.assemble;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import static java.util.function.Predicate.*;
 
@@ -30,12 +31,17 @@ public class Imports {
     /** The fqcn of import. */
     private final Set<String> set;
 
+    /** The implicit imports. */
+    private final Set<String> implicits;
+
 
     /**
      * Constructor.
      */
     private Imports() {
         this.set = new HashSet<>();
+        this.implicits = new HashSet<>();
+        this.implicits.add("java.lang.");
     }
 
 
@@ -58,20 +64,43 @@ public class Imports {
 
 
     /**
+     * Add implicit import.
+     * maybe package name
+     * @param implicit the implicit
+     */
+    public void addImplicit(String implicit) {
+        implicits.add(implicit.endsWith(".") ? implicit : implicit + ".");
+    }
+
+
+    /**
      * Apply import.
      * @param fqcn the type fqcn
      * @return the type name applied import
      */
     public String apply(String fqcn) {
+        return applySingle(fqcn);
+    }
 
-        fqcn = fqcn.trim();
 
-        if (fqcn.startsWith("import ")) {
-            fqcn = fqcn.replace("import ", "");
-        }
-        if (fqcn.endsWith(";")) {
-            fqcn = fqcn.substring(0, fqcn.length() - 1);
-        }
+    /**
+     * Add import.
+     * @param imports the imports subjects
+     * @return the type name applied import
+     */
+    private void add(String imports) {
+        imports.lines().filter(not(String::isBlank)).forEach(this::applySingle);
+    }
+
+
+    /**
+     * Apply import.
+     * @param fqcn the type fqcn
+     * @return the type name applied import
+     */
+    private String applySingle(String fqcn) {
+
+        fqcn = strip(fqcn);
 
         if (fqcn.isBlank() || fqcn.contains(" ") ||
             fqcn.contains(";") || fqcn.contains("\n")) {
@@ -82,7 +111,7 @@ public class Imports {
         }
 
         set.add(fqcn);
-        return strip(fqcn);
+        return simpleName(fqcn);
     }
 
 
@@ -99,8 +128,27 @@ public class Imports {
      * @param fqcn the fqcn
      * @return the simple name
      */
-    private static String strip(String fqcn) {
+    private static String simpleName(String fqcn) {
         return fqcn.substring(fqcn.lastIndexOf('.') + 1);
+    }
+
+
+    /**
+     * Strip import statement.
+     * @param string the import statement
+     * @return the simple name
+     */
+    private static String strip(String string) {
+
+        var ret = string.trim();
+
+        if (ret.startsWith("import ")) {
+            ret = ret.replace("import ", "");
+        }
+        if (ret.endsWith(";")) {
+            ret = ret.substring(0, ret.length() - 1);
+        }
+        return ret;
     }
 
 
@@ -119,8 +167,11 @@ public class Imports {
      * @return the import strings
      */
     private List<String> normalize() {
+
+        Predicate<String> notContainImplicits = str -> implicits.stream().noneMatch(str::startsWith);
+
         return set.stream()
-            .filter(not(s -> s.startsWith("java.lang.")))
+            .filter(notContainImplicits)
             .filter(not(String::isBlank))
             .sorted().toList();
     }

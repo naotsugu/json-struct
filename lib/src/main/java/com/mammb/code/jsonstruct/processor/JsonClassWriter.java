@@ -74,7 +74,7 @@ public class JsonClassWriter {
             """)
             .bind("#{processorName}", JsonStructProcessor.class.getName())
             .bind("#{className}", className)
-            .bind("#{cases}", caseExpression(context.getGenerated()));
+            .bind("#{cases}", caseExpression(context.getProcessed(JsonStructEntity.class)));
 
         try {
             FileObject fo = context.getFiler().createSourceFile(packageName + "." + className);

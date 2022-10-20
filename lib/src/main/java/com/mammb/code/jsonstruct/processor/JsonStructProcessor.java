@@ -37,12 +37,9 @@ import java.util.Set;
     JsonStructEntity.ANNOTATION_TYPE,
 })
 @SupportedOptions({
-    JsonStructProcessor.DEBUG_OPTION,
+    Context.DEBUG_OPTION_KEY,
 })
 public class JsonStructProcessor extends AbstractProcessor {
-
-    /** Debug option. */
-    public static final String DEBUG_OPTION = "debug";
 
     /** Context of processing. */
     private Context context;
@@ -52,12 +49,10 @@ public class JsonStructProcessor extends AbstractProcessor {
     public void init(ProcessingEnvironment env) {
 
         super.init(env);
-        this.context = new Context(
-            env,
-            Boolean.parseBoolean(env.getOptions().getOrDefault(JsonStructProcessor.DEBUG_OPTION, "false")));
+        this.context = new Context(env);
 
         var version = getClass().getPackage().getImplementationVersion();
-        context.logInfo("JsonStructProcessor {}", (Objects.isNull(version) ? "" : version));
+        context.logInfo("JsonStructProcessor {}", (Objects.isNull(version) ? "-" : version));
 
     }
 
@@ -81,9 +76,9 @@ public class JsonStructProcessor extends AbstractProcessor {
             var writer = JsonStructClassWriter.of(context);
             for (Element element : roundEnv.getElementsAnnotatedWith(JsonStruct.class)) {
                 var entity = JsonStructEntity.of(context, element);
-                if (entity.isPresent() && !context.getGenerated().contains(entity.get())) {
+                if (entity.isPresent() && !context.getProcessed().contains(entity.get())) {
                     writer.write(entity.get());
-                    context.addGenerated(entity.get());
+                    context.addProcessed(entity.get());
                 }
             }
             JsonClassWriter.of(context).write();

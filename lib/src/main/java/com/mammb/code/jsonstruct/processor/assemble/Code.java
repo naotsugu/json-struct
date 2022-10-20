@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.code;
+package com.mammb.code.jsonstruct.processor.assemble;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +27,9 @@ public class Code {
 
     /** The line feed char. */
     private static final String LF = "\n";
+
+    /** The indent string. */
+    private static final String INDENT = "    ";
 
     /** The code lines. */
     private final List<String> lines;
@@ -55,11 +58,35 @@ public class Code {
 
     /**
      * Create the Code for the given code string.
-     * @param code the code string
+     * @param literal the code string
      * @return the code
      */
-    public static Code of(String code) {
-        return new Code(trimLines(code.lines().toList()), Imports.of());
+    public static Code of(String literal) {
+        return new Code(trimLines(literal.lines().toList()), Imports.of());
+    }
+
+
+    /**
+     * Indent.
+     */
+    public Code indent() {
+        return indent(1);
+    }
+
+
+    /**
+     * Indent.
+     * @param level the level of indent
+     * @return this code
+     */
+    public Code indent(int level) {
+        if (level <= 0) {
+            return this;
+        }
+        for (int i = 0; i < lines.size(); i++) {
+            lines.set(i, INDENT.repeat(level) + lines.get(i));
+        }
+        return this;
     }
 
 
@@ -112,45 +139,45 @@ public class Code {
 
     /**
      * Add the code at the head.
-     * @param code the code
+     * @param literal the code
      * @return this code
      */
-    public Code addHead(String code) {
-        lines.addAll(0, code.lines().toList());
+    public Code addHead(String literal) {
+        lines.addAll(0, literal.lines().toList());
         return this;
     }
 
 
     /**
      * Add the code at the tail.
-     * @param str the code
+     * @param literal the code
      * @return this code
      */
-    public Code addTail(String str) {
-        lines.addAll(lines.size(), str.lines().toList());
+    public Code addTail(String literal) {
+        lines.addAll(lines.size(), literal.lines().toList());
         return this;
     }
 
 
     /**
-     * Bind the value to the code by given key.
+     * Interpolate the type value to this code by given key.
      * @param key the key name
-     * @param value the value to be bind
+     * @param type the type value to be interpolated
      * @return this code
      */
-    public Code bind(String key, String value) {
-        applySubstitution(key, value);
+    public Code interpolate(String key, String type) {
+        applySubstitution(key, imports.apply(type));
         return this;
     }
 
 
     /**
-     * Bind the value to the code by given key.
+     * Interpolate the code to this code by given key.
      * @param key the key name
-     * @param other the code to be bind
+     * @param other the code to be interpolated
      * @return this code
      */
-    public Code bind(String key, Code other) {
+    public Code interpolate(String key, Code other) {
         applySubstitution(key, other.content());
         return this;
     }
@@ -173,30 +200,20 @@ public class Code {
 
     /**
      * Add the code block in this template(maybe methods).
-     * @param codeBlock the block of code
+     * {@code
+     *   clazz.addBeforeLast("}", method.indent().addHead(""));
+     * }
+     * @param mark the point of line
+     * @param code the code to be added
      */
-    public void addAsEnclosed(String codeBlock) {
+    public void addBeforeLast(String mark, Code code) {
         for (int i = lines.size() - 1; i > 0; i--) {
-            if (lines.get(i).trim().endsWith("}")) {
-                var indent = " ".repeat((lines.get(i).indexOf('}') + 1) * 4);
-                var codes = codeBlock.split(LF);
-                for (int j = 0; j < codes.length; j++) {
-                    lines.add(i + j, indent + codes[j]);
-                }
-                lines.add(i, ""); // add empty line
+            if (lines.get(i).trim().startsWith(mark)) {
+                lines.addAll(i, code.lines);
                 break;
             }
         }
         throw new RuntimeException("can not find curly close.");
-    }
-
-
-    /**
-     * Add the code block in this template(maybe methods).
-     * @param codeBlock the block of code
-     */
-    public void addAsEnclosed(Code codeBlock) {
-        addAsEnclosed(codeBlock.content());
     }
 
 
@@ -218,6 +235,15 @@ public class Code {
 
 
     /**
+     * Get the imports.
+     * @return the imports
+     */
+    public Imports imports() {
+        return imports;
+    }
+
+
+    /**
      * Apply value in the code.
      * @param key the bind key
      * @param value the value to be bind
@@ -229,6 +255,7 @@ public class Code {
         }
 
         var code = value.split(LF);
+
         if (code.length == 1) {
             // single line
             for (int i = 0; i < lines.size(); i++) {
@@ -257,6 +284,14 @@ public class Code {
 
     /**
      * Trim the blank lines at head and tail.
+     * <pre>
+     *     [SOF]   ->    [SOF]
+     *                   aa
+     *       aa          bb
+     *       bb          [EOF]
+     *
+     *     [EOF]
+     * </pre>
      * @param lines the target lines
      * @return the trimmed lines
      */

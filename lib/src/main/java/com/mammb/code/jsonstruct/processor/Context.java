@@ -17,22 +17,23 @@ package com.mammb.code.jsonstruct.processor;
 
 import com.mammb.code.jsonstruct.model.JsonStructEntity;
 import javax.annotation.processing.Filer;
+import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.SourceVersion;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Context of annotation processing.
  * @author Naotsugu Kobayashi
  */
-public class Context {
+public class Context implements ProcessingEnvironment {
+
+    /** Debug option key. */
+    public static final String DEBUG_OPTION_KEY = "debug";
 
     /** Annotation processing environment. */
     private final ProcessingEnvironment pe;
@@ -40,73 +41,90 @@ public class Context {
     /** Mode of debug. */
     private final boolean debug;
 
-    /** Generated model classes holder. */
-    private final Collection<JsonStructEntity> generatedClasses;
+    /** Processed class holder. */
+    private final Collection<Object> processed;
 
 
     /**
      * Private constructor.
      * @param pe the annotation processing environment
-     * @param debug the mode of debug
      */
-    public Context(ProcessingEnvironment pe, boolean debug) {
+    public Context(ProcessingEnvironment pe) {
         this.pe = pe;
-        this.debug = debug;
-        this.generatedClasses = new ArrayList<>();
+        this.processed = new ArrayList<>();
+        this.debug = Boolean.parseBoolean(pe.getOptions()
+            .getOrDefault(DEBUG_OPTION_KEY, "false"));
     }
 
 
-    /**
-     * Get the annotation processing environment.
-     * @return the annotation processing environment
-     */
-    protected ProcessingEnvironment pe() {
-        return pe;
+    @Override
+    public Map<String, String> getOptions() {
+        return pe.getOptions();
     }
 
 
-    /**
-     * Get the filer used to create new source, class, or auxiliary files.
-     * @return the filer used to create new source, class, or auxiliary files
-     */
+    @Override
+    public Messager getMessager() {
+        return pe.getMessager();
+    }
+
+
+    @Override
     public Filer getFiler() {
         return pe.getFiler();
     }
 
 
-    /**
-     * Get an implementation of some utility methods for operating on elements.
-     * @return utility for operating on elements
-     */
+    @Override
     public Elements getElementUtils() {
         return pe.getElementUtils();
     }
 
 
-    /**
-     * Get an implementation of some utility methods for operating on types.
-     * @return utility for operating on types
-     */
+    @Override
     public Types getTypeUtils() {
         return pe.getTypeUtils();
     }
 
 
-    /**
-     * Add the given entity as generated.
-     * @param entity the {@link JsonStructEntity}
-     */
-    public void addGenerated(JsonStructEntity entity) {
-        generatedClasses.add(entity);
+    @Override
+    public SourceVersion getSourceVersion() {
+        return pe.getSourceVersion();
+    }
+
+
+    @Override
+    public Locale getLocale() {
+        return pe.getLocale();
     }
 
 
     /**
-     * Gets the generated entities.
-     * @return the generated entities
+     * Add the given entity as processed.
+     * @param object the {@link JsonStructEntity}
      */
-    public List<JsonStructEntity> getGenerated() {
-        return List.copyOf(generatedClasses);
+    public void addProcessed(Object object) {
+        processed.add(object);
+    }
+
+
+    /**
+     * Gets the processed entities.
+     * @return the processed entities
+     */
+    public List<Object> getProcessed() {
+        return List.copyOf(processed);
+    }
+
+
+    /**
+     * Gets the processed entities.
+     * @return the processed entities
+     */
+    public <T> List<T> getProcessed(Class<T> type) {
+        return processed.stream()
+            .filter(type::isInstance)
+            .map(type::cast).toList();
     }
 
 
@@ -156,7 +174,7 @@ public class Context {
     public boolean isBasic(TypeMirror type) {
         // TODO
         return Objects.equals("java.lang.String", type.toString()) ||
-               Objects.equals("int", type.toString());
+            Objects.equals("int", type.toString());
     }
 
 }

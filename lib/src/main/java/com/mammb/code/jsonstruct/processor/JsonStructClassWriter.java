@@ -15,7 +15,8 @@
  */
 package com.mammb.code.jsonstruct.processor;
 
-import com.mammb.code.jsonstruct.model.JsonStructEntity;
+import com.mammb.code.jsonstruct.processor.assemble.Code;
+
 import javax.tools.FileObject;
 import java.io.PrintWriter;
 
@@ -52,47 +53,26 @@ public class JsonStructClassWriter {
      */
     void write(JsonStructEntity entity) {
 
-        var className = entity.getSimpleName() + "_";
-
-        CodeTemplate code = CodeTemplate.of(entity.getPackageName(),
-            """
-            import com.mammb.code.jsonstruct.Json;
-            import com.mammb.code.jsonstruct.converter.Converters;
-            import com.mammb.code.jsonstruct.parser.JsonPointer;
-            import com.mammb.code.jsonstruct.parser.Parser;
-            import javax.annotation.processing.Generated;
-            import java.io.Reader;
-            import java.io.StringReader;
-
-            @Generated(value = "#{processorName}")
-            public class #{className} implements Json<#{entityName}> {
-
-                private final Converters convert;
-
-                public #{className}(Converters converters) {
-                    this.convert = converters;
-                }
-
-                @Override
-                public #{entityName} from(CharSequence cs) {
-                    return from(new StringReader(cs.toString()));
-                }
-
-            }
-            """)
-            .bind("#{processorName}", JsonStructProcessor.class.getName())
-            .bind("#{className}", className)
-            .bind("#{entityName}", entity.getSimpleName());
-
-        entity.writeTo(code);
-
         try {
-            FileObject fo = context.getFiler().createSourceFile(entity.getPackageName() + "." + className);
+
+            FileObject fo = context.getFiler().createSourceFile(
+                entity.getPackageName() + "." + entity.getEntityClassName());
+
             try (PrintWriter pw = new PrintWriter(fo.openOutputStream())) {
-                code.writeTo(pw);
+
+                Code code = entity.build();
+
+                pw.println("package " + entity.getPackageName() + ";");
+                pw.println("");
+                pw.println(code.imports().toString());
+                pw.println("");
+                entity.build().content().lines().forEach(pw::println);
+
             }
+
         } catch (Exception e) {
-            context.logError("Problem opening file to write {} class : {}", entity.getSimpleName(), e.getMessage());
+            context.logError("Problem opening file to write {} class : {}",
+                entity.getClassName(), e.getMessage());
         }
     }
 

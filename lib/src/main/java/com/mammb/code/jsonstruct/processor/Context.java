@@ -15,12 +15,10 @@
  */
 package com.mammb.code.jsonstruct.processor;
 
-import com.mammb.code.jsonstruct.model.JsonStructEntity;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
@@ -129,6 +127,16 @@ public class Context implements ProcessingEnvironment {
 
 
     /**
+     * Gets whether the given object has been processed or not.
+     * @param object the object
+     * @return {@code true} if whether the given object has been processed
+     */
+    public boolean isProcessed(Object object) {
+        return processed.contains(object);
+    }
+
+
+    /**
      * Write the debug log message.
      * @param message the message
      * @param args the arguments referenced by the format specifiers in this string.
@@ -169,12 +177,6 @@ public class Context implements ProcessingEnvironment {
         return Arrays.stream(args)
             .map(arg -> Objects.nonNull(arg) ? arg.toString() : "")
             .reduce(format, (str, arg) -> str.replaceFirst("\\{}", arg));
-    }
-
-    public boolean isBasic(TypeMirror type) {
-        // TODO
-        return Objects.equals("java.lang.String", type.toString()) ||
-            Objects.equals("int", type.toString());
     }
 
 }

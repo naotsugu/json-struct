@@ -90,6 +90,6 @@ public class Iterate<E> implements Iterable<Iterate.Entry<E>> {
      * @param hasNext whether the following elements are present
      * @param <E> the type of entry
      */
-    record Entry<E>(E value, int index, boolean hasNext) implements Iteration { }
+    public record Entry<E>(E value, int index, boolean hasNext) implements Iteration { }
 
 }

@@ -15,14 +15,17 @@
  */
 package com.mammb.code.jsonstruct.processor.assemble;
 
+import com.mammb.code.jsonstruct.lang.LangModels;
+
 /**
  * AssemblyContext.
  * @author Naotsugu Kobayashi
  */
-public interface AssemblyContext {
+public record AssembleContext(String path, LangModels lang) {
 
-    String interpolateKey();
-
-    String path();
+    public AssembleContext next(String pathNext) {
+        return new AssembleContext(path + pathNext, lang);
+    }
 
 }
+

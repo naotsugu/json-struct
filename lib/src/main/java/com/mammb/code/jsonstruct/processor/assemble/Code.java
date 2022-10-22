@@ -107,6 +107,7 @@ public class Code {
     }
 
 
+
     /**
      * Join the given codes with the given delimiter.
      * @param delimiter the delimiter
@@ -114,6 +115,17 @@ public class Code {
      * @return joined code
      */
     public static Code join(String delimiter, Code... codes) {
+        return join(delimiter, List.of(codes));
+    }
+
+
+    /**
+     * Join the given codes with the given delimiter.
+     * @param delimiter the delimiter
+     * @param codes the codes
+     * @return joined code
+     */
+    public static Code join(String delimiter, List<Code> codes) {
 
         List<String> list = new ArrayList<>();
         Imports imports = Imports.of();
@@ -160,13 +172,37 @@ public class Code {
 
 
     /**
+     * Append the given literal at the end of last line.
+     * @param literal to be appended literal
+     * @return this code
+     */
+    public Code append(String literal) {
+        int index = lines.size() - 1;
+        lines.set(index, lines.get(index) + literal);
+        return this;
+    }
+
+
+    /**
      * Interpolate the type value to this code by given key.
      * @param key the key name
      * @param type the type value to be interpolated
      * @return this code
      */
-    public Code interpolate(String key, String type) {
+    public Code interpolateType(String key, String type) {
         applySubstitution(key, imports.apply(type));
+        return this;
+    }
+
+
+    /**
+     * Interpolate the code to this code by given key.
+     * @param key the key name
+     * @param content the content to be interpolated
+     * @return this code
+     */
+    public Code interpolate(String key, String content) {
+        applySubstitution(key, content);
         return this;
     }
 
@@ -179,6 +215,7 @@ public class Code {
      */
     public Code interpolate(String key, Code other) {
         applySubstitution(key, other.content());
+        add(other.imports);
         return this;
     }
 
@@ -218,6 +255,27 @@ public class Code {
 
 
     /**
+     * Add code.
+     * @param code the code
+     */
+    public Code add(Code code) {
+        lines.addAll(code.lines);
+        imports.marge(code.imports);
+        return this;
+    }
+
+
+    /**
+     * Add imports.
+     * @param other Imports
+     */
+    public Code add(Imports other) {
+        imports.marge(other);
+        return this;
+    }
+
+
+    /**
      * Get the content.
      * @return the content
      */
@@ -250,10 +308,6 @@ public class Code {
      */
     private void applySubstitution(String key, String value) {
 
-        if (value.isBlank()) {
-            return;
-        }
-
         var code = value.split(LF);
 
         if (code.length == 1) {
@@ -268,13 +322,14 @@ public class Code {
         } else {
             // if multi line, we treat the next line indent
             for (int i = 0; i < lines.size(); i++) {
-                if (!lines.get(i).trim().equals(key)) {
+                if (!lines.get(i).contains(key)) {
                     continue;
                 }
                 var indent = " ".repeat(lines.get(i).indexOf(key));
-                lines.set(i, lines.get(i).replace(key, code[0]));
-                for (int j = 1; j < code.length; j++) {
-                    lines.add(i + j, indent + code[j]);
+                var multi = lines.get(i).replace(key, value).split(LF);
+                lines.set(i, multi[0]);
+                for (int j = 1; j < multi.length; j++) {
+                    lines.add(i + j, indent + multi[j]);
                 }
                 i += code.length;
             }

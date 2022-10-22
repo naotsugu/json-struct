@@ -38,8 +38,8 @@ public class Imports {
     /**
      * Constructor.
      */
-    private Imports() {
-        this.set = new HashSet<>();
+    private Imports(Set<String> set) {
+        this.set = set;
         this.implicits = new HashSet<>();
         this.implicits.add("java.lang.");
     }
@@ -50,7 +50,20 @@ public class Imports {
      * @return the empty imports
      */
     public static Imports of() {
-        return new Imports();
+        return new Imports(new HashSet<>());
+    }
+
+
+    /**
+     * Create the empty imports.
+     * @param literal the literal of imports
+     * @return the imports
+     */
+    public static Imports of(String literal) {
+        return new Imports(literal.lines()
+            .filter(not(String::isBlank))
+            .map(Imports::strip)
+            .collect(Collectors.toSet()));
     }
 
 
@@ -88,7 +101,7 @@ public class Imports {
      * @param imports the imports subjects
      * @return the type name applied import
      */
-    private void add(String imports) {
+    public void add(String imports) {
         imports.lines().filter(not(String::isBlank)).forEach(this::applySingle);
     }
 

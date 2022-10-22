@@ -15,8 +15,8 @@
  */
 package com.mammb.code.jsonstruct.processor;
 
-import com.mammb.code.jsonstruct.model.JsonStructEntity;
-
+import com.mammb.code.jsonstruct.processor.assemble.Code;
+import com.mammb.code.jsonstruct.processor.assemble.Imports;
 import javax.tools.FileObject;
 import java.io.PrintWriter;
 import java.util.List;
@@ -55,12 +55,13 @@ public class JsonClassWriter {
         var packageName = "com.mammb.code.jsonstruct";
         var className = "Json_";
 
-        CodeTemplate code = CodeTemplate.of(packageName,
-            """
+        Imports imports = Imports.of("""
             import java.io.Reader;
             import javax.annotation.processing.Generated;
             import com.mammb.code.jsonstruct.converter.Converters;
+            """);
 
+        Code code = Code.of("""
             @SuppressWarnings("unchecked")
             @Generated(value = "#{processorName}")
             public class #{className} {
@@ -72,14 +73,21 @@ public class JsonClassWriter {
                 }
             }
             """)
-            .bind("#{processorName}", JsonStructProcessor.class.getName())
-            .bind("#{className}", className)
-            .bind("#{cases}", caseExpression(context.getProcessed(JsonStructEntity.class)));
+            .interpolateType("#{processorName}", JsonStructProcessor.class.getName())
+            .interpolateType("#{className}", className)
+            .interpolate("#{cases}", caseExpression(context.getProcessed(JsonStructEntity.class)))
+            .add(imports);
 
         try {
             FileObject fo = context.getFiler().createSourceFile(packageName + "." + className);
             try (PrintWriter pw = new PrintWriter(fo.openOutputStream())) {
-                code.writeTo(pw);
+
+                pw.println("package " + packageName + ";");
+                pw.println("");
+                pw.println(code.imports().toString());
+                pw.println("");
+                pw.println(code.content());
+                pw.flush();
             }
         } catch (Exception e) {
             context.logError("Problem opening file to write {} class : {}", packageName, e.getMessage());
@@ -87,14 +95,16 @@ public class JsonClassWriter {
 
     }
 
-    private static String caseExpression(List<JsonStructEntity> entities) {
-        var sb = new StringBuilder();
+    private static Code caseExpression(List<JsonStructEntity> entities) {
+
+        var code = Code.of();
         for (JsonStructEntity entity : entities) {
-            sb.append("case \"%s\" -> (Json<T>) new %s(Converters.of());\n".formatted(
-                entity.getQualifiedName(),
-                entity.getQualifiedName() + "_"));
+            code.add(Code.of("""
+                    case "#{qualifiedName}" -> (Json<T>) new #{type}(Converters.of());""")
+                    .interpolate("#{qualifiedName}", entity.getQualifiedName())
+                    .interpolateType("#{type}", entity.getQualifiedName() + "_"));
         }
-        return sb.toString();
+        return code;
     }
 
 }

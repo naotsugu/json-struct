@@ -16,8 +16,6 @@
 package com.mammb.code.jsonstruct.processor;
 
 import com.mammb.code.jsonstruct.JsonStruct;
-import com.mammb.code.jsonstruct.model.JsonStructEntity;
-
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
@@ -33,12 +31,8 @@ import java.util.Set;
  * Main annotation processor.
  * @author Naotsugu Kobayashi
  */
-@SupportedAnnotationTypes({
-    JsonStructEntity.ANNOTATION_TYPE,
-})
-@SupportedOptions({
-    Context.DEBUG_OPTION_KEY,
-})
+@SupportedAnnotationTypes({ JsonStructEntity.ANNOTATION_TYPE })
+@SupportedOptions({ Context.DEBUG_OPTION_KEY })
 public class JsonStructProcessor extends AbstractProcessor {
 
     /** Context of processing. */
@@ -74,13 +68,17 @@ public class JsonStructProcessor extends AbstractProcessor {
         try {
 
             var writer = JsonStructClassWriter.of(context);
+
             for (Element element : roundEnv.getElementsAnnotatedWith(JsonStruct.class)) {
+
                 var entity = JsonStructEntity.of(context, element);
-                if (entity.isPresent() && !context.getProcessed().contains(entity.get())) {
+                if (entity.isPresent() && !context.isProcessed(entity.get())) {
                     writer.write(entity.get());
                     context.addProcessed(entity.get());
                 }
+
             }
+
             JsonClassWriter.of(context).write();
 
         } catch (Exception e) {

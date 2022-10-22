@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.processor;
+package com.mammb.code.jsonstruct.lang;
 
-import com.mammb.code.jsonstruct.model.Utils;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -29,9 +29,10 @@ import java.lang.annotation.Annotation;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
- * The utility of java lang model.
+ * Utilities for java lang model.
  * @author Naotsugu Kobayashi
  */
 public class LangModels {
@@ -54,11 +55,12 @@ public class LangModels {
 
     /**
      * Create the LangModels.
-     * @param context the context
+     * @param elements ElementUtils
+     * @param types TypeUtils
      * @return the LangModels
      */
-    public static LangModels of(Context context) {
-        return new LangModels(context.getElementUtils(), context.getTypeUtils());
+    public static LangModels of(Elements elements, Types types) {
+        return new LangModels(elements, types);
     }
 
 
@@ -105,7 +107,7 @@ public class LangModels {
     }
 
 
-    public ExecutableElement selectConstructorLike(
+    public Optional<ExecutableElement> selectConstructorLike(
             Element element, Class<? extends Annotation> marker) {
 
         List<ExecutableElement> candidate = element.getEnclosedElements().stream()
@@ -113,28 +115,41 @@ public class LangModels {
             .map(ExecutableElement.class::cast)
             .toList();
 
-
         if (Objects.nonNull(marker)) {
             var ret = candidate.stream()
                 .filter(e -> Objects.nonNull(e.getAnnotation(marker)))
                 .findFirst();
-            if (ret.isPresent()) return ret.get();
+            if (ret.isPresent()) return ret;
         }
 
         var ret = candidate.stream()
-            .filter(Utils::isConstructor)
+            .filter(this::isConstructor)
             .filter(e -> e.getParameters().size() > 0)
             .max(Comparator.comparingInt(e -> e.getParameters().size()));
-        if (ret.isPresent()) return ret.get();
+        if (ret.isPresent()) return ret;
 
         ret = candidate.stream()
-            .filter(Utils::isStaticFactory)
+            .filter(this::isStaticFactory)
             .filter(e -> e.getParameters().size() > 0)
             .max(Comparator.comparingInt(e -> e.getParameters().size()));
-        if (ret.isPresent()) return ret.get();
+        if (ret.isPresent()) return ret;
 
-        return candidate.stream().findFirst().orElseThrow();
+        return candidate.stream().findFirst();
 
     }
+
+    public Element asTypeElement(Element element) {
+        return typeUtils.asElement(element.asType());
+    }
+
+    public Element entryElement(Element element) {
+        DeclaredType declaredType = (DeclaredType) element.asType();
+        var typeArguments = declaredType.getTypeArguments();
+        if (typeArguments.size() != 1) {
+            throw new RuntimeException();
+        }
+        return typeUtils.asElement(typeArguments.get(0));
+    }
+
 
 }

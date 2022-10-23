@@ -54,7 +54,7 @@ public class Parser {
             case CURLY_OPEN  -> parseObject(JsonObject.of());
             case SQUARE_OPEN -> parseArray(JsonArray.of());
             case EOF -> null;
-            default  -> throw new RuntimeException();
+            default  -> throw new JsonParseException();
         };
     }
 
@@ -86,18 +86,18 @@ public class Parser {
                 }
                 case COLON -> {
                     if (prev != null && prev.type == STRING) name = prev.toString();
-                    else throw new RuntimeException();
+                    else throw new JsonParseException();
                 }
                 case COMMA -> {
                     if (!name.isEmpty() || prev == null ||
                         prev.type == CURLY_OPEN || prev.type == SQUARE_OPEN ||
                         prev.type == COLON || prev.type == COMMA)
-                        throw new RuntimeException();
+                        throw new JsonParseException();
                 }
                 case CURLY_CLOSE -> {
                     return obj;
                 }
-                default -> throw new RuntimeException();
+                default -> throw new JsonParseException();
             }
         }
     }
@@ -131,7 +131,7 @@ public class Parser {
                 case SQUARE_CLOSE -> {
                     return array;
                 }
-                default -> throw new RuntimeException();
+                default -> throw new JsonParseException();
             }
         }
     }
@@ -139,7 +139,7 @@ public class Parser {
 
     private void keying(String key, Consumer<String> consumer) {
         if (key.isEmpty()) {
-            throw new RuntimeException();
+            throw new JsonParseException();
         }
         consumer.accept(key);
     }

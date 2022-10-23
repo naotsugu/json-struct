@@ -22,6 +22,8 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.*;
 
 /**
@@ -166,6 +168,15 @@ public class Context implements ProcessingEnvironment {
         pe.getMessager().printMessage(Diagnostic.Kind.ERROR, formatted(message, args));
     }
 
+    /**
+     * Write the error log message.
+     * @param e the exception.
+     */
+    public void logError(Exception e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        pe.getMessager().printMessage(Diagnostic.Kind.ERROR, sw.toString());
+    }
 
     /**
      * Format the given format string with args.

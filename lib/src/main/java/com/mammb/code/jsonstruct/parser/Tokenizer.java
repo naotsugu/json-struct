@@ -95,14 +95,12 @@ class Tokenizer {
         boolean frac = false;
         boolean exp = false;
 
-        // sign
         if (ch == '-') {
             ca.add((char) ch);
             ch = read();
             if (ch < '0' || ch > '9') throw unexpectedChar(ch);
         }
 
-        // int
         if (ch == '0') {
             ca.add((char) ch);
             ch = read();
@@ -113,7 +111,6 @@ class Tokenizer {
             } while (ch >= '0' && ch <= '9');
         }
 
-        // frac
         if (ch == '.') {
             frac = true;
             int count = 0;
@@ -125,7 +122,6 @@ class Tokenizer {
             if (count == 1) throw unexpectedChar(ch);
         }
 
-        // exp
         if (ch == 'e' || ch == 'E') {
             exp = true;
             ca.add((char) ch);
@@ -218,7 +214,7 @@ class Tokenizer {
 
 
     private RuntimeException unexpectedChar(int ch) {
-        return new RuntimeException("Unexpected char");
+        return new JsonParseException("Unexpected char.[{}]]", ch);
     }
 
 

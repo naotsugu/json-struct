@@ -15,7 +15,10 @@
  */
 package com.mammb.code.jsonstruct.processor.assemble;
 
+import com.mammb.code.jsonstruct.processor.JsonStructException;
+
 import javax.lang.model.element.Element;
+import javax.lang.model.type.TypeKind;
 import java.util.Objects;
 
 /**
@@ -31,6 +34,9 @@ public class ListAssembly implements Assembly {
      * @param element
      */
     private ListAssembly(Element element) {
+        if (element.asType().getKind() != TypeKind.DECLARED) {
+            throw new JsonStructException("element type must be declared. [{}]", element);
+        }
         this.element = Objects.requireNonNull(element);
     }
 

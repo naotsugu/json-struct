@@ -17,9 +17,7 @@ package com.mammb.code.jsonstruct.processor.assemble;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.type.TypeMirror;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Assemblies.
@@ -46,12 +44,6 @@ public class Assemblies {
         }
         return ObjectAssembly.of(element);
 
-    }
-
-
-    public static boolean isBasic(TypeMirror type) {
-        return Objects.equals("java.lang.String", type.toString()) ||
-            Objects.equals("int", type.toString());
     }
 
 }

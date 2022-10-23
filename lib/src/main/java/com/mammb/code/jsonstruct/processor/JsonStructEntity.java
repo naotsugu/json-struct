@@ -149,6 +149,7 @@ public class JsonStructEntity {
         return element.getSimpleName().toString();
     }
 
+
     /**
      * Get class name of the entity.
      * e.g. {@code Person}
@@ -158,6 +159,7 @@ public class JsonStructEntity {
         return getClassName() + "_";
     }
 
+
     /**
      * Get qualified name of the entity class.
      * e.g. {@code foo.bar.Person}
@@ -166,6 +168,7 @@ public class JsonStructEntity {
     public String getQualifiedName() {
         return element.getQualifiedName().toString();
     }
+
 
     /**
      * Gets whether the element is subject to this Entity.

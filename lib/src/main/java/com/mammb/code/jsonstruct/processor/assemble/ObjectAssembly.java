@@ -16,12 +16,15 @@
 package com.mammb.code.jsonstruct.processor.assemble;
 
 import com.mammb.code.jsonstruct.JsonStruct;
+import com.mammb.code.jsonstruct.processor.JsonStructException;
 import com.mammb.code.jsonstruct.lang.Iterate;
 import com.mammb.code.jsonstruct.lang.LangModels;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * ObjectAssembly.
@@ -36,7 +39,10 @@ public class ObjectAssembly implements Assembly {
      * Constructor.
      */
     private ObjectAssembly(Element element) {
-        this.element = element;
+        if (element.asType().getKind() != TypeKind.DECLARED) {
+            throw new JsonStructException("element type must be declared. " + element);
+        }
+        this.element = Objects.requireNonNull(element);
     }
 
 
@@ -82,17 +88,21 @@ public class ObjectAssembly implements Assembly {
 
 
     public String instantiation(ExecutableElement executable, LangModels lang) {
+
         if (lang.isConstructor(executable)) {
             // e.g. "new Book"
             var constructor = executable.toString();
             return "new " + constructor.substring(0, constructor.indexOf('('));
         }
+
         if (lang.isStaticFactory(executable)) {
             // e.g. "Book.of"
             var declaredType = (DeclaredType) executable.getReturnType();
             return declaredType.asElement().getSimpleName() + "." + executable.getSimpleName();
         }
-        throw new RuntimeException();
+
+        throw new JsonStructException("Name not identified.");
+
     }
 
 }

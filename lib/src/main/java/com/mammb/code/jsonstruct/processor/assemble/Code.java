@@ -18,6 +18,7 @@ package com.mammb.code.jsonstruct.processor.assemble;
 import com.mammb.code.jsonstruct.lang.Iterate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Code block with import considerations.
@@ -42,8 +43,8 @@ public class Code {
      * Constructor.
      */
     public Code(List<String> lines, Imports imports) {
-        this.lines = lines;
-        this.imports = imports;
+        this.lines = Objects.requireNonNull(lines);
+        this.imports = Objects.requireNonNull(imports);
     }
 
 

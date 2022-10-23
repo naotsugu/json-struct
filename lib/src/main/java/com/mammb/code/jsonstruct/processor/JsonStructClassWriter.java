@@ -73,6 +73,7 @@ public class JsonStructClassWriter {
         } catch (Exception e) {
             context.logError("Problem opening file to write {} class : {}",
                 entity.getClassName(), e.getMessage());
+            context.logError(e);
         }
     }
 

@@ -63,7 +63,7 @@ public class JsonPointer {
     }
 
     public JsonValue getValue(JsonStructure structure) {
-        return asValue(structure).orElseThrow(RuntimeException::new);
+        return asValue(structure).orElseThrow(JsonParseException::new);
     }
 
     public Optional<JsonValue> asValue(JsonStructure structure) {
@@ -113,7 +113,7 @@ public class JsonPointer {
 
     static private int asIndex(String token) {
         if (token == null || token.isBlank()) {
-            throw new RuntimeException();
+            throw new JsonParseException();
         }
         if (token.equals("-")) {
             return -1;
@@ -122,12 +122,12 @@ public class JsonPointer {
             return 0;
         }
         if (token.charAt(0) == '+' || token.charAt(0) == '-') {
-            throw new RuntimeException();
+            throw new JsonParseException();
         }
         try {
             return Integer.parseInt(token);
         } catch (NumberFormatException ex) {
-            throw new RuntimeException();
+            throw new JsonParseException();
         }
     }
 

@@ -15,6 +15,7 @@
  */
 package com.mammb.code.jsonstruct.convert;
 
+import com.mammb.code.jsonstruct.processor.JsonStructException;
 import com.mammb.code.jsonstruct.parser.CharSource;
 import com.mammb.code.jsonstruct.parser.JsonValue;
 import com.mammb.code.jsonstruct.parser.NumberSource;
@@ -91,7 +92,7 @@ public class Converts {
         if (val instanceof CharSource cs) {
             return cs;
         } else {
-            throw new RuntimeException();
+            throw new JsonStructException("Illegal value.[{}]", val);
         }
     }
 
@@ -100,7 +101,7 @@ public class Converts {
         if (val instanceof NumberSource ns) {
             return ns;
         } else {
-            throw new RuntimeException();
+            throw new JsonStructException("Illegal value.[{}]", val);
         }
     }
 

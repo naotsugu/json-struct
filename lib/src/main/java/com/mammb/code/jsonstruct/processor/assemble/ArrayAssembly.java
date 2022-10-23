@@ -42,8 +42,8 @@ public class ArrayAssembly implements Assembly {
 
 
     /**
-     * Create the ListAssembly.
-     * @return the ListAssembly
+     * Create a ArrayAssembly.
+     * @return the ArrayAssembly
      */
     public static ArrayAssembly of(Element element) {
         return new ArrayAssembly(element);

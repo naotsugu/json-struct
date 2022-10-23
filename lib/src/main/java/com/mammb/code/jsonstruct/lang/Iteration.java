@@ -53,6 +53,24 @@ public interface Iteration {
     }
 
 
+    /**
+     *
+     * @return
+     */
+    default boolean isOdd() {
+        return !isEven();
+    }
+
+
+    /**
+     *
+     * @return
+     */
+    default boolean isEven() {
+        return index() % 2 == 0;
+    }
+
+
     /** The empty iteration. */
     Iteration EMPTY = new Empty();
 

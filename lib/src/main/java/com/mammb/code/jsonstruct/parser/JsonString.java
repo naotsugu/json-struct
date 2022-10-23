@@ -26,6 +26,10 @@ public interface JsonString extends JsonValue, CharSource {
         return new JsonStringImpl(cs);
     }
 
+    static JsonString of(String str) {
+        return new JsonStringRaw(str);
+    }
+
     class JsonStringImpl implements JsonString {
         private final CharSource source;
         public JsonStringImpl(CharSource cs) {
@@ -41,4 +45,18 @@ public interface JsonString extends JsonValue, CharSource {
         }
     }
 
+    class JsonStringRaw implements JsonString {
+        private final String source;
+        public JsonStringRaw(String str) {
+            source = str;
+        }
+        @Override
+        public char[] chars() {
+            return source.toCharArray();
+        }
+        @Override
+        public String toString() {
+            return source.toString();
+        }
+    }
 }

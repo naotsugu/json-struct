@@ -16,7 +16,9 @@
 package com.mammb.code.jsonstruct.parser;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * JsonObject.
@@ -27,6 +29,7 @@ public interface JsonObject extends JsonStructure {
 
     void put(String name, JsonValue value);
     JsonValue get(String name);
+    Set<Map.Entry<String, JsonValue>> entrySet();
 
     static JsonObject of() {
         return new JsonObjectImpl();
@@ -50,6 +53,11 @@ public interface JsonObject extends JsonStructure {
         @Override
         public int size() {
             return values.size();
+        }
+
+        @Override
+        public Set<Map.Entry<String, JsonValue>> entrySet() {
+            return values.entrySet();
         }
     }
 

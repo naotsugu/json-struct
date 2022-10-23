@@ -15,10 +15,8 @@
  */
 package com.mammb.code.jsonstruct.convert;
 
-import com.mammb.code.jsonstruct.processor.JsonStructException;
 import com.mammb.code.jsonstruct.parser.CharSource;
 import com.mammb.code.jsonstruct.parser.JsonValue;
-import com.mammb.code.jsonstruct.parser.NumberSource;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -37,7 +35,7 @@ public class Converts {
 
 
     public Converts() {
-        this.map = builtin();
+        this.map = Builtin.mapping();
         this.opt = new HashMap<>();
     }
 
@@ -73,36 +71,8 @@ public class Converts {
     }
 
     private static Function<JsonValue, ?> adapt(Function<String, ?> fun) {
-        return (JsonValue v) -> fun.apply(new String(asCs(v).chars()));
+        return (JsonValue v) -> fun.apply(new String(((CharSource) v).chars()));
     }
 
-
-    private Map<Class<?>, Function<JsonValue, ?>> builtin() {
-        Map<Class<?>, Function<JsonValue, ?>> map = new HashMap<>();
-        map.put(String.class,  v -> new String(asCs(v).chars()));
-        map.put(Integer.class, v -> asNs(v).getInt());
-        map.put(Integer.TYPE,  v -> asNs(v).getInt());
-        map.put(Long.class,    v -> asNs(v).getLong());
-        map.put(Long.TYPE,     v -> asNs(v).getLong());
-        return map;
-    }
-
-
-    private static CharSource asCs(JsonValue val) {
-        if (val instanceof CharSource cs) {
-            return cs;
-        } else {
-            throw new JsonStructException("Illegal value.[{}]", val);
-        }
-    }
-
-
-    private static NumberSource asNs(JsonValue val) {
-        if (val instanceof NumberSource ns) {
-            return ns;
-        } else {
-            throw new JsonStructException("Illegal value.[{}]", val);
-        }
-    }
 
 }

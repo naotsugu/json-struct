@@ -25,6 +25,7 @@ import java.util.List;
  */
 public class Assemblies {
 
+
     public static List<Assembly> parameters(ExecutableElement element, AssembleContext ctx) {
         return element.getParameters().stream()
             .map(p -> toAssembly(p, ctx)).toList();
@@ -42,6 +43,13 @@ public class Assemblies {
         if (ctx.lang().isListLike(element.asType())) {
             return ListAssembly.of(element);
         }
+        if (ctx.lang().isSetLike(element.asType())) {
+            return SetAssembly.of(element);
+        }
+        if (ctx.lang().isMapLike(element.asType())) {
+            return MapAssembly.of(element);
+        }
+
         return ObjectAssembly.of(element);
 
     }

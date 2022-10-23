@@ -16,15 +16,16 @@
 package com.mammb.code.jsonstruct.processor.assemble;
 
 import com.mammb.code.jsonstruct.processor.JsonStructException;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeKind;
 import java.util.Objects;
 
 /**
- * ListAssembly.
+ * SetAssembly.
  * @author Naotsugu Kobayashi
  */
-public class ListAssembly implements Assembly {
+public class SetAssembly implements Assembly {
 
     private final Element element;
 
@@ -32,7 +33,7 @@ public class ListAssembly implements Assembly {
      * Constructor.
      * @param element
      */
-    private ListAssembly(Element element) {
+    private SetAssembly(Element element) {
         if (element.asType().getKind() != TypeKind.DECLARED) {
             throw new JsonStructException("element type must be declared. [{}]", element);
         }
@@ -41,11 +42,11 @@ public class ListAssembly implements Assembly {
 
 
     /**
-     * Create a ListAssembly.
-     * @return the ListAssembly
+     * Create a SetAssembly.
+     * @return the SetAssembly
      */
-    public static ListAssembly of(Element element) {
-        return new ListAssembly(element);
+    public static SetAssembly of(Element element) {
+        return new SetAssembly(element);
     }
 
 
@@ -62,29 +63,28 @@ public class ListAssembly implements Assembly {
         Assembly entry = Assemblies.toAssembly(entryElement, ctx);
         BackingCode entryCode = entry.execute(ctx.next("/"));
 
-        var methodName = name() + "List";
+        var methodName = name() + "Set";
 
         BackingCode ret = BackingCode.of("""
             #{methodName}((JsonArray) json.at("#{path}"))""")
             .interpolate("#{methodName}", methodName)
             .interpolateType("#{path}", ctx.path() + name());
 
-
         Imports imports = Imports.of("""
-            import java.util.List;
-            import java.util.ArrayList;
+            import java.util.Set;
+            import java.util.LinkedHashSet;
             import com.mammb.code.jsonstruct.parser.JsonStructure;
             import com.mammb.code.jsonstruct.parser.JsonArray;
             import com.mammb.code.jsonstruct.parser.JsonValue;
             """);
 
         Code backingMethod = Code.of("""
-            private List<#{type}> #{methodName}(JsonArray array) {
-                List<#{type}> list = new ArrayList<>();
+            private Set<#{type}> #{methodName}(JsonArray array) {
+                Set<#{type}> set = new LinkedHashSet<>();
                 for (JsonValue json : array) {
-                    list.add(#{entry});
+                    set.add(#{entry});
                 }
-                return list;
+                return set;
             }
             """)
             .interpolateType("#{type}", entryElement.asType().toString())

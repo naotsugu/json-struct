@@ -15,6 +15,8 @@
  */
 package com.mammb.code.jsonstruct.lang;
 
+import com.mammb.code.jsonstruct.processor.JsonStructException;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -55,7 +57,7 @@ public class LangModels {
 
 
     /**
-     * Create the LangModels.
+     * Create a new LangModels.
      * @param elements ElementUtils
      * @param types TypeUtils
      * @return the LangModels
@@ -103,8 +105,23 @@ public class LangModels {
         return isConstructor(element) || isStaticFactory(element);
     }
 
+
     public boolean isListLike(TypeMirror typeMirror) {
         TypeMirror list = elementUtils.getTypeElement("java.util.List").asType();
+        TypeMirror erasure = typeUtils.erasure(typeMirror);
+        return typeUtils.isAssignable(erasure, list);
+    }
+
+
+    public boolean isSetLike(TypeMirror typeMirror) {
+        TypeMirror list = elementUtils.getTypeElement("java.util.Set").asType();
+        TypeMirror erasure = typeUtils.erasure(typeMirror);
+        return typeUtils.isAssignable(erasure, list);
+    }
+
+
+    public boolean isMapLike(TypeMirror typeMirror) {
+        TypeMirror list = elementUtils.getTypeElement("java.util.Map").asType();
         TypeMirror erasure = typeUtils.erasure(typeMirror);
         return typeUtils.isAssignable(erasure, list);
     }
@@ -146,10 +163,6 @@ public class LangModels {
 
     }
 
-    public Element asTypeElement(Element element) {
-        return typeUtils.asElement(element.asType());
-    }
-
 
     public Element asTypeElement(TypeMirror type) {
         return typeUtils.asElement(type);
@@ -160,10 +173,21 @@ public class LangModels {
         DeclaredType declaredType = (DeclaredType) element.asType();
         var typeArguments = declaredType.getTypeArguments();
         if (typeArguments.size() != 1) {
-            throw new RuntimeException();
+            throw new JsonStructException();
         }
         return typeUtils.asElement(typeArguments.get(0));
     }
 
+    public Element[] mapEntryElement(Element element) {
+        DeclaredType declaredType = (DeclaredType) element.asType();
+        var typeArguments = declaredType.getTypeArguments();
+        if (typeArguments.size() != 2) {
+            throw new JsonStructException();
+        }
+        return new Element[] {
+            typeUtils.asElement(typeArguments.get(0)),
+            typeUtils.asElement(typeArguments.get(1))
+        };
+    }
 
 }

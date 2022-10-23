@@ -61,7 +61,7 @@ public class ObjectAssembly implements Assembly {
     public BackingCode execute(AssembleContext ctx) {
 
         var type = name().isEmpty()
-            ? element : ctx.lang().asTypeElement(element);
+            ? element : ctx.lang().asTypeElement(element.asType());
 
         ExecutableElement constructorLike = ctx.lang()
             .selectConstructorLike(type, JsonStruct.class)

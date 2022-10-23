@@ -13,51 +13,71 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.converter;
+package com.mammb.code.jsonstruct.convert;
 
 import com.mammb.code.jsonstruct.parser.CharSource;
 import com.mammb.code.jsonstruct.parser.JsonValue;
 import com.mammb.code.jsonstruct.parser.NumberSource;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 
 /**
- * Converters.
+ * Converts.
  * @author Naotsugu Kobayashi
  */
-public class Converters {
+public class Converts {
 
-    private static final Map<Class<?>, Converter<JsonValue, ?>> map = builtin();
-    private Map<Class<?>, Converter<?, ?>> opt;
+    private final Map<Class<?>, Function<JsonValue, ?>> map;
+
+    private final Map<Class<?>, Function<JsonValue, ?>> opt;
 
 
-    private Converters() {
-        this.opt = Collections.emptyMap();
+    public Converts() {
+        this.map = builtin();
+        this.opt = new HashMap<>();
     }
 
-    public static Converters of() {
-        return new Converters();
-    }
 
-    public void add(Class<?> clazz, Converter<JsonValue, ?> converter) {
-        if (opt == Collections.EMPTY_MAP) {
-            opt = new HashMap<>();
-        }
-        opt.put(clazz, converter);
+    public static Converts of() {
+        return new Converts();
     }
 
 
     @SuppressWarnings("unchecked")
-    public <T> Converter<JsonValue, T> to(Class<?> clazz) {
+    public <T> Function<JsonValue, T> to(Class<?> clazz) {
         return opt.containsKey(clazz)
-            ? (Converter<JsonValue, T>) opt.get(clazz)
-            : (Converter<JsonValue, T>) map.get(clazz);
+            ? (Function<JsonValue, T>) opt.get(clazz)
+            : (Function<JsonValue, T>) map.get(clazz);
     }
 
 
-    private static Map<Class<?>, Converter<JsonValue, ?>> builtin() {
-        Map<Class<?>, Converter<JsonValue, ?>> map = new HashMap<>();
+    public void add(Class<?> clazz, Function<String, ?> conv) {
+        opt.put(clazz, adapt(conv));
+    }
+
+
+    public void addAll(Map<Class<?>, Function<String, ?>> conv) {
+        conv.forEach(this::add);
+    }
+
+
+    public Set<String> classes() {
+        Set<String> set = new HashSet<>();
+        map.keySet().forEach(k -> set.add(k.getCanonicalName()));
+        opt.keySet().forEach(k -> set.add(k.getCanonicalName()));
+        return set;
+    }
+
+    private static Function<JsonValue, ?> adapt(Function<String, ?> fun) {
+        return (JsonValue v) -> fun.apply(new String(asCs(v).chars()));
+    }
+
+
+    private Map<Class<?>, Function<JsonValue, ?>> builtin() {
+        Map<Class<?>, Function<JsonValue, ?>> map = new HashMap<>();
         map.put(String.class,  v -> new String(asCs(v).chars()));
         map.put(Integer.class, v -> asNs(v).getInt());
         map.put(Integer.TYPE,  v -> asNs(v).getInt());
@@ -66,6 +86,7 @@ public class Converters {
         return map;
     }
 
+
     private static CharSource asCs(JsonValue val) {
         if (val instanceof CharSource cs) {
             return cs;
@@ -73,6 +94,7 @@ public class Converters {
             throw new RuntimeException();
         }
     }
+
 
     private static NumberSource asNs(JsonValue val) {
         if (val instanceof NumberSource ns) {

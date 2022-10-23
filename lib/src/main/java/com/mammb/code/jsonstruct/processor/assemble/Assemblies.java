@@ -1,28 +1,53 @@
+/*
+ * Copyright 2019-2022 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.mammb.code.jsonstruct.processor.assemble;
 
-import com.mammb.code.jsonstruct.lang.LangModels;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Assemblies.
+ * @author Naotsugu Kobayashi
+ */
 public class Assemblies {
 
-    public static List<Assembly> parameters(ExecutableElement element, LangModels lang) {
+    public static List<Assembly> parameters(ExecutableElement element, AssembleContext ctx) {
         return element.getParameters().stream()
-            .map(p -> toAssembly(p, lang)).toList();
+            .map(p -> toAssembly(p, ctx)).toList();
     }
 
-    public static Assembly toAssembly(Element element, LangModels lang) {
-        if (isBasic(element.asType())) {
+
+    public static Assembly toAssembly(Element element, AssembleContext ctx) {
+
+        if (ctx.isKnown(element.asType().toString())) {
             return BasicAssembly.of(element);
         }
-        if (lang.isListLike(element.asType())) {
+        if (ctx.lang().isArrayLike(element.asType())) {
+            return ArrayAssembly.of(element);
+        }
+        if (ctx.lang().isListLike(element.asType())) {
             return ListAssembly.of(element);
         }
         return ObjectAssembly.of(element);
+
     }
+
 
     public static boolean isBasic(TypeMirror type) {
         return Objects.equals("java.lang.String", type.toString()) ||

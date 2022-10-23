@@ -13,12 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.converter;
+package com.mammb.code.jsonstruct;
 
 /**
- * Converter.
+ * JsonStructException.
  * @author Naotsugu Kobayashi
  */
-public interface Converter<I, O> {
-    O apply(I in);
+public class JsonStructException extends RuntimeException {
+
+    public JsonStructException() {
+        super();
+    }
+
+    public JsonStructException(String message) {
+        super(message);
+    }
+
+    public JsonStructException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public JsonStructException(Throwable cause) {
+        super(cause);
+    }
+
 }

@@ -31,9 +31,9 @@ public class ObjectAssembly implements Assembly {
 
     private final Element element;
 
+
     /**
      * Constructor.
-     * @param element
      */
     private ObjectAssembly(Element element) {
         this.element = element;
@@ -54,8 +54,8 @@ public class ObjectAssembly implements Assembly {
     @Override
     public BackingCode execute(AssembleContext ctx) {
 
-
-        var type = name().isEmpty() ? element : ctx.lang().asTypeElement(element);
+        var type = name().isEmpty()
+            ? element : ctx.lang().asTypeElement(element);
 
         ExecutableElement constructorLike = ctx.lang()
             .selectConstructorLike(type, JsonStruct.class)
@@ -63,7 +63,8 @@ public class ObjectAssembly implements Assembly {
 
         AssembleContext nextCtx = ctx.next(name() + "/");
         BackingCode paramsCode = BackingCode.of();
-        List<Assembly> params = Assemblies.parameters(constructorLike, ctx.lang());
+
+        List<Assembly> params = Assemblies.parameters(constructorLike, ctx);
         for (Iterate.Entry<Assembly> param : Iterate.of(params)) {
             BackingCode ret = param.value().execute(nextCtx);
             ret.append(param.hasNext() ? "," : "");

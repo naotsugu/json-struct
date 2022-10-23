@@ -58,13 +58,19 @@ public class JsonClassWriter {
         Imports imports = Imports.of("""
             import java.io.Reader;
             import javax.annotation.processing.Generated;
-            import com.mammb.code.jsonstruct.converter.Converters;
+            import com.mammb.code.jsonstruct.convert.Converts;
             """);
 
         Code code = Code.of("""
             @SuppressWarnings("unchecked")
             @Generated(value = "#{processorName}")
             public class #{className} {
+
+                private static final Converts converts = Converts.of();
+                static {
+                    // converts.addAll(null);
+                }
+
                 public static <T> Json<T> of(Class<T> clazz) {
                     return switch (clazz.getCanonicalName()) {
                         #{cases}
@@ -100,7 +106,7 @@ public class JsonClassWriter {
         var code = Code.of();
         for (JsonStructEntity entity : entities) {
             code.add(Code.of("""
-                    case "#{qualifiedName}" -> (Json<T>) new #{type}(Converters.of());""")
+                    case "#{qualifiedName}" -> (Json<T>) new #{type}(converts);""")
                     .interpolate("#{qualifiedName}", entity.getQualifiedName())
                     .interpolateType("#{type}", entity.getQualifiedName() + "_"));
         }

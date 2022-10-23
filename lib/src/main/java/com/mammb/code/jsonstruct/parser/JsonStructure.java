@@ -15,7 +15,7 @@
  */
 package com.mammb.code.jsonstruct.parser;
 
-import com.mammb.code.jsonstruct.converter.Converter;
+import java.util.function.Function;
 
 /**
  * JsonStructure.
@@ -28,7 +28,7 @@ public interface JsonStructure extends JsonValue {
         return JsonPointer.of(pointer).getValue(this);
     }
 
-    default <T> T as(String pointer, Converter<JsonValue, T> conv) {
+    default <T> T as(String pointer, Function<JsonValue, T> conv) {
         return conv.apply(at(pointer));
     }
 

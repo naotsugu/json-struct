@@ -15,9 +15,9 @@
  */
 package com.mammb.code.jsonstruct.processor.assemble;
 
+import com.mammb.code.jsonstruct.lang.Iterate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Code block with import considerations.
@@ -87,65 +87,6 @@ public class Code {
             lines.set(i, INDENT.repeat(level) + lines.get(i));
         }
         return this;
-    }
-
-
-    /**
-     * Join the given templates.
-     * as the new line
-     * @param codes the codes
-     * @return joined code
-     */
-    public static Code join(Code... codes) {
-        List<String> lines = new ArrayList<>();
-        Imports imports = Imports.of();
-        for (Code code : codes) {
-            lines.addAll(code.lines);
-            imports.marge(code.imports);
-        }
-        return new Code(lines, imports);
-    }
-
-
-
-    /**
-     * Join the given codes with the given delimiter.
-     * @param delimiter the delimiter
-     * @param codes the codes
-     * @return joined code
-     */
-    public static Code join(String delimiter, Code... codes) {
-        return join(delimiter, List.of(codes));
-    }
-
-
-    /**
-     * Join the given codes with the given delimiter.
-     * @param delimiter the delimiter
-     * @param codes the codes
-     * @return joined code
-     */
-    public static Code join(String delimiter, List<Code> codes) {
-
-        List<String> list = new ArrayList<>();
-        Imports imports = Imports.of();
-
-        for (Code code : codes) {
-
-            imports.marge(code.imports);
-
-            if (code.lines.isEmpty()) {
-                continue;
-            }
-            if (!list.isEmpty()) {
-                // add delimiter at last line
-                int index = list.size() - 1;
-                list.set(index, list.get(index) + delimiter);
-            }
-            list.addAll(code.lines);
-
-        }
-        return new Code(list, imports);
     }
 
 
@@ -286,9 +227,14 @@ public class Code {
         if (lines.size() == 1) {
             return lines.get(0);
         }
-        return lines.stream()
-            .map(line -> line.endsWith(LF) ? line : line + LF)
-            .collect(Collectors.joining());
+        var content = new StringBuilder();
+        for (Iterate.Entry<String> line : Iterate.of(lines)) {
+            content.append(line.value());
+            if (line.hasNext() && !line.value().endsWith(LF)) {
+                content.append(LF);
+            }
+        }
+        return content.toString();
     }
 
 

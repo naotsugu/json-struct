@@ -28,8 +28,7 @@ class CodeTest {
             public static void main(String[] args) {
                 System.out.println("hello");
                 System.exit(0);
-            }
-            """, code.content());
+            }""", code.content());
     }
 
     @Test
@@ -42,25 +41,8 @@ class CodeTest {
         code.clear("#{sout}");
         assertEquals("""
             public static void main(String[] args) {
-            }
-            """, code.content());
+            }""", code.content());
     }
 
-    @Test
-    void testJoin() {
-
-        var code1 = Code.of("foo");
-        var code2 = Code.of("bar");
-        var code3 = Code.of("baz");
-
-        var joined = Code.join(",", code1, code2, code3);
-
-        assertEquals("""
-                foo,
-                bar,
-                baz
-                """, joined.content());
-
-    }
 
 }

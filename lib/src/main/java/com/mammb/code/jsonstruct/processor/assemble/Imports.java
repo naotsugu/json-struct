@@ -156,7 +156,7 @@ public class Imports {
         var ret = string.trim();
 
         if (ret.startsWith("import ")) {
-            ret = ret.replace("import ", "");
+            ret = ret.substring("import ".length());
         }
         if (ret.endsWith(";")) {
             ret = ret.substring(0, ret.length() - 1);

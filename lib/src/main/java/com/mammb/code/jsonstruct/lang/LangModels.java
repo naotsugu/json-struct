@@ -22,6 +22,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -88,11 +89,13 @@ public class LangModels {
 
             TypeElement typeElement = (TypeElement) element.getEnclosingElement();
             ExecutableElement executableElement = (ExecutableElement) element;
-            // TODO do not use string
+
             return typeElement.getQualifiedName().toString()
                 .equals(executableElement.getReturnType().toString());
         }
+
         return false;
+
     }
 
 
@@ -107,17 +110,22 @@ public class LangModels {
     }
 
 
+    public boolean isArrayLike(TypeMirror typeMirror) {
+        return typeMirror.getKind() == TypeKind.ARRAY;
+    }
+
+
     public Optional<ExecutableElement> selectConstructorLike(
-            Element element, Class<? extends Annotation> marker) {
+            Element element, Class<? extends Annotation> priorMarker) {
 
         List<ExecutableElement> candidate = element.getEnclosedElements().stream()
             .filter(this::isConstructorLike)
             .map(ExecutableElement.class::cast)
             .toList();
 
-        if (Objects.nonNull(marker)) {
+        if (Objects.nonNull(priorMarker)) {
             var ret = candidate.stream()
-                .filter(e -> Objects.nonNull(e.getAnnotation(marker)))
+                .filter(e -> Objects.nonNull(e.getAnnotation(priorMarker)))
                 .findFirst();
             if (ret.isPresent()) return ret;
         }
@@ -141,6 +149,12 @@ public class LangModels {
     public Element asTypeElement(Element element) {
         return typeUtils.asElement(element.asType());
     }
+
+
+    public Element asTypeElement(TypeMirror type) {
+        return typeUtils.asElement(type);
+    }
+
 
     public Element entryElement(Element element) {
         DeclaredType declaredType = (DeclaredType) element.asType();

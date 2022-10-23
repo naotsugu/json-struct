@@ -16,6 +16,7 @@
 package com.mammb.code.jsonstruct.processor;
 
 import com.mammb.code.jsonstruct.JsonStruct;
+import com.mammb.code.jsonstruct.convert.Converts;
 import com.mammb.code.jsonstruct.lang.LangModels;
 import com.mammb.code.jsonstruct.processor.assemble.AssembleContext;
 import com.mammb.code.jsonstruct.processor.assemble.Assemblies;
@@ -82,12 +83,14 @@ public class JsonStructEntity {
 
     public Code build() {
 
-        BackingCode backingCode = Assemblies.toAssembly(element, lang)
-            .execute(new AssembleContext("", lang));
+        Converts convert = Converts.of(); // TODO addon convert
+        AssembleContext ctx = AssembleContext.of(lang, convert.classes());
+
+        BackingCode backingCode = Assemblies.toAssembly(element, ctx).execute(ctx);
 
         Imports imports = Imports.of("""
             import com.mammb.code.jsonstruct.Json;
-            import com.mammb.code.jsonstruct.converter.Converters;
+            import com.mammb.code.jsonstruct.convert.Converts;
             import com.mammb.code.jsonstruct.parser.JsonPointer;
             import com.mammb.code.jsonstruct.parser.Parser;
             import javax.annotation.processing.Generated;
@@ -99,10 +102,10 @@ public class JsonStructEntity {
             @Generated(value = "#{processorName}")
             public class #{className} implements Json<#{entityName}> {
 
-                private final Converters convert;
+                private final Converts convert;
 
-                public #{className}(Converters converters) {
-                    this.convert = converters;
+                public #{className}(Converts convert) {
+                    this.convert = convert;
                 }
 
                 @Override

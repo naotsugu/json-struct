@@ -17,14 +17,24 @@ package com.mammb.code.jsonstruct.processor.assemble;
 
 import com.mammb.code.jsonstruct.lang.LangModels;
 
+import java.util.Set;
+
 /**
  * AssemblyContext.
  * @author Naotsugu Kobayashi
  */
-public record AssembleContext(String path, LangModels lang) {
+public record AssembleContext(String path, LangModels lang, Set<String> basicClasses) {
+
+    public static AssembleContext of(LangModels lang, Set<String> basicClasses) {
+        return new AssembleContext("", lang, basicClasses);
+    }
 
     public AssembleContext next(String pathNext) {
-        return new AssembleContext(path + pathNext, lang);
+        return new AssembleContext(path + pathNext, lang, basicClasses);
+    }
+
+    public boolean isKnown(String type) {
+        return basicClasses.contains(type);
     }
 
 }

@@ -62,7 +62,7 @@ public class ArrayAssembly implements Assembly {
         ArrayType arrayType = (ArrayType) element.asType();
         Element compElement = ctx.lang().asTypeElement(arrayType.getComponentType());
         Assembly comp = Assemblies.toAssembly(compElement, ctx);
-        BackingCode entryCode = comp.execute(ctx.next("/"));
+        BackingCode entryCode = comp.execute(ctx.with("/"));
 
         var methodName = name() + "Array";
 

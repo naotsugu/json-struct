@@ -107,6 +107,17 @@ public class BackingCode {
 
 
     /**
+     * Add imports.
+     * @param imports the imports
+     * @return this BackingCode
+     */
+    public BackingCode addImports(Imports imports) {
+        code.add(imports);
+        return this;
+    }
+
+
+    /**
      * Add backing method.
      * @param method the backing method
      * @return this BackingCode
@@ -117,11 +128,19 @@ public class BackingCode {
     }
 
 
+    /**
+     * Gets a code.
+     * @return code
+     */
     public Code code() {
         return code;
     }
 
 
+    /**
+     * Gets the backingMethods.
+     * @return the backingMethods
+     */
     public Code backingMethods() {
         return backingMethods;
     }

@@ -61,7 +61,7 @@ public class SetAssembly implements Assembly {
 
         Element entryElement = ctx.lang().entryElement(element);
         Assembly entry = Assemblies.toAssembly(entryElement, ctx);
-        BackingCode entryCode = entry.execute(ctx.next("/"));
+        BackingCode entryCode = entry.execute(ctx.with("/"));
 
         var methodName = name() + "Set";
 

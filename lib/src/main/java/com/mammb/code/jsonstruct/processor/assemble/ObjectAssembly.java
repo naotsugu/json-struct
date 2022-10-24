@@ -67,7 +67,7 @@ public class ObjectAssembly implements Assembly {
             .selectConstructorLike(type, JsonStruct.class)
             .orElseThrow();
 
-        AssembleContext nextCtx = ctx.next(name() + "/");
+        AssembleContext nextCtx = ctx.next(name().isEmpty() ? "" : name() + "/");
         BackingCode paramsCode = BackingCode.of();
 
         List<Assembly> params = Assemblies.parameters(constructorLike, ctx);

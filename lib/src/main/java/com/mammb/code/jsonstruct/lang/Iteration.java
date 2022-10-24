@@ -54,8 +54,8 @@ public interface Iteration {
 
 
     /**
-     *
-     * @return
+     * Gets whether the current index is odd or not.
+     * @return {@code true} if whether the current index is odd
      */
     default boolean isOdd() {
         return !isEven();
@@ -63,8 +63,8 @@ public interface Iteration {
 
 
     /**
-     *
-     * @return
+     * Gets whether the current index is even or not.
+     * @return {@code true} if whether the current index is even
      */
     default boolean isEven() {
         return index() % 2 == 0;

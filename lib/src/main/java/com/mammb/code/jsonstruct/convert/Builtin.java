@@ -19,8 +19,21 @@ import com.mammb.code.jsonstruct.parser.CharSource;
 import com.mammb.code.jsonstruct.parser.JsonValue;
 import com.mammb.code.jsonstruct.parser.NumberSource;
 import com.mammb.code.jsonstruct.processor.JsonStructException;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 /**
@@ -29,18 +42,51 @@ import java.util.function.Function;
  */
 public class Builtin {
 
+    static Locale locale = Locale.getDefault();
+
+    /**
+     * Create a builtin mappings.
+     * @return the builtin mappings
+     */
     public static Map<Class<?>, Function<JsonValue, ?>> mapping() {
+
 
         Map<Class<?>, Function<JsonValue, ?>> map = new HashMap<>();
 
-        map.put(String.class,  v -> new String(asCs(v).chars()));
-        map.put(Integer.class, v -> asNs(v).getInt());
-        map.put(Integer.TYPE,  v -> asNs(v).getInt());
-        map.put(Long.class,    v -> asNs(v).getLong());
-        map.put(Long.TYPE,     v -> asNs(v).getLong());
+        map.put(String.class,    v -> asStr(v));
+        map.put(Integer.class,   v -> asNs(v).getInt());
+        map.put(Integer.TYPE,    v -> asNs(v).getInt());
+        map.put(Long.class,      v -> asNs(v).getLong());
+        map.put(Long.TYPE,       v -> asNs(v).getLong());
+        map.put(Boolean.class,   v -> v.equals(JsonValue.TRUE));
+        map.put(Boolean.TYPE,    v -> v.equals(JsonValue.TRUE));
+        map.put(Character.class, v -> asCs(v).chars()[0]);
+        map.put(Character.TYPE,  v -> asCs(v).chars()[0]);
 
+        map.put(LocalDate.class,      v -> LocalDate.parse(asStr(v), DateTimeFormatter.ISO_LOCAL_DATE.withLocale(locale)));
+        map.put(LocalTime.class,      v -> LocalTime.parse(asStr(v), DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale)));
+        map.put(LocalDateTime.class,  v -> LocalDateTime.parse(asStr(v), DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale)));
+        map.put(OffsetTime.class,     v -> OffsetTime.parse(asStr(v), DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale)));
+        map.put(OffsetDateTime.class, v -> OffsetDateTime.parse(asStr(v), DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale)));
+
+        map.put(Period.class,    v -> Period.parse(asStr(v)));
+
+        map.put(Path.class,      v -> Paths.get(asStr(v)));
+        map.put(URI.class,       v -> URI.create(asStr(v)));
+        map.put(URL.class,       v -> tried(() -> new URL(asStr(v))));
+        map.put(UUID.class,      v -> UUID.fromString(asStr(v)));
         return map;
     }
+
+
+    private static String asStr(JsonValue val) {
+        if (val instanceof CharSource cs) {
+            return new String(cs.chars());
+        } else {
+            throw new JsonStructException("Illegal value.[{}]", val);
+        }
+    }
+
 
     private static CharSource asCs(JsonValue val) {
         if (val instanceof CharSource cs) {
@@ -57,6 +103,21 @@ public class Builtin {
         } else {
             throw new JsonStructException("Illegal value.[{}]", val);
         }
+    }
+
+
+    public static <T> T tried(ThrowsSupplier<T> supplier) {
+        try {
+            return supplier.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    private interface ThrowsSupplier<T> {
+        T get() throws Exception;
     }
 
 }

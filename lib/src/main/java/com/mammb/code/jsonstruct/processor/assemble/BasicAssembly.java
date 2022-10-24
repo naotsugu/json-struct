@@ -61,10 +61,10 @@ public class BasicAssembly implements Assembly {
                   .interpolateType("#{type}", element.asType().toString())
 
             : BackingCode.of("""
-                json.as("#{name}", convert.to(#{type}.class))""")
-                  .interpolate("#{name}", ctx.path() + name())
-                  .interpolateType("#{type}", element.asType().toString());
-
+                ((JsonStructure) json).as("#{name}", convert.to(#{type}.class))""")
+                .interpolate("#{name}", ctx.path() + name())
+                .interpolateType("#{type}", element.asType().toString())
+                .addImports(Imports.of("com.mammb.code.jsonstruct.parser.JsonStructure"));
     }
 
 }

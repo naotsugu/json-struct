@@ -16,7 +16,6 @@
 package com.mammb.code.jsonstruct.lang;
 
 import com.mammb.code.jsonstruct.processor.JsonStructException;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -67,6 +66,11 @@ public class LangModels {
     }
 
 
+    /**
+     * Gets the package of an element
+     * @param element the element being examined
+     * @return the package of an element
+     */
     public PackageElement getPackage(Element element) {
         return elementUtils.getPackageOf(element);
     }

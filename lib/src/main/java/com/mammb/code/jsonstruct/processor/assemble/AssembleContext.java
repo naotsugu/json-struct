@@ -26,12 +26,17 @@ import java.util.Set;
 public record AssembleContext(String path, LangModels lang, Set<String> basicClasses) {
 
     public static AssembleContext of(LangModels lang, Set<String> basicClasses) {
-        return new AssembleContext("", lang, basicClasses);
+        return new AssembleContext("/", lang, basicClasses);
     }
 
     public AssembleContext next(String pathNext) {
         return new AssembleContext(path + pathNext, lang, basicClasses);
     }
+
+    public AssembleContext with(String path) {
+        return new AssembleContext(path, lang, basicClasses);
+    }
+
 
     public boolean isKnown(String type) {
         return basicClasses.contains(type);

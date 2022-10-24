@@ -61,10 +61,10 @@ public class MapAssembly implements Assembly {
         Element[] entryElements = ctx.lang().mapEntryElement(element);
 
         Assembly key = Assemblies.toAssembly(entryElements[0], ctx);
-        BackingCode keyCode = key.execute(ctx.next("/"));
+        BackingCode keyCode = key.execute(ctx.with("/"));
 
         Assembly val = Assemblies.toAssembly(entryElements[1], ctx);
-        BackingCode valCode = val.execute(ctx.next("/"));
+        BackingCode valCode = val.execute(ctx.with("/"));
 
 
         var methodName = name() + "Map";

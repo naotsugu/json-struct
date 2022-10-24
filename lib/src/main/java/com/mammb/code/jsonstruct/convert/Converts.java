@@ -29,22 +29,37 @@ import java.util.function.Function;
  */
 public class Converts {
 
+    /** The Builtin mapping. */
     private final Map<Class<?>, Function<JsonValue, ?>> map;
 
+    /** The Optional mapping. */
     private final Map<Class<?>, Function<JsonValue, ?>> opt;
 
 
-    public Converts() {
+    /**
+     * Constructor.
+     */
+    private Converts() {
         this.map = Builtin.mapping();
         this.opt = new HashMap<>();
     }
 
 
+    /**
+     * Create a Converts.
+     * @return a Converts
+     */
     public static Converts of() {
         return new Converts();
     }
 
 
+    /**
+     * Gets the converter for the given class.
+     * @param clazz the Target Classes
+     * @param <T> the type of class
+     * @return the converter
+     */
     @SuppressWarnings("unchecked")
     public <T> Function<JsonValue, T> to(Class<?> clazz) {
         return opt.containsKey(clazz)
@@ -53,22 +68,36 @@ public class Converts {
     }
 
 
+    /**
+     * Add optional mapping
+     * @param clazz the Class
+     * @param conv the convert
+     */
     public void add(Class<?> clazz, Function<String, ?> conv) {
         opt.put(clazz, adapt(conv));
     }
 
 
+    /**
+     * Add all optional mapping
+     * @param conv the convert
+     */
     public void addAll(Map<Class<?>, Function<String, ?>> conv) {
         conv.forEach(this::add);
     }
 
 
+    /**
+     * Gets the predefined classes fqcn.
+     * @return the predefined classes fqcn
+     */
     public Set<String> classes() {
         Set<String> set = new HashSet<>();
         map.keySet().forEach(k -> set.add(k.getCanonicalName()));
         opt.keySet().forEach(k -> set.add(k.getCanonicalName()));
         return set;
     }
+
 
     private static Function<JsonValue, ?> adapt(Function<String, ?> fun) {
         return (JsonValue v) -> fun.apply(new String(((CharSource) v).chars()));

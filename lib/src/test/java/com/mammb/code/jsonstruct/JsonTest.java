@@ -2,6 +2,7 @@ package com.mammb.code.jsonstruct;
 
 import com.mammb.code.jsonstruct.processor.testdata.Book;
 import com.mammb.code.jsonstruct.processor.testdata.Food;
+import com.mammb.code.jsonstruct.processor.testdata.Gender;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

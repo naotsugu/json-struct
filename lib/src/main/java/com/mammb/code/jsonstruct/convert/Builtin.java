@@ -19,6 +19,9 @@ import com.mammb.code.jsonstruct.parser.CharSource;
 import com.mammb.code.jsonstruct.parser.JsonValue;
 import com.mammb.code.jsonstruct.parser.NumberSource;
 import com.mammb.code.jsonstruct.processor.JsonStructException;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
@@ -53,33 +56,38 @@ public class Builtin {
 
         Map<Class<?>, Function<JsonValue, ?>> map = new HashMap<>();
 
-        map.put(String.class,    v -> asStr(v));
-        map.put(Integer.class,   v -> asNs(v).getInt());
-        map.put(Integer.TYPE,    v -> asNs(v).getInt());
-        map.put(Long.class,      v -> asNs(v).getLong());
-        map.put(Long.TYPE,       v -> asNs(v).getLong());
-        map.put(Boolean.class,   v -> v.equals(JsonValue.TRUE));
-        map.put(Boolean.TYPE,    v -> v.equals(JsonValue.TRUE));
-        map.put(Character.class, v -> asCs(v).chars()[0]);
-        map.put(Character.TYPE,  v -> asCs(v).chars()[0]);
+        map.put(Byte.class,       v -> Byte.parseByte(str(v)));
+        map.put(Byte.TYPE,        v -> Byte.parseByte(str(v)));
+        map.put(BigDecimal.class, v -> asNs(v).getBigDecimal());
+        map.put(BigInteger.class, v -> asNs(v).getBigDecimal().toBigInteger());
 
-        map.put(LocalDate.class,      v -> LocalDate.parse(asStr(v), DateTimeFormatter.ISO_LOCAL_DATE.withLocale(locale)));
-        map.put(LocalTime.class,      v -> LocalTime.parse(asStr(v), DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale)));
-        map.put(LocalDateTime.class,  v -> LocalDateTime.parse(asStr(v), DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale)));
-        map.put(OffsetTime.class,     v -> OffsetTime.parse(asStr(v), DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale)));
-        map.put(OffsetDateTime.class, v -> OffsetDateTime.parse(asStr(v), DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale)));
+        map.put(String.class,     v -> str(v));
+        map.put(Integer.class,    v -> asNs(v).getInt());
+        map.put(Integer.TYPE,     v -> asNs(v).getInt());
+        map.put(Long.class,       v -> asNs(v).getLong());
+        map.put(Long.TYPE,        v -> asNs(v).getLong());
+        map.put(Boolean.class,    v -> v.equals(JsonValue.TRUE));
+        map.put(Boolean.TYPE,     v -> v.equals(JsonValue.TRUE));
+        map.put(Character.class,  v -> asCs(v).chars()[0]);
+        map.put(Character.TYPE,   v -> asCs(v).chars()[0]);
 
-        map.put(Period.class,    v -> Period.parse(asStr(v)));
+        map.put(LocalDate.class,      v -> LocalDate.parse(str(v), DateTimeFormatter.ISO_LOCAL_DATE.withLocale(locale)));
+        map.put(LocalTime.class,      v -> LocalTime.parse(str(v), DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale)));
+        map.put(LocalDateTime.class,  v -> LocalDateTime.parse(str(v), DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale)));
+        map.put(OffsetTime.class,     v -> OffsetTime.parse(str(v), DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale)));
+        map.put(OffsetDateTime.class, v -> OffsetDateTime.parse(str(v), DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale)));
 
-        map.put(Path.class,      v -> Paths.get(asStr(v)));
-        map.put(URI.class,       v -> URI.create(asStr(v)));
-        map.put(URL.class,       v -> tried(() -> new URL(asStr(v))));
-        map.put(UUID.class,      v -> UUID.fromString(asStr(v)));
+        map.put(Period.class,    v -> Period.parse(str(v)));
+
+        map.put(Path.class,      v -> Paths.get(str(v)));
+        map.put(URI.class,       v -> URI.create(str(v)));
+        map.put(URL.class,       v -> tried(() -> new URL(str(v))));
+        map.put(UUID.class,      v -> UUID.fromString(str(v)));
         return map;
     }
 
 
-    private static String asStr(JsonValue val) {
+    private static String str(JsonValue val) {
         if (val instanceof CharSource cs) {
             return new String(cs.chars());
         } else {

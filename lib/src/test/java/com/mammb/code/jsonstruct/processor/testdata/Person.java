@@ -23,5 +23,5 @@ import com.mammb.code.jsonstruct.JsonStruct;
  * @author Naotsugu Kobayashi
  */
 @JsonStruct
-public record Person(FullName fullName, int age) {
+public record Person(FullName fullName, int age, Gender gender) {
 }

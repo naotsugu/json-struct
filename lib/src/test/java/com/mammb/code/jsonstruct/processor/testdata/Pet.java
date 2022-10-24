@@ -2,15 +2,21 @@ package com.mammb.code.jsonstruct.processor.testdata;
 
 import com.mammb.code.jsonstruct.JsonStruct;
 
-public class Pet {
-    private final String name;
+import java.util.Map;
 
-    private Pet(String name) {
+public class Pet {
+
+    private final String name;
+    private final Map<String, FullName> owners;
+
+    private Pet(String name, Map<String, FullName> owners) {
         this.name = name;
+        this.owners = owners;
     }
 
     @JsonStruct
-    public static Pet of(String name) {
-        return new Pet(name);
+    public static Pet of(String name, Map<String, FullName> owners) {
+        return new Pet(name, owners);
     }
+
 }

@@ -37,6 +37,9 @@ public class Assemblies {
         if (ctx.isKnown(element.asType().toString())) {
             return BasicAssembly.of(element);
         }
+        if (ctx.lang().isEnum(element.asType())) {
+            return EnumAssembly.of(element);
+        }
         if (ctx.lang().isArrayLike(element.asType())) {
             return ArrayAssembly.of(element);
         }

@@ -96,15 +96,15 @@ public class MapAssembly implements Assembly {
                 } else if (str instanceof JsonArray array) {
                     JsonValue prev = null;
                     for (Iterate.Entry<JsonValue> e : Iterate.of(array)) {
-                        if (e.isOdd()) {
-                            JsonValue json = prev;
-                            #{keyType} key = #{key};
-                            json = e.value();
-                            #{valType} val = #{val};
-                            map.put(key, val);
-                        } else {
+                        if (e.isEven()) {
                             prev = e.value();
+                            continue;
                         }
+                        JsonValue json = prev;
+                        #{keyType} key = #{key};
+                        json = e.value();
+                        #{valType} val = #{val};
+                        map.put(key, val);
                     }
                 } else {
                     throw new JsonStructException();

@@ -110,6 +110,11 @@ public class LangModels {
     }
 
 
+    public boolean isEnum(TypeMirror typeMirror) {
+        return typeUtils.asElement(typeMirror).getKind() == ElementKind.ENUM;
+    }
+
+
     public boolean isListLike(TypeMirror typeMirror) {
         TypeMirror list = elementUtils.getTypeElement("java.util.List").asType();
         TypeMirror erasure = typeUtils.erasure(typeMirror);

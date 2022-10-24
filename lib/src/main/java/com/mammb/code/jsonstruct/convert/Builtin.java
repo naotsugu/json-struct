@@ -19,23 +19,38 @@ import com.mammb.code.jsonstruct.parser.CharSource;
 import com.mammb.code.jsonstruct.parser.JsonValue;
 import com.mammb.code.jsonstruct.parser.NumberSource;
 import com.mammb.code.jsonstruct.processor.JsonStructException;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.Period;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalQueries;
+import java.time.zone.ZoneRulesException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
+import java.util.SimpleTimeZone;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -60,29 +75,47 @@ public class Builtin {
         map.put(Byte.TYPE,        v -> Byte.parseByte(str(v)));
         map.put(BigDecimal.class, v -> asNs(v).getBigDecimal());
         map.put(BigInteger.class, v -> asNs(v).getBigDecimal().toBigInteger());
-
-        map.put(String.class,     v -> str(v));
-        map.put(Integer.class,    v -> asNs(v).getInt());
-        map.put(Integer.TYPE,     v -> asNs(v).getInt());
-        map.put(Long.class,       v -> asNs(v).getLong());
-        map.put(Long.TYPE,        v -> asNs(v).getLong());
         map.put(Boolean.class,    v -> v.equals(JsonValue.TRUE));
         map.put(Boolean.TYPE,     v -> v.equals(JsonValue.TRUE));
+        map.put(Calendar.class,   v -> asCalendar(str(v)));
         map.put(Character.class,  v -> asCs(v).chars()[0]);
         map.put(Character.TYPE,   v -> asCs(v).chars()[0]);
-
-        map.put(LocalDate.class,      v -> LocalDate.parse(str(v), DateTimeFormatter.ISO_LOCAL_DATE.withLocale(locale)));
-        map.put(LocalTime.class,      v -> LocalTime.parse(str(v), DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale)));
-        map.put(LocalDateTime.class,  v -> LocalDateTime.parse(str(v), DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale)));
-        map.put(OffsetTime.class,     v -> OffsetTime.parse(str(v), DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale)));
+        map.put(Date.class,       v -> asDate(str(v)));
+        map.put(Double.class,     v -> Double.parseDouble(str(v)));
+        map.put(Double.TYPE,      v -> Double.parseDouble(str(v)));
+        map.put(Duration.class,   v -> Duration.parse(str(v)));
+        map.put(Float.class,      v -> Float.parseFloat(str(v)));
+        map.put(Float.TYPE,       v -> Float.parseFloat(str(v)));
+        map.put(Integer.class,    v -> asNs(v).getInt());
+        map.put(Integer.TYPE,     v -> asNs(v).getInt());
+        map.put(Instant.class,    v -> Instant.from(DateTimeFormatter.ISO_INSTANT.withZone(ZoneOffset.UTC).withLocale(locale).parse(str(v))));
+        map.put(LocalDateTime.class, v -> LocalDateTime.parse(str(v), DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale)));
+        map.put(LocalDate.class,  v -> LocalDate.parse(str(v), DateTimeFormatter.ISO_LOCAL_DATE.withLocale(locale)));
+        map.put(LocalTime.class,  v -> LocalTime.parse(str(v), DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale)));
+        map.put(Long.class,       v -> asNs(v).getLong());
+        map.put(Long.TYPE,        v -> asNs(v).getLong());
+        map.put(Number.class,     v -> asNs(v).getBigDecimal());
         map.put(OffsetDateTime.class, v -> OffsetDateTime.parse(str(v), DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale)));
-
-        map.put(Period.class,    v -> Period.parse(str(v)));
-
+        map.put(OffsetTime.class,     v -> OffsetTime.parse(str(v), DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale)));
+        map.put(OptionalDouble.class, v -> v.equals(JsonValue.NULL) ? OptionalDouble.empty() : OptionalDouble.of(Double.parseDouble(str(v))));
+        map.put(OptionalInt.class,    v -> v.equals(JsonValue.NULL) ? OptionalInt.empty() : OptionalInt.of(asNs(v).getInt()));
+        map.put(OptionalLong.class,   v -> v.equals(JsonValue.NULL) ? OptionalLong.empty() : OptionalLong.of(asNs(v).getLong()));
         map.put(Path.class,      v -> Paths.get(str(v)));
+        map.put(Period.class,    v -> Period.parse(str(v)));
+        map.put(Short.class,     v -> Short.parseShort(str(v)));
+        map.put(Short.TYPE,      v -> Short.parseShort(str(v)));
+        map.put(String.class,    v -> str(v));
+        map.put(TimeZone.class,  v -> asTimeZone(str(v)));
         map.put(URI.class,       v -> URI.create(str(v)));
-        map.put(URL.class,       v -> tried(() -> new URL(str(v))));
+        map.put(URL.class,       v -> trying(() -> new URL(str(v))));
         map.put(UUID.class,      v -> UUID.fromString(str(v)));
+        map.put(ZonedDateTime.class, v -> ZonedDateTime.parse(str(v), DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(locale)));
+        map.put(ZoneId.class,    v -> ZoneId.of(str(v)));
+        map.put(ZoneOffset.class,v -> ZoneOffset.of(str(v)));
+        if (isClassAvailable("java.sql.Date")) {
+            map.put(java.sql.Date.class,      v -> java.sql.Date.valueOf(LocalDate.parse(str(v), DateTimeFormatter.ISO_DATE.withZone(ZoneOffset.UTC).withLocale(locale))));
+            map.put(java.sql.Timestamp.class, v -> LocalDateTime.from(DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneOffset.UTC).withLocale(locale).parse(str(v))).atZone(ZoneOffset.UTC).toInstant());
+        }
         return map;
     }
 
@@ -114,18 +147,66 @@ public class Builtin {
     }
 
 
-    public static <T> T tried(ThrowsSupplier<T> supplier) {
+    public static <T> T trying(ThrowsSupplier<T> supplier) {
         try {
             return supplier.get();
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            throw new JsonStructException("zone parse error.", e);
         }
     }
 
 
     private interface ThrowsSupplier<T> {
         T get() throws Exception;
+    }
+
+
+    public static boolean isClassAvailable(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException | LinkageError e) {
+            return false;
+        }
+    }
+
+
+    private static Calendar asCalendar(String str) {
+        DateTimeFormatter formatter = str.contains("T")
+            ? DateTimeFormatter.ISO_DATE_TIME
+            : DateTimeFormatter.ISO_DATE;
+
+        final TemporalAccessor parsed = formatter.parse(str);
+        LocalTime time = parsed.query(TemporalQueries.localTime());
+        ZoneId zone = parsed.query(TemporalQueries.zone());
+        if (zone == null) {
+            zone = ZoneOffset.UTC;
+        }
+        if (time == null) {
+            time = LocalTime.parse("00:00:00");
+        }
+        ZonedDateTime result = LocalDate.from(parsed).atTime(time).atZone(zone);
+        return GregorianCalendar.from(result);
+    }
+
+
+    private static Date asDate(String str) {
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withLocale(locale);
+        ZonedDateTime parsed = (formatter.getZone() == null)
+            ? ZonedDateTime.parse(str, formatter.withZone(ZoneOffset.UTC))
+            : ZonedDateTime.parse(str, formatter);
+        return Date.from(parsed.toInstant());
+    }
+
+
+    private static TimeZone asTimeZone(String str) {
+        try {
+            final ZoneId zoneId = ZoneId.of(str);
+            final ZonedDateTime zonedDateTime = LocalDateTime.now().atZone(zoneId);
+            return new SimpleTimeZone(zonedDateTime.getOffset().getTotalSeconds() * 1000, zoneId.getId());
+        } catch (ZoneRulesException e) {
+            throw new JsonStructException("zone parse error.", e);
+        }
     }
 
 }

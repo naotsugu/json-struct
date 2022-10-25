@@ -17,9 +17,10 @@ package com.mammb.code.jsonstruct.parser;
 
 /**
  * CharSource.
- *
  * @author Naotsugu Kobayashi
  */
 public interface CharSource {
+
     char[] chars();
+
 }

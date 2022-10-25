@@ -17,6 +17,8 @@ package com.mammb.code.jsonstruct.lang;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * Iterate.
@@ -25,15 +27,15 @@ import java.util.List;
 public class Iterate<E> implements Iterable<Iterate.Entry<E>> {
 
     /** Iterate subject. */
-    private final Iterable<E> iterable;
+    private final Supplier<Iterator<E>> iteratorSupplier;
 
 
     /**
      * Constructor.
-     * @param iterable to iterate subject
+     * @param iteratorSupplier the iterator supplier
      */
-    private Iterate(Iterable<E> iterable) {
-        this.iterable = iterable;
+    private Iterate(Supplier<Iterator<E>> iteratorSupplier) {
+        this.iteratorSupplier = iteratorSupplier;
     }
 
 
@@ -44,7 +46,7 @@ public class Iterate<E> implements Iterable<Iterate.Entry<E>> {
      * @return Iterate
      */
     public static <E> Iterate<E> of(Iterable<E> iterable) {
-        return new Iterate<>(iterable);
+        return new Iterate<>(iterable::iterator);
     }
 
 
@@ -55,7 +57,19 @@ public class Iterate<E> implements Iterable<Iterate.Entry<E>> {
      * @return Iterate
      */
     public static <E> Iterate<E> of(E[] array) {
-        return new Iterate<>(List.of(array));
+        return new Iterate<>(() -> List.of(array).iterator());
+    }
+
+
+    /**
+     * Create a iterate.
+     * Stream is something that can only be used once.
+     * @param stream to iterate stream
+     * @param <E> the type of iterable
+     * @return Iterate
+     */
+    public static <E> Iterate<E> of(Stream<E> stream) {
+        return new Iterate<>(stream::iterator);
     }
 
 
@@ -64,7 +78,7 @@ public class Iterate<E> implements Iterable<Iterate.Entry<E>> {
 
         return new Iterator<>() {
 
-            private final Iterator<E> iterator = iterable.iterator();
+            private final Iterator<E> iterator = iteratorSupplier.get();
 
             private int index = 0;
 

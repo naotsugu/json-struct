@@ -21,6 +21,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.RecordComponentElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
@@ -76,17 +77,35 @@ public class LangModels {
     }
 
 
+    /**
+     * Gets whether the given {@link Element} is a Class.
+     * An enum is not considered a class.
+     * @param element the {@link Element}
+     * @return {@code true} if whether the given {@link Element} is a Class
+     */
     public boolean isClass(Element element) {
         return element.getKind() == ElementKind.CLASS ||
             element.getKind() == ElementKind.RECORD;
     }
 
+
+    /**
+     * Gets whether the given {@link Element} is a Constructor.
+     * Targets a public constructor.
+     * @param element the {@link Element}
+     * @return {@code true} if whether the given {@link Element} is a Constructor
+     */
     public boolean isConstructor(Element element) {
         return element.getKind() == ElementKind.CONSTRUCTOR &&
             element.getModifiers().contains(Modifier.PUBLIC);
     }
 
 
+    /**
+     * Gets whether the given {@link Element} is a Static Factory Method.
+     * @param element the {@link Element}
+     * @return {@code true} if whether the given {@link Element} is a Static Factory Method
+     */
     public boolean isStaticFactory(Element element) {
 
         if (element.getKind() == ElementKind.METHOD &&
@@ -105,16 +124,31 @@ public class LangModels {
     }
 
 
+    /**
+     * Gets whether the given {@link Element} is a Constructor like(Constructor or Static factory method).
+     * @param element the {@link Element}
+     * @return {@code true} if whether the given {@link Element} is a Constructor like
+     */
     public boolean isConstructorLike(Element element) {
         return isConstructor(element) || isStaticFactory(element);
     }
 
 
+    /**
+     * Gets whether the given {@link TypeMirror} is a Enum type.
+     * @param typeMirror the {@link TypeMirror}
+     * @return {@code true} if whether the given {@link TypeMirror} is a Enum type
+     */
     public boolean isEnum(TypeMirror typeMirror) {
         return typeUtils.asElement(typeMirror).getKind() == ElementKind.ENUM;
     }
 
 
+    /**
+     * Gets whether the given {@link TypeMirror} is a List type.
+     * @param typeMirror the {@link TypeMirror}
+     * @return {@code true} if whether the given {@link TypeMirror} is a List type
+     */
     public boolean isListLike(TypeMirror typeMirror) {
         TypeMirror list = elementUtils.getTypeElement("java.util.List").asType();
         TypeMirror erasure = typeUtils.erasure(typeMirror);
@@ -122,6 +156,11 @@ public class LangModels {
     }
 
 
+    /**
+     * Gets whether the given {@link TypeMirror} is a Set type.
+     * @param typeMirror the {@link TypeMirror}
+     * @return {@code true} if whether the given {@link TypeMirror} is a Set type
+     */
     public boolean isSetLike(TypeMirror typeMirror) {
         TypeMirror list = elementUtils.getTypeElement("java.util.Set").asType();
         TypeMirror erasure = typeUtils.erasure(typeMirror);
@@ -129,6 +168,11 @@ public class LangModels {
     }
 
 
+    /**
+     * Gets whether the given {@link TypeMirror} is a Map type.
+     * @param typeMirror the {@link TypeMirror}
+     * @return {@code true} if whether the given {@link TypeMirror} is a Map type
+     */
     public boolean isMapLike(TypeMirror typeMirror) {
         TypeMirror list = elementUtils.getTypeElement("java.util.Map").asType();
         TypeMirror erasure = typeUtils.erasure(typeMirror);
@@ -136,13 +180,24 @@ public class LangModels {
     }
 
 
+    /**
+     * Gets whether the given {@link TypeMirror} is an Array type.
+     * @param typeMirror the {@link TypeMirror}
+     * @return {@code true} if whether the given {@link TypeMirror} is an Array type
+     */
     public boolean isArrayLike(TypeMirror typeMirror) {
         return typeMirror.getKind() == TypeKind.ARRAY;
     }
 
 
+    /**
+     * Select the Constructor like(Constructor or Static factory method) present in the given {@link Element}.
+     * @param element the {@link Element}
+     * @param priorMarker the annotation markers to be preferentially selected.
+     * @return the Constructor like {@link ExecutableElement}
+     */
     public Optional<ExecutableElement> selectConstructorLike(
-            Element element, Class<? extends Annotation> priorMarker) {
+        Element element, Class<? extends Annotation> priorMarker) {
 
         List<ExecutableElement> candidate = element.getEnclosedElements().stream()
             .filter(this::isConstructorLike)
@@ -173,30 +228,139 @@ public class LangModels {
     }
 
 
+    /**
+     * Gets the element corresponding to a type.
+     * the element corresponding to the given type
+     * @param type the type to map to an element
+     * @return the element corresponding to the given type
+     */
     public Element asTypeElement(TypeMirror type) {
         return typeUtils.asElement(type);
     }
 
 
+    /**
+     * Gets the type argument of the given {@link Element} as an {@link Element}.
+     * e.g. {@code List<String>} -> element of String type
+     * @param element the {@link Element}
+     * @return the type argument of the given {@link Element}
+     */
     public Element entryElement(Element element) {
         DeclaredType declaredType = (DeclaredType) element.asType();
         var typeArguments = declaredType.getTypeArguments();
         if (typeArguments.size() != 1) {
-            throw new JsonStructException();
+            throw new JsonStructException("Type arguments size must be 1. [{}]", element);
         }
         return typeUtils.asElement(typeArguments.get(0));
     }
 
+
+    /**
+     * Gets the type argument of the given {@link Element} as an {@link Element}.
+     * e.g. {@code Map<String, Integer>} -> element of String and Integer type
+     * @param element the {@link Element}
+     * @return the type argument of the given {@link Element}
+     */
     public Element[] mapEntryElement(Element element) {
         DeclaredType declaredType = (DeclaredType) element.asType();
         var typeArguments = declaredType.getTypeArguments();
         if (typeArguments.size() != 2) {
-            throw new JsonStructException();
+            throw new JsonStructException("Type arguments size must be 2. [{}]", element);
         }
         return new Element[] {
             typeUtils.asElement(typeArguments.get(0)),
             typeUtils.asElement(typeArguments.get(1))
         };
+    }
+
+
+    /**
+     * Select the accessor method present in the given {@link Element}.
+     * @param element the {@link Element}.
+     * @return the accessor methods
+     */
+    public List<ExecutableElement> selectAccessors(Element element) {
+
+        if (element.getKind() == ElementKind.RECORD) {
+            return element.getEnclosedElements().stream()
+                .filter(e -> e.getKind() == ElementKind.RECORD_COMPONENT)
+                .map(RecordComponentElement.class::cast)
+                .map(RecordComponentElement::getAccessor)
+                .toList();
+        }
+
+        if (element.getKind() == ElementKind.CLASS) {
+            return element.getEnclosedElements().stream()
+                .filter(e -> e.getKind() == ElementKind.METHOD)
+                .map(ExecutableElement.class::cast)
+                .filter(LangModels::isBeanAccessor)
+                .toList();
+        }
+
+        return List.of();
+    }
+
+
+    /**
+     * Gets whether the given {@link ExecutableElement} is a bean accessor.
+     * @param execElement the {@link ExecutableElement}
+     * @return {@code true} if whether the given {@link ExecutableElement} is a bean accessor
+     */
+    private static boolean isBeanAccessor(ExecutableElement execElement) {
+        if (!execElement.getModifiers().contains(Modifier.PUBLIC) ||
+            execElement.getReturnType().getKind() == TypeKind.VOID ||
+            execElement.getParameters().size() > 0) {
+            return false;
+        }
+        String name = execElement.getSimpleName().toString();
+        if (name.startsWith("get") && name.length() > 3 && Character.isUpperCase(name.charAt(3))) {
+            return true;
+        }
+        if (name.startsWith("is") && name.length() > 2 && Character.isUpperCase(name.charAt(2)) &&
+            execElement.getReturnType().getKind() == TypeKind.BOOLEAN) {
+            return true;
+        }
+        return false;
+    }
+
+
+    /**
+     * Get the accessor property name for the given {@link ExecutableElement}.
+     * @param accessor the {@link ExecutableElement}.
+     * @return the accessor property name
+     */
+    private static String getPropertyName(ExecutableElement accessor) {
+        if (!isBeanAccessor(accessor)) {
+            throw new IllegalArgumentException();
+        }
+        String name = accessor.getSimpleName().toString();
+        if (name.startsWith("get")) {
+            return decapitalize(name.substring(3));
+        } else if (name.startsWith("is")) {
+            return decapitalize(name.substring(2));
+        } else {
+            return name;
+        }
+    }
+
+
+    /**
+     * Utility method to take a string and convert it to normal Java variable name capitalization.
+     * Thus, "FooBah" becomes "fooBah" and "X" becomes "x", but "URL" stays as "URL".
+     * @param name The string to be decapitalized.
+     * @return The decapitalized version of the string.
+     */
+    private static String decapitalize(String name) {
+        if (name == null || name.isBlank()) {
+            return name;
+        }
+        if (name.length() > 1 && Character.isUpperCase(name.charAt(1)) &&
+            Character.isUpperCase(name.charAt(0))) {
+            return name;
+        }
+        char[] chars = name.toCharArray();
+        chars[0] = Character.toLowerCase(chars[0]);
+        return new String(chars);
     }
 
 }

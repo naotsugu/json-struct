@@ -24,26 +24,38 @@ import java.util.Arrays;
  */
 public class CharArray implements Serializable {
 
+    /** empty. */
     private static final char[] EMPTY = {};
 
+    /** The char array elements. */
     private char[] elements;
+
+    /** The length of char array. */
     private int length;
 
+
+    /**
+     * Constructor.
+     * @param elements the char array elements
+     * @param length the length of char array
+     */
     private CharArray(char[] elements, int length) {
         this.elements = elements;
         this.length = length;
     }
 
+
     /**
-     * Create empty char array.
+     * Create an empty char array.
      * @return CharArray
      */
     public static CharArray of() {
         return new CharArray(EMPTY, 0);
     }
 
+
     /**
-     * Create char array from given value.
+     * Create a char array from given value.
      * @param value char
      * @return CharArray
      */
@@ -51,8 +63,9 @@ public class CharArray implements Serializable {
         return new CharArray(new char[] { value }, 1);
     }
 
+
     /**
-     * Create char array from given values.
+     * Create a char array from given values.
      * @param values the initial chars
      * @return CharArray
      */
@@ -60,6 +73,11 @@ public class CharArray implements Serializable {
         return new CharArray(Arrays.copyOf(values, values.length), values.length);
     }
 
+
+    /**
+     * Add char values.
+     * @param values the char values
+     */
     public void add(char[] values) {
         if (length + values.length > elements.length) {
             elements = grow(values.length);
@@ -68,6 +86,11 @@ public class CharArray implements Serializable {
         length += values.length;
     }
 
+
+    /**
+     * Add char value.
+     * @param value the char value
+     */
     public void add(char value) {
         if (length == elements.length) {
             elements = grow(length + 1);

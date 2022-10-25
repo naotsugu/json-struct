@@ -103,5 +103,4 @@ public class Converts {
         return (JsonValue v) -> fun.apply(new String(((CharSource) v).chars()));
     }
 
-
 }

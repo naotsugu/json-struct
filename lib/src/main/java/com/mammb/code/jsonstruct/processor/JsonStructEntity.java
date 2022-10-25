@@ -95,33 +95,34 @@ public class JsonStructEntity {
             import com.mammb.code.jsonstruct.parser.Parser;
             import javax.annotation.processing.Generated;
             import java.io.Reader;
+            import java.io.Writer;
             import java.io.StringReader;
+            import java.io.StringWriter;
             """);
 
         return Code.of("""
-            @Generated(value = "#{processorName}")
-            public class #{className} implements Json<#{entityName}> {
+                @Generated(value = "#{processorName}")
+                public class #{className} implements Json<#{entityName}> {
 
-                private final Converts convert;
+                    private final Converts convert;
 
-                public #{className}(Converts convert) {
-                    this.convert = convert;
+                    public #{className}(Converts convert) {
+                        this.convert = convert;
+                    }
+
+                    @Override
+                    public #{entityName} from(Reader reader) {
+                        var json = Parser.of(reader).parse();
+                        return #{assemblyCode};
+                    }
+
+                    @Override
+                    public void to(#{entityName} object, Writer writer) {
+                    }
+
+                    #{backingMethods}
                 }
-
-                @Override
-                public #{entityName} from(CharSequence cs) {
-                    return from(new StringReader(cs.toString()));
-                }
-
-                @Override
-                public #{entityName} from(Reader reader) {
-                    var json = Parser.of(reader).parse();
-                    return #{assemblyCode};
-                }
-
-                #{backingMethods}
-            }
-            """)
+                """)
             .interpolateType("#{processorName}", JsonStructProcessor.class.getName())
             .interpolateType("#{className}", getEntityClassName())
             .interpolateType("#{entityName}", getClassName())

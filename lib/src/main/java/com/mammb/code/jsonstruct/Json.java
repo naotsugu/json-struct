@@ -16,6 +16,9 @@
 package com.mammb.code.jsonstruct;
 
 import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 
 /**
  * Json.
@@ -30,13 +33,43 @@ public interface Json<T> {
      */
     T from(Reader reader);
 
+
     /**
      * Construct the given class instance from json.
      * @param cs the char sequence of json
      * @return the class instance
      */
-    T from(CharSequence cs);
+    default T from(CharSequence cs) {
+        return from(new StringReader(cs.toString()));
+    }
 
+
+    /**
+     * Writes the object content tree to a {@link Writer}.
+     * @param object the object content tree to be serialized.
+     * @param writer destination of json data where serialized from java content tree
+     */
+    void to(T object, Writer writer);
+
+
+    /**
+     * Serializes the object content tree to a {@link CharSequence}.
+     * @param object the object content tree to be serialized.
+     * @return the {@link CharSequence} serialized from java content tree.
+     */
+    default CharSequence to(T object) {
+        StringWriter sw = new StringWriter();
+        to(object, sw);
+        return sw.toString();
+    }
+
+
+    /**
+     * Create a Json instance for a specified type.
+     * @param clazz the specified type
+     * @param <T> type of class
+     * @return a Json instance
+     */
     static <T> Json<T> of(Class<T> clazz) {
         return Json_.of(clazz);
     }

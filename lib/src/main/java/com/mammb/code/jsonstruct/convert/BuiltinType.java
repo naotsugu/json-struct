@@ -34,10 +34,10 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * Builtin.
+ * Builtin deserializes.
  * @author Naotsugu Kobayashi
  */
-public class Builtin {
+public class BuiltinType {
 
     static Locale locale = Locale.getDefault();
 
@@ -45,7 +45,7 @@ public class Builtin {
      * Create a builtin mappings.
      * @return the builtin mappings
      */
-    public static Map<Class<?>, Function<JsonValue, ?>> mapping() {
+    public static Map<Class<?>, Function<JsonValue, ?>> map() {
 
 
         Map<Class<?>, Function<JsonValue, ?>> map = new HashMap<>();
@@ -91,10 +91,7 @@ public class Builtin {
         map.put(ZonedDateTime.class, v -> ZonedDateTime.parse(str(v), DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(locale)));
         map.put(ZoneId.class,    v -> ZoneId.of(str(v)));
         map.put(ZoneOffset.class,v -> ZoneOffset.of(str(v)));
-        if (isClassAvailable("java.sql.Date")) {
-            map.put(java.sql.Date.class,      v -> java.sql.Date.valueOf(LocalDate.parse(str(v), DateTimeFormatter.ISO_DATE.withZone(ZoneOffset.UTC).withLocale(locale))));
-            map.put(java.sql.Timestamp.class, v -> LocalDateTime.from(DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneOffset.UTC).withLocale(locale).parse(str(v))).atZone(ZoneOffset.UTC).toInstant());
-        }
+
         return map;
     }
 
@@ -138,17 +135,6 @@ public class Builtin {
     private interface ThrowsSupplier<T> {
         T get() throws Exception;
     }
-
-
-    public static boolean isClassAvailable(String className) {
-        try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException | LinkageError e) {
-            return false;
-        }
-    }
-
 
     private static Calendar asCalendar(String str) {
         DateTimeFormatter formatter = str.contains("T")

@@ -30,18 +30,24 @@ import java.util.function.Function;
 public class Converts {
 
     /** The Builtin mapping. */
-    private final Map<Class<?>, Function<JsonValue, ?>> map;
+    private final Map<Class<?>, Function<JsonValue, ?>> typeMap;
+
+    private final Map<Class<?>, Function<?, CharSequence>> stringifyMap;
 
     /** The Optional mapping. */
-    private final Map<Class<?>, Function<JsonValue, ?>> opt;
+    private final Map<Class<?>, Function<JsonValue, ?>> typeOptMap;
+
+    private final Map<Class<?>, Function<?, CharSequence>> stringifyOptMap;
 
 
     /**
      * Constructor.
      */
     private Converts() {
-        this.map = Builtin.mapping();
-        this.opt = new HashMap<>();
+        this.typeMap = BuiltinType.map();
+        this.stringifyMap = BuiltinStringify.map();
+        this.typeOptMap = new HashMap<>();
+        this.stringifyOptMap =  new HashMap<>();
     }
 
 
@@ -62,9 +68,22 @@ public class Converts {
      */
     @SuppressWarnings("unchecked")
     public <T> Function<JsonValue, T> to(Class<?> clazz) {
-        return opt.containsKey(clazz)
-            ? (Function<JsonValue, T>) opt.get(clazz)
-            : (Function<JsonValue, T>) map.get(clazz);
+        return typeOptMap.containsKey(clazz)
+            ? (Function<JsonValue, T>) typeOptMap.get(clazz)
+            : (Function<JsonValue, T>) typeMap.get(clazz);
+    }
+
+    /**
+     * Gets the stringify for the given object.
+     * @param object the target object
+     * @param <T> the type of class
+     * @return the converter
+     */
+    @SuppressWarnings("unchecked")
+    public <T> CharSequence stringify(T object) {
+        return stringifyOptMap.containsKey(object.getClass())
+            ? ((Function<T, CharSequence>) stringifyOptMap.get(object.getClass())).apply(object)
+            : ((Function<T, CharSequence>) stringifyMap.get(object.getClass())).apply(object);
     }
 
 
@@ -74,16 +93,7 @@ public class Converts {
      * @param conv the convert
      */
     public void add(Class<?> clazz, Function<String, ?> conv) {
-        opt.put(clazz, adapt(conv));
-    }
-
-
-    /**
-     * Add all optional mapping
-     * @param conv the convert
-     */
-    public void addAll(Map<Class<?>, Function<String, ?>> conv) {
-        conv.forEach(this::add);
+        typeOptMap.put(clazz, adapt(conv));
     }
 
 
@@ -91,13 +101,24 @@ public class Converts {
      * Gets the predefined classes fqcn.
      * @return the predefined classes fqcn
      */
-    public Set<String> classes() {
+    public Set<String> typeClasses() {
         Set<String> set = new HashSet<>();
-        map.keySet().forEach(k -> set.add(k.getCanonicalName()));
-        opt.keySet().forEach(k -> set.add(k.getCanonicalName()));
+        typeMap.keySet().forEach(k -> set.add(k.getCanonicalName()));
+        typeOptMap.keySet().forEach(k -> set.add(k.getCanonicalName()));
         return set;
     }
 
+
+    /**
+     * Gets the predefined stringify classes fqcn.
+     * @return the predefined stringify classes fqcn
+     */
+    public Set<String> stringifyClasses() {
+        Set<String> set = new HashSet<>();
+        stringifyMap.keySet().forEach(k -> set.add(k.getCanonicalName()));
+        stringifyOptMap.keySet().forEach(k -> set.add(k.getCanonicalName()));
+        return set;
+    }
 
     private static Function<JsonValue, ?> adapt(Function<String, ?> fun) {
         return (JsonValue v) -> fun.apply(new String(((CharSource) v).chars()));

@@ -40,7 +40,7 @@ public class ObjectAssembly implements Assembly {
      */
     private ObjectAssembly(Element element) {
         if (element.asType().getKind() != TypeKind.DECLARED) {
-            throw new JsonStructException("element type must be declared. " + element);
+            throw new JsonStructException("element type must be declared. [{}]", element);
         }
         this.element = Objects.requireNonNull(element);
     }
@@ -101,7 +101,7 @@ public class ObjectAssembly implements Assembly {
             return declaredType.asElement().getSimpleName() + "." + executable.getSimpleName();
         }
 
-        throw new JsonStructException("Name not identified.");
+        throw new JsonStructException("Name not identified. [{}]", executable);
 
     }
 

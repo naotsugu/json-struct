@@ -84,7 +84,7 @@ public class JsonStructEntity {
     public Code build() {
 
         Converts convert = Converts.of(); // TODO addon convert
-        AssembleContext ctx = AssembleContext.of(lang, convert.classes());
+        AssembleContext ctx = AssembleContext.of(lang, convert.typeClasses());
 
         BackingCode backingCode = Assemblies.toAssembly(element, ctx).execute(ctx);
 
@@ -94,10 +94,7 @@ public class JsonStructEntity {
             import com.mammb.code.jsonstruct.parser.JsonPointer;
             import com.mammb.code.jsonstruct.parser.Parser;
             import javax.annotation.processing.Generated;
-            import java.io.Reader;
-            import java.io.Writer;
-            import java.io.StringReader;
-            import java.io.StringWriter;
+            import java.io.*;
             """);
 
         return Code.of("""
@@ -117,7 +114,7 @@ public class JsonStructEntity {
                     }
 
                     @Override
-                    public void to(#{entityName} object, Writer writer) {
+                    public void to(#{entityName} obj, Writer w) throws IOException {
                     }
 
                     #{backingMethods}

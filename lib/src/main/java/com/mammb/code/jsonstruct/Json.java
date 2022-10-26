@@ -15,6 +15,7 @@
  */
 package com.mammb.code.jsonstruct;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -49,7 +50,7 @@ public interface Json<T> {
      * @param object the object content tree to be serialized.
      * @param writer destination of json data where serialized from java content tree
      */
-    void to(T object, Writer writer);
+    void to(T object, Writer writer) throws IOException;
 
 
     /**
@@ -57,7 +58,7 @@ public interface Json<T> {
      * @param object the object content tree to be serialized.
      * @return the {@link CharSequence} serialized from java content tree.
      */
-    default CharSequence to(T object) {
+    default CharSequence to(T object) throws IOException {
         StringWriter sw = new StringWriter();
         to(object, sw);
         return sw.toString();
@@ -73,5 +74,6 @@ public interface Json<T> {
     static <T> Json<T> of(Class<T> clazz) {
         return Json_.of(clazz);
     }
+
 
 }

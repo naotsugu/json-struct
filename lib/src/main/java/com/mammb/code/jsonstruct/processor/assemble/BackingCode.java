@@ -47,6 +47,11 @@ public class BackingCode {
     }
 
 
+    public static BackingCode of(Code code, Code backingMethods) {
+        return new BackingCode(code, backingMethods);
+    }
+
+
     /**
      * Add the given BackingCode.
      * @param other to be added BackingCode

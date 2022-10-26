@@ -329,9 +329,9 @@ public class LangModels {
      * @param accessor the {@link ExecutableElement}.
      * @return the accessor property name
      */
-    private static String getPropertyName(ExecutableElement accessor) {
+    public String getPropertyName(ExecutableElement accessor) {
         if (!isBeanAccessor(accessor)) {
-            throw new IllegalArgumentException();
+            return accessor.getSimpleName().toString();
         }
         String name = accessor.getSimpleName().toString();
         if (name.startsWith("get")) {

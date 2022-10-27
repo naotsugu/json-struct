@@ -39,7 +39,8 @@ import java.util.function.Function;
  */
 public class BuiltinType {
 
-    static Locale locale = Locale.getDefault();
+    private static final Locale locale = Locale.getDefault();
+    private static final ZoneId UTC = ZoneId.of("UTC");
 
     /**
      * Create a builtin mappings.
@@ -50,47 +51,47 @@ public class BuiltinType {
 
         Map<Class<?>, Function<JsonValue, ?>> map = new HashMap<>();
 
-        map.put(Byte.class,       v -> Byte.parseByte(str(v)));
-        map.put(Byte.TYPE,        v -> Byte.parseByte(str(v)));
-        map.put(BigDecimal.class, v -> asNs(v).getBigDecimal());
-        map.put(BigInteger.class, v -> asNs(v).getBigDecimal().toBigInteger());
-        map.put(Boolean.class,    v -> v.equals(JsonValue.TRUE));
-        map.put(Boolean.TYPE,     v -> v.equals(JsonValue.TRUE));
-        map.put(Calendar.class,   v -> asCalendar(str(v)));
-        map.put(Character.class,  v -> asCs(v).chars()[0]);
-        map.put(Character.TYPE,   v -> asCs(v).chars()[0]);
-        map.put(Date.class,       v -> asDate(str(v)));
-        map.put(Double.class,     v -> Double.parseDouble(str(v)));
-        map.put(Double.TYPE,      v -> Double.parseDouble(str(v)));
-        map.put(Duration.class,   v -> Duration.parse(str(v)));
-        map.put(Float.class,      v -> Float.parseFloat(str(v)));
-        map.put(Float.TYPE,       v -> Float.parseFloat(str(v)));
-        map.put(Integer.class,    v -> asNs(v).getInt());
-        map.put(Integer.TYPE,     v -> asNs(v).getInt());
-        map.put(Instant.class,    v -> Instant.from(DateTimeFormatter.ISO_INSTANT.withZone(ZoneOffset.UTC).withLocale(locale).parse(str(v))));
+        map.put(Byte.class,          v -> Byte.parseByte(str(v)));
+        map.put(Byte.TYPE,           v -> Byte.parseByte(str(v)));
+        map.put(BigDecimal.class,    v -> asNs(v).getBigDecimal());
+        map.put(BigInteger.class,    v -> asNs(v).getBigDecimal().toBigInteger());
+        map.put(Boolean.class,       v -> v.equals(JsonValue.TRUE));
+        map.put(Boolean.TYPE,        v -> v.equals(JsonValue.TRUE));
+        map.put(Calendar.class,      v -> asCalendar(str(v)));
+        map.put(Character.class,     v -> asCs(v).chars()[0]);
+        map.put(Character.TYPE,      v -> asCs(v).chars()[0]);
+        map.put(Date.class,          v -> asDate(str(v)));
+        map.put(Double.class,        v -> Double.parseDouble(str(v)));
+        map.put(Double.TYPE,         v -> Double.parseDouble(str(v)));
+        map.put(Duration.class,      v -> Duration.parse(str(v)));
+        map.put(Float.class,         v -> Float.parseFloat(str(v)));
+        map.put(Float.TYPE,          v -> Float.parseFloat(str(v)));
+        map.put(Integer.class,       v -> asNs(v).getInt());
+        map.put(Integer.TYPE,        v -> asNs(v).getInt());
+        map.put(Instant.class,       v -> Instant.from(DateTimeFormatter.ISO_INSTANT.withZone(UTC).withLocale(locale).parse(str(v))));
         map.put(LocalDateTime.class, v -> LocalDateTime.parse(str(v), DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale)));
-        map.put(LocalDate.class,  v -> LocalDate.parse(str(v), DateTimeFormatter.ISO_LOCAL_DATE.withLocale(locale)));
-        map.put(LocalTime.class,  v -> LocalTime.parse(str(v), DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale)));
-        map.put(Long.class,       v -> asNs(v).getLong());
-        map.put(Long.TYPE,        v -> asNs(v).getLong());
-        map.put(Number.class,     v -> asNs(v).getBigDecimal());
-        map.put(OffsetDateTime.class, v -> OffsetDateTime.parse(str(v), DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale)));
-        map.put(OffsetTime.class,     v -> OffsetTime.parse(str(v), DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale)));
-        map.put(OptionalDouble.class, v -> v.equals(JsonValue.NULL) ? OptionalDouble.empty() : OptionalDouble.of(Double.parseDouble(str(v))));
-        map.put(OptionalInt.class,    v -> v.equals(JsonValue.NULL) ? OptionalInt.empty() : OptionalInt.of(asNs(v).getInt()));
-        map.put(OptionalLong.class,   v -> v.equals(JsonValue.NULL) ? OptionalLong.empty() : OptionalLong.of(asNs(v).getLong()));
-        map.put(Path.class,      v -> Paths.get(str(v)));
-        map.put(Period.class,    v -> Period.parse(str(v)));
-        map.put(Short.class,     v -> Short.parseShort(str(v)));
-        map.put(Short.TYPE,      v -> Short.parseShort(str(v)));
-        map.put(String.class,    v -> str(v));
-        map.put(TimeZone.class,  v -> asTimeZone(str(v)));
-        map.put(URI.class,       v -> URI.create(str(v)));
-        map.put(URL.class,       v -> trying(() -> new URL(str(v))));
-        map.put(UUID.class,      v -> UUID.fromString(str(v)));
+        map.put(LocalDate.class,     v -> LocalDate.parse(str(v), DateTimeFormatter.ISO_LOCAL_DATE.withLocale(locale)));
+        map.put(LocalTime.class,     v -> LocalTime.parse(str(v), DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale)));
+        map.put(Long.class,          v -> asNs(v).getLong());
+        map.put(Long.TYPE,           v -> asNs(v).getLong());
+        map.put(Number.class,        v -> asNs(v).getBigDecimal());
+        map.put(OffsetDateTime.class,v -> OffsetDateTime.parse(str(v), DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale)));
+        map.put(OffsetTime.class,    v -> OffsetTime.parse(str(v), DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale)));
+        map.put(OptionalDouble.class,v -> v.equals(JsonValue.NULL) ? OptionalDouble.empty() : OptionalDouble.of(Double.parseDouble(str(v))));
+        map.put(OptionalInt.class,   v -> v.equals(JsonValue.NULL) ? OptionalInt.empty() : OptionalInt.of(asNs(v).getInt()));
+        map.put(OptionalLong.class,  v -> v.equals(JsonValue.NULL) ? OptionalLong.empty() : OptionalLong.of(asNs(v).getLong()));
+        map.put(Path.class,          v -> Paths.get(str(v)));
+        map.put(Period.class,        v -> Period.parse(str(v)));
+        map.put(Short.class,         v -> Short.parseShort(str(v)));
+        map.put(Short.TYPE,          v -> Short.parseShort(str(v)));
+        map.put(String.class,        v -> str(v));
+        map.put(TimeZone.class,      v -> asTimeZone(str(v)));
+        map.put(URI.class,           v -> URI.create(str(v)));
+        map.put(URL.class,           v -> trying(() -> new URL(str(v))));
+        map.put(UUID.class,          v -> UUID.fromString(str(v)));
         map.put(ZonedDateTime.class, v -> ZonedDateTime.parse(str(v), DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(locale)));
-        map.put(ZoneId.class,    v -> ZoneId.of(str(v)));
-        map.put(ZoneOffset.class,v -> ZoneOffset.of(str(v)));
+        map.put(ZoneId.class,        v -> ZoneId.of(str(v)));
+        map.put(ZoneOffset.class,    v -> ZoneOffset.of(str(v)));
 
         return map;
     }
@@ -145,7 +146,7 @@ public class BuiltinType {
         LocalTime time = parsed.query(TemporalQueries.localTime());
         ZoneId zone = parsed.query(TemporalQueries.zone());
         if (zone == null) {
-            zone = ZoneOffset.UTC;
+            zone = UTC;
         }
         if (time == null) {
             time = LocalTime.parse("00:00:00");
@@ -158,7 +159,7 @@ public class BuiltinType {
     private static Date asDate(String str) {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withLocale(locale);
         ZonedDateTime parsed = (formatter.getZone() == null)
-            ? ZonedDateTime.parse(str, formatter.withZone(ZoneOffset.UTC))
+            ? ZonedDateTime.parse(str, formatter.withZone(UTC))
             : ZonedDateTime.parse(str, formatter);
         return Date.from(parsed.toInstant());
     }

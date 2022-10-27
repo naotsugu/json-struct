@@ -23,6 +23,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.RecordComponentElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -254,6 +255,30 @@ public class LangModels {
         return typeUtils.asElement(typeArguments.get(0));
     }
 
+    public TypeMirror entryType(TypeMirror typeMirror) {
+        if (typeMirror.getKind() == TypeKind.ARRAY) {
+            ArrayType arrayType = (ArrayType) typeMirror;
+            return arrayType.getComponentType();
+        } else if (typeMirror.getKind() == TypeKind.DECLARED) {
+            DeclaredType declaredType = (DeclaredType) typeMirror;
+            var typeArguments = declaredType.getTypeArguments();
+            if (typeArguments.size() == 1) {
+                return typeArguments.get(0);
+            }
+        }
+        throw new JsonStructException("Type arguments is not found. [{}]", typeMirror);
+    }
+
+    public TypeMirror[] mapEntryTypes(TypeMirror typeMirror) {
+        if (typeMirror.getKind() == TypeKind.DECLARED) {
+            DeclaredType declaredType = (DeclaredType) typeMirror;
+            var typeArguments = declaredType.getTypeArguments();
+            if (typeArguments.size() == 2) {
+                return new TypeMirror[] { typeArguments.get(0), typeArguments.get(1) };
+            }
+        }
+        throw new JsonStructException("Type arguments is not found. [{}]", typeMirror);
+    }
 
     /**
      * Gets the type argument of the given {@link Element} as an {@link Element}.

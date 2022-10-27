@@ -17,10 +17,8 @@ package com.mammb.code.jsonstruct.convert;
 
 import com.mammb.code.jsonstruct.parser.CharSource;
 import com.mammb.code.jsonstruct.parser.JsonValue;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -81,9 +79,19 @@ public class Converts {
      */
     @SuppressWarnings("unchecked")
     public <T> CharSequence stringify(T object) {
-        return stringifyOptMap.containsKey(object.getClass())
-            ? ((Function<T, CharSequence>) stringifyOptMap.get(object.getClass())).apply(object)
-            : ((Function<T, CharSequence>) stringifyMap.get(object.getClass())).apply(object);
+        if (Objects.isNull(object)) {
+            return "null";
+        }
+        if (object instanceof Enum<?> en) {
+            return "\"" + en.name() + "\"";
+        }
+        if (stringifyOptMap.containsKey(object.getClass())) {
+            return ((Function<T, CharSequence>) stringifyOptMap.get(object.getClass())).apply(object);
+        }
+        if (stringifyMap.containsKey(object.getClass())) {
+            return ((Function<T, CharSequence>) stringifyMap.get(object.getClass())).apply(object);
+        }
+        return "\"" + object + "\"";
     }
 
 

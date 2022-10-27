@@ -23,6 +23,8 @@ import com.mammb.code.jsonstruct.processor.assemble.Assemblies;
 import com.mammb.code.jsonstruct.processor.assemble.BackingCode;
 import com.mammb.code.jsonstruct.processor.assemble.Code;
 import com.mammb.code.jsonstruct.processor.assemble.Imports;
+import com.mammb.code.jsonstruct.processor.assemble.Stringify;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -87,6 +89,7 @@ public class JsonStructEntity {
         AssembleContext ctx = AssembleContext.of(lang, convert.typeClasses());
 
         BackingCode backingCode = Assemblies.toAssembly(element, ctx).execute(ctx);
+        BackingCode stringifyCode = Stringify.of(lang, convert.stringifyClasses()).build(element);
 
         Imports imports = Imports.of("""
             import com.mammb.code.jsonstruct.Json;
@@ -114,7 +117,8 @@ public class JsonStructEntity {
                     }
 
                     @Override
-                    public void to(#{entityName} obj, Writer w) throws IOException {
+                    public void to(#{entityName} object, Writer writer) throws IOException {
+                        writer#{stringifyCode};
                     }
 
                     #{backingMethods}
@@ -124,7 +128,8 @@ public class JsonStructEntity {
             .interpolateType("#{className}", getEntityClassName())
             .interpolateType("#{entityName}", getClassName())
             .interpolate("#{assemblyCode}", backingCode.code())
-            .interpolate("#{backingMethods}", backingCode.backingMethods())
+            .interpolate("#{stringifyCode}", stringifyCode.code())
+            .interpolate("#{backingMethods}", backingCode.backingMethods().add(stringifyCode.backingMethods()))
             .add(imports);
     }
 

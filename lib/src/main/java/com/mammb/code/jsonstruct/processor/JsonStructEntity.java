@@ -24,7 +24,6 @@ import com.mammb.code.jsonstruct.processor.assemble.BackingCode;
 import com.mammb.code.jsonstruct.processor.assemble.Code;
 import com.mammb.code.jsonstruct.processor.assemble.Imports;
 import com.mammb.code.jsonstruct.processor.assemble.Stringify;
-
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -98,6 +97,7 @@ public class JsonStructEntity {
             import com.mammb.code.jsonstruct.parser.Parser;
             import javax.annotation.processing.Generated;
             import java.io.*;
+            import java.util.*;
             """);
 
         return Code.of("""

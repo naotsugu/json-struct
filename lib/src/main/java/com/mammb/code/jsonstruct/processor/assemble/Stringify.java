@@ -2,19 +2,11 @@ package com.mammb.code.jsonstruct.processor.assemble;
 
 import com.mammb.code.jsonstruct.lang.Iterate;
 import com.mammb.code.jsonstruct.lang.LangModels;
-
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import java.io.Writer;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
+
 
 public class Stringify {
 
@@ -36,11 +28,11 @@ public class Stringify {
 
 
     public BackingCode build(TypeElement type) {
-        return BackingCode.of(object(type, "object"), clearBacking());
+        return BackingCode.of(object(type, AccessPath.of("object")), clearBacking());
     }
 
 
-    public Code toCode(TypeMirror type, String path) {
+    public Code toCode(TypeMirror type, AccessPath path) {
         if (basicClasses.contains(type.toString())  || lang.isEnum(type)) {
             return basic(path);
         }
@@ -57,20 +49,20 @@ public class Stringify {
     }
 
 
-    public Code toCode(ExecutableElement accessor, String path) {
+    public Code toCode(ExecutableElement accessor, AccessPath path) {
         return toCode(accessor.getReturnType(),
-            path + "." + accessor.getSimpleName() + "()");
+            path.with(accessor.getSimpleName().toString()));
     }
 
 
-    public Code basic(String path) {
+    public Code basic(AccessPath path) {
         return Code.of("""
-            .append(convert.stringify(#{path}))""")
-            .interpolate("#{path}", path);
+            .append(convert.stringify(#{path}.orElse(null)))""")
+            .interpolate("#{path}", path.elvis());
     }
 
 
-    public Code object(TypeElement type, String path) {
+    public Code object(TypeElement type, AccessPath path) {
 
         Code props = Code.of();
 
@@ -93,33 +85,34 @@ public class Stringify {
     }
 
 
-    public Code array(TypeMirror type, String path) {
+    public Code array(TypeMirror type, AccessPath path) {
 
         TypeMirror entryType = lang.entryType(type);
-        String methodName = path.replaceAll("\\W", "") + "Stringify";
+        String methodName = path.camelJoin("") + "Stringify";
         buildIterableMethod(entryType, methodName);
 
         return Code.of("""
             .append("[")
-                .append(#{methodName}(Arrays.asList(#{path})))
+                .append(#{methodName}(Arrays.asList(#{path}.orElse(new #{type}[0]))))
             .append("]")""")
             .interpolate("#{methodName}", methodName)
-            .interpolate("#{path}", path);
+            .interpolate("#{path}", path.elvis())
+            .interpolateType("#{type}", entryType.toString());
     }
 
 
-    public Code collection(TypeMirror type, String path) {
+    public Code collection(TypeMirror type, AccessPath path) {
 
         TypeMirror entryType = lang.entryType(type);
-        String methodName = path.replaceAll("\\W", "") + "Stringify";
+        String methodName = path.camelJoin("") + "Stringify";
         buildIterableMethod(entryType, methodName);
 
         return Code.of("""
             .append("[")
-                .append(#{methodName}(#{path}))
+                .append(#{methodName}(#{path}.orElse(List.of())))
             .append("]")""")
             .interpolate("#{methodName}", methodName)
-            .interpolate("#{path}", path);
+            .interpolate("#{path}", path.elvis());
     }
 
     private void buildIterableMethod(TypeMirror entryType, String methodName) {
@@ -135,15 +128,15 @@ public class Stringify {
             """)
             .interpolateType("#{type}", entryType.toString())
             .interpolate("#{methodName}", methodName)
-            .interpolate("#{entry}", toCode(entryType, "object"));
+            .interpolate("#{entry}", toCode(entryType, AccessPath.of("object")));
         backingMethods.add(backingMethod);
     }
 
 
-    public Code map(TypeMirror type, String path) {
+    public Code map(TypeMirror type, AccessPath path) {
 
         TypeMirror[] entryTypes = lang.mapEntryTypes(type);
-        String methodName = path.replaceAll("\\W", "") + "Stringify";
+        String methodName = path.camelJoin("") + "Stringify";
 
         TypeMirror key = entryTypes[0];
         TypeMirror val = entryTypes[1];
@@ -163,16 +156,16 @@ public class Stringify {
                 .interpolateType("#{keyType}", key.toString())
                 .interpolateType("#{valType}", val.toString())
                 .interpolate("#{methodName}", methodName)
-                .interpolate("#{keyEntry}", toCode(key, "entry.getKey()"))
-                .interpolate("#{valEntry}", toCode(val, "entry.getValue()"));
+                .interpolate("#{keyEntry}", toCode(key, AccessPath.of("entry", "getKey")))
+                .interpolate("#{valEntry}", toCode(val, AccessPath.of("entry", "getValue")));
             backingMethods.add(backingMethod);
 
             return Code.of("""
             .append("{")
-                .append(#{methodName}(#{path}.entrySet()))
+                .append(#{methodName}(#{path}.orElse(Map.of()).entrySet()))
             .append("}")""")
                 .interpolate("#{methodName}", methodName)
-                .interpolate("#{path}", path);
+                .interpolate("#{path}", path.elvis());
 
         } else {
             Code backingMethod = Code.of("""
@@ -189,16 +182,16 @@ public class Stringify {
                 .interpolateType("#{keyType}", key.toString())
                 .interpolateType("#{valType}", val.toString())
                 .interpolate("#{methodName}", methodName)
-                .interpolate("#{keyEntry}", toCode(key, "entry.getKey()"))
-                .interpolate("#{valEntry}", toCode(val, "entry.getValue()"));
+                .interpolate("#{keyEntry}", toCode(key, AccessPath.of("entry", "getKey")))
+                .interpolate("#{valEntry}", toCode(val, AccessPath.of("entry", "getValue")));
             backingMethods.add(backingMethod);
 
             return Code.of("""
             .append("[")
-                .append(#{methodName}(#{path}.entrySet()))
+                .append(#{methodName}(#{path}.orElse(Map.of()).entrySet()))
             .append("]")""")
                 .interpolate("#{methodName}", methodName)
-                .interpolate("#{path}", path);
+                .interpolate("#{path}", path.elvis());
         }
 
     }

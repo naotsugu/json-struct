@@ -28,26 +28,49 @@ import static com.mammb.code.jsonstruct.parser.Token.Type.*;
  */
 public class Parser {
 
+    /** Tokenizer. */
     private final Tokenizer tokenizer;
+
+    /** current token. */
     private Token curr;
+
+    /** previous token. */
     private Token prev;
 
 
+    /**
+     * Constructor.
+     * @param tokenizer the Tokenizer
+     */
     private Parser(Tokenizer tokenizer) {
         this.tokenizer = tokenizer;
     }
 
 
+    /**
+     * Create a new Parser.
+     * @param reader the Reader
+     * @return a new Parser
+     */
     public static Parser of(Reader reader) {
         return new Parser(Tokenizer.of(reader));
     }
 
 
+    /**
+     * Create a new Parser.
+     * @param cs the CharSequence
+     * @return a new Parser
+     */
     public static Parser of(CharSequence cs) {
         return new Parser(Tokenizer.of(new StringReader(cs.toString())));
     }
 
 
+    /**
+     * Parses JSON and generates JsonStructure.
+     * @return JsonStructure
+     */
     public JsonStructure parse() {
         Token token = tokenizer.next();
         return switch (token.type) {
@@ -59,6 +82,11 @@ public class Parser {
     }
 
 
+    /**
+     * Parse object.
+     * @param obj the JsonObject parsed in
+     * @return JsonObject
+     */
     JsonObject parseObject(JsonObject obj) {
         String name = "";
         for (;;) {
@@ -103,6 +131,11 @@ public class Parser {
     }
 
 
+    /**
+     * Parse array
+     * @param array the array parsed in
+     * @return JsonArray
+     */
     JsonArray parseArray(JsonArray array) {
         for (;;) {
             prev = curr;
@@ -137,6 +170,11 @@ public class Parser {
     }
 
 
+    /**
+     * Apply key
+     * @param key the key
+     * @param consumer Key consuming actions
+     */
     private void keying(String key, Consumer<String> consumer) {
         if (key.isEmpty()) {
             throw new JsonParseException();

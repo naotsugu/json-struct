@@ -49,6 +49,7 @@ public interface JsonArray extends JsonStructure, Iterable<JsonValue> {
         return new JsonArrayImpl();
     }
 
+
     /**
      * JsonArray implementation.
      */

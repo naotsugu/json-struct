@@ -99,21 +99,41 @@ public class CharArray implements Serializable {
     }
 
 
+    /**
+     * Gets the element at the specified position in this array.
+     * @param index index of the element to return
+     * @return the element at the specified position in this array
+     */
     public int get(char index) {
         return elements[index];
     }
 
 
+    /**
+     * Gets an array containing all the elements in this array in proper sequence.
+     * @return an array containing all of the elements in this array in proper sequence
+     */
     public char[] array() {
         return Arrays.copyOf(elements, length);
     }
 
 
+    /**
+     * Gets CharSource that is a subArray of this array.
+     * @param start the beginning index, inclusive.
+     * @param end the ending index, exclusive.
+     * @return the subArray
+     */
     public CharSource subArray(int start, int end) {
         return new SubArray(this, start, end);
     }
 
 
+    /**
+     * Gets CharSource that is a subArray of this array.
+     * @param start the beginning index, inclusive
+     * @return the subArray
+     */
     public CharSource subArray(int start) {
         return new SubArray(this, start, length);
     }
@@ -163,6 +183,13 @@ public class CharArray implements Serializable {
     }
 
 
+    /**
+     * Gets the next new capacity.
+     * @param oldLength old length
+     * @param minGrowth min growth length
+     * @param prefGrowth preferred growth length
+     * @return the next new capacity
+     */
     private static int newCapacity(int oldLength, int minGrowth, int prefGrowth) {
         int prefLength = oldLength + Math.max(minGrowth, prefGrowth);
         if (0 < prefLength && prefLength <= Integer.MAX_VALUE - 8) {
@@ -178,6 +205,12 @@ public class CharArray implements Serializable {
     }
 
 
+    /**
+     * The SubArray record.
+     * @param source the CharArray
+     * @param start the beginning index, inclusive.
+     * @param end the ending index, exclusive.
+     */
     private record SubArray(CharArray source, int start, int end) implements CharSource, Serializable {
 
         @Override

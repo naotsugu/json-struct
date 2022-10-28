@@ -16,14 +16,19 @@
 package com.mammb.code.jsonstruct.processor.assembly;
 
 import com.mammb.code.jsonstruct.lang.Iterate;
+import com.mammb.code.jsonstruct.processor.JsonStructException;
+import com.mammb.code.jsonstruct.processor.LangUtil;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Stringify.
@@ -40,23 +45,26 @@ public class Stringify {
     /** The backing methods. */
     private Code backingMethods;
 
-    /** Current depth. */
-    private int depth;
+    /** The max cyclic depth. */
+    private final int cyclicDepth;
 
-    /** The list of handled type fqcn. */
-    private final List<String> handledTypes;
+    /** The stack of handling type fqcn. */
+    private final Deque<Name> stack;
+
 
     /**
      * Constructor.
      * @param lang The lang model utility
      * @param basicClasses The known basic classes
      * @param backingMethods The backing methods
+     * @param cyclicDepth The max cyclic depth
      */
-    private Stringify(LangUtil lang, Set<String> basicClasses, Code backingMethods) {
+    private Stringify(LangUtil lang, Set<String> basicClasses, Code backingMethods, int cyclicDepth) {
         this.lang = Objects.requireNonNull(lang);
         this.basicClasses = Objects.requireNonNull(basicClasses);
         this.backingMethods = Objects.requireNonNull(backingMethods);
-        this.handledTypes = new ArrayList<>();
+        this.stack = new ArrayDeque<>();
+        this.cyclicDepth = cyclicDepth;
     }
 
 
@@ -64,20 +72,23 @@ public class Stringify {
      * Create a new Stringify instance.
      * @param lang The lang model utility
      * @param basicClasses The known basic classes
+     * @param cyclicDepth The max cyclic depth
      * @return a new Stringify instance
      */
-    public static Stringify of(LangUtil lang, Set<String> basicClasses) {
-        return new Stringify(lang, basicClasses, Code.of());
+    public static Stringify of(LangUtil lang, Set<String> basicClasses, int cyclicDepth) {
+        return new Stringify(lang, basicClasses, Code.of(), cyclicDepth);
     }
 
 
     /**
      * Build backingCode for given element.
-     * @param type The type element
+     * @param element The type element
      * @return a backingCode
      */
-    public BackingCode build(TypeElement type) {
-        return BackingCode.of(object(type, Path.of("object")), clearBacking());
+    public BackingCode build(TypeElement element) {
+        return BackingCode.of(
+            withStack(element, e -> object(e, Path.of("object"))),
+            backingWithClear());
     }
 
 
@@ -94,7 +105,7 @@ public class Stringify {
         if (lang.isMapLike(type)) {
             return map(type, path);
         }
-        return object((TypeElement) lang.asTypeElement(type), path);
+        return withStack(lang.asTypeElement(type), element -> object(element, path));
     }
 
 
@@ -247,12 +258,26 @@ public class Stringify {
     }
 
 
-    private Code clearBacking() {
+    private Code backingWithClear() {
         Code ret = backingMethods;
         backingMethods = Code.of();
-        handledTypes.clear();
-        depth = 0;
+        stack.clear();
         return ret;
     }
+
+    private Code withStack(Element element, Function<TypeElement, Code> function) {
+        if (!element.getKind().isClass()) {
+            throw new JsonStructException("element must be type.[{}]", element);
+        }
+        TypeElement type = (TypeElement) element;
+        if (stack.stream().filter(type.getQualifiedName()::equals).count() > cyclicDepth) {
+            return Code.of();
+        }
+        stack.push(type.getQualifiedName());
+        Code ret = function.apply(type);
+        stack.pop();
+        return ret;
+    }
+
 
 }

@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.processor.assembly;
+package com.mammb.code.jsonstruct.processor;
 
-import com.mammb.code.jsonstruct.processor.JsonStructException;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -28,8 +27,10 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.SimpleAnnotationValueVisitor9;
 import javax.lang.model.util.Types;
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -366,6 +367,29 @@ public class LangUtil {
         char[] chars = name.toCharArray();
         chars[0] = Character.toLowerCase(chars[0]);
         return new String(chars);
+    }
+
+
+    /**
+     * Get int value in specified annotation attribute.
+     * @param element the target element
+     * @param annName the name of annotation
+     * @param attributeName the name of attribute
+     * @return int value in specified annotation attribute
+     */
+    public int attributeIntValue(Element element, String annName, String attributeName) {
+        var visitor = new SimpleAnnotationValueVisitor9<Integer, Void>() {
+            public Integer visitInt(int val, Void p) {
+                return val;
+            }
+        };
+        return element.getAnnotationMirrors().stream()
+            .filter(am -> annName.equals(am.getAnnotationType().toString()))
+            .map(am -> elementUtils.getElementValuesWithDefaults(am).entrySet())
+            .flatMap(Collection::stream)
+            .filter(e -> e.getKey().getSimpleName().toString().equals(attributeName))
+            .map(e -> e.getValue().accept(visitor, null))
+            .findFirst().orElseThrow();
     }
 
 }

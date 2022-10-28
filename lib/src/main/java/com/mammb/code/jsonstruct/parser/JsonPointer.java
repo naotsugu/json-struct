@@ -26,10 +26,17 @@ import java.util.Optional;
  */
 public class JsonPointer {
 
+    /** the token of pointer. */
     private final List<String> tokens;
+
+    /** the value of pointer. */
     private final CharSequence val;
 
 
+    /**
+     * Constructor.
+     * @param val the value of pointer
+     */
     private JsonPointer(CharSequence val) {
         this.val = Objects.requireNonNull(val);
         this.tokens = split(val);
@@ -39,11 +46,21 @@ public class JsonPointer {
     }
 
 
+    /**
+     * Create a new Pointer for the given pointer value.
+     * @param val pointer value
+     * @return JsonPointer
+     */
     public static JsonPointer of(CharSequence val) {
         return new JsonPointer(val);
     }
 
 
+    /**
+     * Split the pointer value.
+     * @param cs the pointer value
+     * @return the split pointer value
+     */
     private static List<String> split(CharSequence cs) {
         int offset = 0;
         int next = 0;
@@ -58,14 +75,32 @@ public class JsonPointer {
     }
 
 
+    /**
+     * Gets whether if there is a value at the referenced location in the specified target.
+     * @param structure the target referenced by this {@code JsonPointer}
+     * @return {@code true} if this pointer points to a value in a specified structure.
+     */
     public boolean containsValue(JsonStructure structure) {
         return asValue(structure).isPresent();
     }
 
+
+    /**
+     * Gets the value at the referenced location in the specified target.
+     * @param structure the target referenced by this {@code JsonPointer}
+     * @return the referenced value in the target
+     * @throws JsonParseException if not exists
+     */
     public JsonValue getValue(JsonStructure structure) {
         return asValue(structure).orElseThrow(JsonParseException::new);
     }
 
+
+    /**
+     * Gets the value at the referenced location in the specified target.
+     * @param structure the target referenced by this {@code JsonPointer}
+     * @return the referenced value in the target
+     */
     public Optional<JsonValue> asValue(JsonStructure structure) {
         if (tokens.size() == 1) {
             return Optional.of(structure);
@@ -89,10 +124,20 @@ public class JsonPointer {
     }
 
 
+    /**
+     * Gets the pointer token.
+     * @param index the index
+     * @return the pointer token
+     */
     public CharSequence token(int index) {
         return tokens.get(index);
     }
 
+
+    /**
+     * Gets the size of token.
+     * @return the size of token
+     */
     public int tokenSize() {
         return tokens.size();
     }
@@ -106,12 +151,19 @@ public class JsonPointer {
         return val.equals(that.val);
     }
 
+
     @Override
     public int hashCode() {
         return val.hashCode();
     }
 
-    static private int asIndex(String token) {
+
+    /**
+     * Parse token as index
+     * @param token the token
+     * @return parsed index
+     */
+    private static int asIndex(String token) {
         if (token == null || token.isBlank()) {
             throw new JsonParseException();
         }
@@ -131,6 +183,12 @@ public class JsonPointer {
         }
     }
 
+
+    /**
+     * Unescape pointer string.
+     * @param str pointer string
+     * @return unescaped pointer string
+     */
     private static String unescape(String str) {
         return (str.indexOf('~') != -1)
             ? str.replace("~1", "/").replace("~0", "~")

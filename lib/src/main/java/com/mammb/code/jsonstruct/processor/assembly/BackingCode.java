@@ -72,7 +72,7 @@ public class BackingCode {
 
 
     /**
-     * Gets a code.
+     * Get a code.
      * @return code
      */
     public Code code() {

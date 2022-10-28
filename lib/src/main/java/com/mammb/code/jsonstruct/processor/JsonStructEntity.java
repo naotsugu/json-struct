@@ -17,7 +17,6 @@ package com.mammb.code.jsonstruct.processor;
 
 import com.mammb.code.jsonstruct.JsonStruct;
 import com.mammb.code.jsonstruct.convert.Converts;
-import com.mammb.code.jsonstruct.processor.assembly.LangUtil;
 import com.mammb.code.jsonstruct.processor.assembly.*;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -40,13 +39,17 @@ public class JsonStructEntity {
     /** JsonStruct type element. */
     private final TypeElement element;
 
+    /** The max cyclic depth. */
+    private final int cyclicDepth;
+
 
     /**
      * Constructor.
      */
-    private JsonStructEntity(LangUtil lang, TypeElement element) {
+    private JsonStructEntity(LangUtil lang, TypeElement element, int cyclicDepth) {
         this.lang = lang;
         this.element = element;
+        this.cyclicDepth = cyclicDepth;
     }
 
 
@@ -58,19 +61,21 @@ public class JsonStructEntity {
      */
     public static Optional<JsonStructEntity> of(Context ctx, Element element) {
 
-        if (!isInTarget(element)) {
+        if (!isInTarget(ctx, element)) {
             return Optional.empty();
         }
 
         LangUtil lang = LangUtil.of(ctx.getElementUtils(), ctx.getTypeUtils());
 
+        int cyclicDepth = lang.attributeIntValue(element, ANNOTATION_TYPE, "cyclicDepth");
+
         if (lang.isClass(element) &&
             lang.selectConstructorLike(element, JsonStruct.class).isPresent()) {
-            return Optional.of(new JsonStructEntity(lang, (TypeElement) element));
+            return Optional.of(new JsonStructEntity(lang, (TypeElement) element, cyclicDepth));
         }
 
         if (lang.isConstructor(element) || lang.isStaticFactory(element)) {
-            return Optional.of(new JsonStructEntity(lang, (TypeElement) element.getEnclosingElement()));
+            return Optional.of(new JsonStructEntity(lang, (TypeElement) element.getEnclosingElement(), cyclicDepth));
         }
 
         return Optional.empty();
@@ -86,8 +91,8 @@ public class JsonStructEntity {
 
         Converts convert = Converts.of(); // TODO addon convert
 
-        BackingCode objectifyCode = Objectify.of(lang, convert.typeClasses()).build(element);
-        BackingCode stringifyCode = Stringify.of(lang, convert.stringifyClasses()).build(element);
+        BackingCode objectifyCode = Objectify.of(lang, convert.typeClasses(), cyclicDepth).build(element);
+        BackingCode stringifyCode = Stringify.of(lang, convert.stringifyClasses(), cyclicDepth).build(element);
 
         Imports imports = Imports.of("""
             import com.mammb.code.jsonstruct.Json;
@@ -111,12 +116,14 @@ public class JsonStructEntity {
                     @Override
                     public #{entityName} from(Reader reader) {
                         var json = Parser.of(reader).parse();
-                        return #{objectifyCode};
+                        return
+                            #{objectifyCode};
                     }
 
                     @Override
                     public void stringify(#{entityName} object, Appendable writer) throws IOException {
-                        writer#{stringifyCode};
+                        writer
+                            #{stringifyCode};
                     }
 
                     #{backingMethods}
@@ -173,14 +180,20 @@ public class JsonStructEntity {
 
     /**
      * Gets whether the element is subject to this Entity.
+     * @param ctx the context of processing
      * @param element the element
      * @return {@code true} if whether the element is subject to this Entity
      */
-    private static boolean isInTarget(Element element) {
-        return element.getAnnotationMirrors().stream()
+    private static boolean isInTarget(Context ctx, Element element) {
+        long count = element.getAnnotationMirrors().stream()
             .map(AnnotationMirror::getAnnotationType)
             .map(Object::toString)
-            .anyMatch(ANNOTATION_TYPE::equals);
+            .filter(ANNOTATION_TYPE::equals)
+            .count();
+        if (count > 1) {
+            ctx.logError("duplicate @JsonStruct. [{}]", count);
+        }
+        return count == 1;
     }
 
 }

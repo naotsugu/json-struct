@@ -18,26 +18,51 @@ package com.mammb.code.jsonstruct.parser;
 import java.math.BigDecimal;
 
 /**
- * Token.
- *
+ * The Json token.
  * @author Naotsugu Kobayashi
  */
 class Token {
 
+    /** the type of token. */
     public final Type type;
 
+
+    /**
+     * Constructor.
+     * @param type the type of token
+     */
     Token(Type type) {
         this.type = type;
     }
 
+
+    /**
+     * Create a string token.
+     * @param source the source of token
+     * @return a string token
+     */
     public static Token string(CharSource source) {
         return new Str(source);
     }
 
+
+    /**
+     * Create a number token.
+     * @param source the source of token
+     * @param frac fraction?
+     * @param exp exponential?
+     * @return a number token
+     */
     public static Token number(CharSource source, boolean frac, boolean exp) {
         return new Num(source, frac, exp);
     }
 
+
+    /**
+     * Create a token for a given type.
+     * @param type the type of token
+     * @return a token
+     */
     public static Token of(Type type) {
         return switch (type) {
             case CURLY_OPEN   -> Token.CURLY_OPEN;
@@ -54,22 +79,60 @@ class Token {
         };
     }
 
+    /** Token true. */
     private static final Token TRUE  = new Token(Type.TRUE);
+    /** Token false. */
     private static final Token FALSE = new Token(Type.FALSE);
+    /** Token null. */
     private static final Token NULL  = new Token(Type.NULL);
+    /** Token eof. */
     private static final Token EOF   = new Token(Type.EOF);
+    /** Token colon. */
     private static final Token COLON = new Token(Type.COLON);
+    /** Token comma. */
     private static final Token COMMA = new Token(Type.COMMA);
+    /** Token curly open. */
     private static final Token CURLY_OPEN = new Token(Type.CURLY_OPEN);
+    /** Token curly close. */
     private static final Token CURLY_CLOSE = new Token(Type.CURLY_CLOSE);
+    /** Token square open. */
     private static final Token SQUARE_OPEN = new Token(Type.SQUARE_OPEN);
+    /** Token square close. */
     private static final Token SQUARE_CLOSE = new Token(Type.SQUARE_CLOSE);
 
+
+    /**
+     * Token type.
+     */
     public enum Type {
-        CURLY_OPEN, SQUARE_OPEN, COLON, COMMA, STRING, NUMBER, TRUE, FALSE, NULL, CURLY_CLOSE, SQUARE_CLOSE, EOF;
+        /** curly open {@code `{`}. */
+        CURLY_OPEN,
+        /** square open {@code `[`}. */
+        SQUARE_OPEN,
+        /** colon {@code `:`}. */
+        COLON,
+        /** comma {@code `,`}. */
+        COMMA,
+        /** string. */
+        STRING,
+        /** number. */
+        NUMBER,
+        /** true. */
+        TRUE,
+        /** false. */
+        FALSE,
+        /** null. */
+        NULL,
+        /** curly close {@code `}`}. */
+        CURLY_CLOSE,
+        /** square close {@code `]`}. */
+        SQUARE_CLOSE, EOF;
     }
 
 
+    /**
+     * String token.
+     */
     static class Str extends Token implements CharSource {
 
         private final CharSource source;
@@ -98,6 +161,9 @@ class Token {
     }
 
 
+    /**
+     * Number token.
+     */
     static class Num extends Token implements NumberSource {
 
         private final CharSource source;
@@ -144,7 +210,6 @@ class Token {
                 return getBigDecimal().longValue();
             }
         }
-
 
         @Override
         public BigDecimal getBigDecimal() {

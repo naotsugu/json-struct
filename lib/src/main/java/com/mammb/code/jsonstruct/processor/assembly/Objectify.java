@@ -18,13 +18,16 @@ package com.mammb.code.jsonstruct.processor.assembly;
 import com.mammb.code.jsonstruct.JsonStruct;
 import com.mammb.code.jsonstruct.lang.Iterate;
 import com.mammb.code.jsonstruct.processor.JsonStructException;
+import com.mammb.code.jsonstruct.processor.LangUtil;
+
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Objectify.
@@ -41,11 +44,11 @@ public class Objectify {
     /** The backing methods. */
     private Code backingMethods;
 
-    /** Current depth. */
-    private int depth;
+    /** The max cyclic depth. */
+    private final int cyclicDepth;
 
-    /** The list of handled type fqcn. */
-    private final List<String> handledTypes;
+    /** The stack of handling type fqcn. */
+    private final Deque<Name> stack;
 
 
     /**
@@ -53,12 +56,14 @@ public class Objectify {
      * @param lang The lang model utility
      * @param basicClasses The known basic classes
      * @param backingMethods The backing methods
+     * @param cyclicDepth The max cyclic depth
      */
-    private Objectify(LangUtil lang, Set<String> basicClasses, Code backingMethods) {
+    private Objectify(LangUtil lang, Set<String> basicClasses, Code backingMethods, int cyclicDepth) {
         this.lang = Objects.requireNonNull(lang);
         this.basicClasses = Objects.requireNonNull(basicClasses);
         this.backingMethods = Objects.requireNonNull(backingMethods);
-        this.handledTypes = new ArrayList<>();
+        this.cyclicDepth = cyclicDepth;
+        this.stack = new ArrayDeque<>();
     }
 
 
@@ -66,10 +71,11 @@ public class Objectify {
      * Create a new Objectify instance.
      * @param lang The lang model utility
      * @param basicClasses The known basic classes
+     * @param cyclicDepth The max cyclic depth
      * @return a new Objectify instance
      */
-    public static Objectify of(LangUtil lang, Set<String> basicClasses) {
-        return new Objectify(lang, basicClasses, Code.of());
+    public static Objectify of(LangUtil lang, Set<String> basicClasses, int cyclicDepth) {
+        return new Objectify(lang, basicClasses, Code.of(), cyclicDepth);
     }
 
 
@@ -79,7 +85,9 @@ public class Objectify {
      * @return a backingCode
      */
     public BackingCode build(TypeElement element) {
-        return BackingCode.of(object(element, Path.of()), clearBacking());
+        return BackingCode.of(
+            withStack(element, e -> object(e, Path.of())),
+            backingWithClear());
     }
 
 
@@ -103,8 +111,7 @@ public class Objectify {
         if (lang.isMapLike(type)) {
             return map(type, path);
         }
-
-        return object((TypeElement) lang.asTypeElement(type), path);
+        return withStack(lang.asTypeElement(type), element -> object(element, path));
     }
 
 
@@ -289,13 +296,28 @@ public class Objectify {
     }
 
 
-    private Code clearBacking() {
+    private Code backingWithClear() {
         Code ret = backingMethods;
         backingMethods = Code.of();
-        handledTypes.clear();
-        depth = 0;
+        stack.clear();
         return ret;
     }
+
+
+    private Code withStack(Element element, Function<TypeElement, Code> function) {
+        if (!element.getKind().isClass()) {
+            throw new JsonStructException("element must be type.[{}]", element);
+        }
+        TypeElement type = (TypeElement) element;
+        if (stack.stream().filter(type.getQualifiedName()::equals).count() > cyclicDepth) {
+            return Code.of();
+        }
+        stack.push(type.getQualifiedName());
+        Code ret = function.apply(type);
+        stack.pop();
+        return ret;
+    }
+
 
     private String instantiation(ExecutableElement executable, LangUtil lang) {
 

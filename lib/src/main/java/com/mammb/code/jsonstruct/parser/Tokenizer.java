@@ -29,15 +29,28 @@ import static com.mammb.code.jsonstruct.parser.Token.Type.*;
  */
 class Tokenizer {
 
+    /** Reader. */
     private final Reader reader;
+
+    /** CharArray. */
     private final CharArray ca;
+
+    /** Previously read character. */
     private Integer prev;
 
+    /** number of current line. */
     private int line;
+
+    /** number of current column. */
     private int colm;
 
 
-    Tokenizer(Reader reader, CharArray ca) {
+    /**
+     * Constructor.
+     * @param reader the reader
+     * @param ca CharArray
+     */
+    private Tokenizer(Reader reader, CharArray ca) {
         this.reader = reader.markSupported() ? reader : new BufferedReader(reader);
         this.ca = ca;
         this.prev = null;
@@ -45,10 +58,38 @@ class Tokenizer {
         this.colm = 0;
     }
 
+
+    /**
+     * Create a new Tokenizer.
+     * @param reader the reader
+     * @return a new Tokenizer
+     */
     static Tokenizer of(Reader reader) {
-        return new Tokenizer(reader, CharArray.of());
+        return Tokenizer.of(reader);
     }
 
+
+    /**
+     * Get the number of current line.
+     * @return the number of current line
+     */
+    int getLine() {
+        return line;
+    }
+
+    /**
+     * Get the number of current column.
+     * @return the number of current column
+     */
+    int getColm() {
+        return colm;
+    }
+
+
+    /**
+     * Read a next token.
+     * @return a next token
+     */
     Token next() {
         int ch = read();
         return switch (ch) {
@@ -70,6 +111,10 @@ class Tokenizer {
     }
 
 
+    /**
+     * Read string.
+     * @return token
+     */
     private Token readString() {
         int start = ca.length();
         for (;;) {
@@ -88,6 +133,10 @@ class Tokenizer {
     }
 
 
+    /**
+     * Read number.
+     * @return token
+     */
     private Token readNumber(int ch)  {
 
         int start = ca.length();
@@ -145,6 +194,10 @@ class Tokenizer {
     }
 
 
+    /**
+     * Read true.
+     * @return token
+     */
     private Token readTrue() {
         if (read() != 'r') throw unexpectedChar('r');
         if (read() != 'u') throw unexpectedChar('u');
@@ -153,6 +206,10 @@ class Tokenizer {
     }
 
 
+    /**
+     * Read false.
+     * @return token
+     */
     private Token readFalse() {
         if (read() != 'a') throw unexpectedChar('a');
         if (read() != 'l') throw unexpectedChar('l');
@@ -162,6 +219,10 @@ class Tokenizer {
     }
 
 
+    /**
+     * Read null.
+     * @return token
+     */
     private Token readNull() {
         if (read() != 'u') throw unexpectedChar('u');
         if (read() != 'l') throw unexpectedChar('l');
@@ -170,6 +231,10 @@ class Tokenizer {
     }
 
 
+    /**
+     * Unescape.
+     * @return unescaped read character
+     */
     private int unescape() {
         int ch = read();
         return switch (ch) {
@@ -192,6 +257,10 @@ class Tokenizer {
     }
 
 
+    /**
+     * Read a next character
+     * @return a next character
+     */
     private int read() {
         try {
             if (prev != null) {
@@ -208,23 +277,18 @@ class Tokenizer {
             }
             return ret;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new JsonParseException(e);
         }
     }
 
 
-    private RuntimeException unexpectedChar(int ch) {
-        return new JsonParseException("Unexpected char.[{}]]", ch);
-    }
-
-
-    int getLine() {
-        return line;
-    }
-
-
-    int getColm() {
-        return colm;
+    /**
+     * Create a JsonParseException.
+     * @param ch character
+     * @return a JsonParseException
+     */
+    private JsonParseException unexpectedChar(int ch) {
+        return new JsonParseException("Unexpected char. [{}] line:{}, column:{}", ch, line, colm);
     }
 
 }

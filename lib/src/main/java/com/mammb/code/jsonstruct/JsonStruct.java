@@ -22,11 +22,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * JsonStruct.
+ * Specify the target class to be serialized/deserialized.
  * @author Naotsugu Kobayashi
  */
 @Documented
 @Target({ ElementType.TYPE, ElementType.CONSTRUCTOR, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonStruct {
+
+    int cyclicDepth() default 1;
 }

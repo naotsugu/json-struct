@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.processor.assemble;
+package com.mammb.code.jsonstruct.processor.assembly;
 
 import com.mammb.code.jsonstruct.lang.Iterate;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class Code {
     /** The code lines. */
     private final List<String> lines;
 
-    /** imports. */
+    /** The imports. */
     private final Imports imports;
 
 
@@ -68,7 +68,7 @@ public class Code {
 
 
     /**
-     * Indent.
+     * Set level one indent.
      */
     public Code indent() {
         return indent(1);
@@ -87,28 +87,6 @@ public class Code {
         for (int i = 0; i < lines.size(); i++) {
             lines.set(i, INDENT.repeat(level) + lines.get(i));
         }
-        return this;
-    }
-
-
-    /**
-     * Add the code at the head.
-     * @param literal the code
-     * @return this code
-     */
-    public Code addHead(String literal) {
-        lines.addAll(0, literal.lines().toList());
-        return this;
-    }
-
-
-    /**
-     * Add the code at the tail.
-     * @param literal the code
-     * @return this code
-     */
-    public Code addTail(String literal) {
-        lines.addAll(lines.size(), literal.lines().toList());
         return this;
     }
 

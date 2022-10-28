@@ -15,8 +15,8 @@
  */
 package com.mammb.code.jsonstruct.processor;
 
-import com.mammb.code.jsonstruct.processor.assemble.Code;
-import com.mammb.code.jsonstruct.processor.assemble.Imports;
+import com.mammb.code.jsonstruct.processor.assembly.Code;
+import com.mammb.code.jsonstruct.processor.assembly.Imports;
 import javax.tools.FileObject;
 import java.io.PrintWriter;
 import java.util.List;
@@ -30,6 +30,7 @@ public class JsonClassWriter {
     /** Context of processing. */
     private final Context context;
 
+
     /**
      * Constructor.
      * @param context the context of processing
@@ -37,6 +38,7 @@ public class JsonClassWriter {
     private JsonClassWriter(Context context) {
         this.context = context;
     }
+
 
     /**
      * Create a criteria {@link JsonClassWriter} instance.
@@ -46,6 +48,7 @@ public class JsonClassWriter {
     public static JsonClassWriter of(Context context) {
         return new JsonClassWriter(context);
     }
+
 
     /**
      * Write a class file.
@@ -100,6 +103,7 @@ public class JsonClassWriter {
         }
 
     }
+
 
     private static Code caseExpression(List<JsonStructEntity> entities) {
 

@@ -31,9 +31,17 @@ import java.util.function.Function;
  */
 public class BuiltinStringify {
 
+    /** Locale. */
     private static final Locale locale = Locale.getDefault();
+
+    /** UTC Zone. */
     private static final ZoneId UTC = ZoneId.of("UTC");
 
+
+    /**
+     * Create a builtin mappings.
+     * @return the builtin mappings
+     */
     public static Map<Class<?>, Function<?, CharSequence>> map() {
         Map<Class<?>, Function<?, CharSequence>> map = new HashMap<>();
         map.put(Byte.class,          String::valueOf);

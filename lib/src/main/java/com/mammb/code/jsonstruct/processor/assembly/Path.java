@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.processor.assemble;
+package com.mammb.code.jsonstruct.processor.assembly;
 
 import com.mammb.code.jsonstruct.lang.Iterate;
 import java.util.ArrayList;
@@ -24,48 +24,82 @@ import java.util.stream.Collectors;
 import static java.util.function.Predicate.not;
 
 /**
- * AccessPath.
+ * Path.
  * @author Naotsugu Kobayashi
  */
-public class AccessPath {
+public class Path {
 
+    /** The list of path. */
     private final List<String> paths;
 
 
-    public AccessPath(List<String> paths) {
+    /**
+     * Constructor.
+     * @param paths The list of path
+     */
+    private Path(List<String> paths) {
         this.paths = paths;
     }
 
 
-    public static AccessPath of() {
-        return new AccessPath(new ArrayList<>());
+    /**
+     * Create a new empty path.
+     * @return a new empty path
+     */
+    public static Path of() {
+        return new Path(new ArrayList<>());
     }
 
 
-    public static AccessPath of(String... paths) {
-        return new AccessPath(new ArrayList<>(List.of(paths)));
+    /**
+     * Create a new path with given paths.
+     * @param paths The list of path
+     * @return a new path
+     */
+    public static Path of(String... paths) {
+        return new Path(new ArrayList<>(List.of(paths)));
     }
 
 
-    public AccessPath with(String name) {
-        AccessPath ret = AccessPath.of();
+    public Path with(String name) {
+        Path ret = Path.of();
         ret.paths.addAll(this.paths);
         ret.paths.add(name);
         return ret;
     }
 
 
-    public void add(String name) {
-        this.paths.add(name);
+    /**
+     * Gets whether this list contains no elements.
+     * @return {@code true} if this list contains no elements.
+     */
+    public boolean isEmpty() {
+        return paths.isEmpty();
     }
 
 
+    /**
+     * Add a path.
+     * @param path path
+     */
+    public void add(String path) {
+        this.paths.add(path);
+    }
+
+
+    /**
+     * Clear path elements.
+     */
     public void clear() {
         paths.clear();
     }
 
 
-    public String elvis() {
+    /**
+     * Join the paths as elvis operation.
+     * @return the joined string
+     */
+    public String elvisJoin() {
         StringBuilder sb = new StringBuilder("Optional.ofNullable(");
         for (Iterate.Entry<String> entry : Iterate.of(paths)) {
             String path = entry.value();
@@ -85,19 +119,27 @@ public class AccessPath {
     }
 
 
-    public String join(String delimiter) {
-        return paths.stream()
+    /**
+     * Join the paths as pointer.
+     * @return the joined string
+     */
+    public String pointerJoin() {
+        return "/" + paths.stream()
             .filter(Objects::nonNull).filter(not(String::isBlank))
-            .collect(Collectors.joining(delimiter));
+            .collect(Collectors.joining("/"));
     }
 
 
-    public String camelJoin(String delimiter) {
+    /**
+     * Join the paths as camel case.
+     * @return the joined string
+     */
+    public String camelJoin() {
 
         String ret = paths.stream()
             .filter(Objects::nonNull).filter(not(String::isBlank))
             .map(s -> Character.toUpperCase(s.charAt(0)) + s.substring(1))
-            .collect(Collectors.joining(delimiter));
+            .collect(Collectors.joining());
 
         return Character.toLowerCase(ret.charAt(0)) + ret.substring(1);
     }

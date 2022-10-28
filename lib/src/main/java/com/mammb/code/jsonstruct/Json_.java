@@ -15,6 +15,11 @@
  */
 package com.mammb.code.jsonstruct;
 
+/**
+ * Dummy class of Json_.
+ * This class is not included in the archive.
+ * @author Naotsugu Kobayashi
+ */
 public class Json_ {
 
     public static <T> Json<T> of(Class<T> clazz) {

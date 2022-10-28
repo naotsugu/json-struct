@@ -17,13 +17,9 @@ package com.mammb.code.jsonstruct.processor;
 
 import com.mammb.code.jsonstruct.JsonStruct;
 import com.mammb.code.jsonstruct.convert.Converts;
-import com.mammb.code.jsonstruct.lang.LangModels;
-import com.mammb.code.jsonstruct.processor.assemble.AssembleContext;
-import com.mammb.code.jsonstruct.processor.assemble.Assemblies;
-import com.mammb.code.jsonstruct.processor.assemble.BackingCode;
-import com.mammb.code.jsonstruct.processor.assemble.Code;
-import com.mammb.code.jsonstruct.processor.assemble.Imports;
-import com.mammb.code.jsonstruct.processor.assemble.Stringify;
+import com.mammb.code.jsonstruct.processor.assembly.LangUtil;
+import com.mammb.code.jsonstruct.processor.assembly.*;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -39,7 +35,7 @@ public class JsonStructEntity {
     public static final String ANNOTATION_TYPE = "com.mammb.code.jsonstruct.JsonStruct";
 
     /** Utility of java lang model. */
-    private final LangModels lang;
+    private final LangUtil lang;
 
     /** JsonStruct type element. */
     private final TypeElement element;
@@ -48,7 +44,7 @@ public class JsonStructEntity {
     /**
      * Constructor.
      */
-    private JsonStructEntity(LangModels lang, TypeElement element) {
+    private JsonStructEntity(LangUtil lang, TypeElement element) {
         this.lang = lang;
         this.element = element;
     }
@@ -66,7 +62,7 @@ public class JsonStructEntity {
             return Optional.empty();
         }
 
-        LangModels lang = LangModels.of(ctx.getElementUtils(), ctx.getTypeUtils());
+        LangUtil lang = LangUtil.of(ctx.getElementUtils(), ctx.getTypeUtils());
 
         if (lang.isClass(element) &&
             lang.selectConstructorLike(element, JsonStruct.class).isPresent()) {
@@ -82,19 +78,21 @@ public class JsonStructEntity {
     }
 
 
+    /**
+     * Build code.
+     * @return the code
+     */
     public Code build() {
 
         Converts convert = Converts.of(); // TODO addon convert
-        AssembleContext ctx = AssembleContext.of(lang, convert.typeClasses());
 
-        BackingCode backingCode = Assemblies.toAssembly(element, ctx).execute(ctx);
+        BackingCode objectifyCode = Objectify.of(lang, convert.typeClasses()).build(element);
         BackingCode stringifyCode = Stringify.of(lang, convert.stringifyClasses()).build(element);
 
         Imports imports = Imports.of("""
             import com.mammb.code.jsonstruct.Json;
             import com.mammb.code.jsonstruct.convert.Converts;
-            import com.mammb.code.jsonstruct.parser.JsonPointer;
-            import com.mammb.code.jsonstruct.parser.Parser;
+            import com.mammb.code.jsonstruct.parser.*;
             import javax.annotation.processing.Generated;
             import java.io.*;
             import java.util.*;
@@ -113,11 +111,11 @@ public class JsonStructEntity {
                     @Override
                     public #{entityName} from(Reader reader) {
                         var json = Parser.of(reader).parse();
-                        return #{assemblyCode};
+                        return #{objectifyCode};
                     }
 
                     @Override
-                    public void to(#{entityName} object, Writer writer) throws IOException {
+                    public void stringify(#{entityName} object, Appendable writer) throws IOException {
                         writer#{stringifyCode};
                     }
 
@@ -127,9 +125,9 @@ public class JsonStructEntity {
             .interpolateType("#{processorName}", JsonStructProcessor.class.getName())
             .interpolateType("#{className}", getEntityClassName())
             .interpolateType("#{entityName}", getClassName())
-            .interpolate("#{assemblyCode}", backingCode.code())
+            .interpolate("#{objectifyCode}", objectifyCode.code())
             .interpolate("#{stringifyCode}", stringifyCode.code())
-            .interpolate("#{backingMethods}", backingCode.backingMethods().add(stringifyCode.backingMethods()))
+            .interpolate("#{backingMethods}", objectifyCode.backingMethods().add(stringifyCode.backingMethods()))
             .add(imports);
     }
 

@@ -168,6 +168,7 @@ public class Context implements ProcessingEnvironment {
         pe.getMessager().printMessage(Diagnostic.Kind.ERROR, formatted(message, args));
     }
 
+
     /**
      * Write the error log message.
      * @param e the exception.
@@ -177,6 +178,7 @@ public class Context implements ProcessingEnvironment {
         e.printStackTrace(new PrintWriter(sw));
         pe.getMessager().printMessage(Diagnostic.Kind.ERROR, sw.toString());
     }
+
 
     /**
      * Format the given format string with args.

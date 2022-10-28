@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.lang;
+package com.mammb.code.jsonstruct.processor.assembly;
 
 import com.mammb.code.jsonstruct.processor.JsonStructException;
 import javax.lang.model.element.Element;
@@ -39,7 +39,7 @@ import java.util.Optional;
  * Utilities for java lang model.
  * @author Naotsugu Kobayashi
  */
-public class LangModels {
+public class LangUtil {
 
     /** ElementUtils. */
     private final Elements elementUtils;
@@ -51,7 +51,7 @@ public class LangModels {
     /**
      * Constructor.
      */
-    private LangModels(Elements elementUtils, Types typeUtils) {
+    private LangUtil(Elements elementUtils, Types typeUtils) {
         this.elementUtils = Objects.requireNonNull(elementUtils);
         this.typeUtils = Objects.requireNonNull(typeUtils);
     }
@@ -63,8 +63,8 @@ public class LangModels {
      * @param types TypeUtils
      * @return the LangModels
      */
-    public static LangModels of(Elements elements, Types types) {
-        return new LangModels(elements, types);
+    public static LangUtil of(Elements elements, Types types) {
+        return new LangUtil(elements, types);
     }
 
 
@@ -241,20 +241,11 @@ public class LangModels {
 
 
     /**
-     * Gets the type argument of the given {@link Element} as an {@link Element}.
-     * e.g. {@code List<String>} -> element of String type
-     * @param element the {@link Element}
-     * @return the type argument of the given {@link Element}
+     * Gets the type argument of the given {@link TypeMirror} as a {@link TypeMirror}.
+     * e.g. {@code List<String>} -> TypeMirror of String type
+     * @param typeMirror the {@link TypeMirror}
+     * @return the type argument of the given {@link TypeMirror}
      */
-    public Element entryElement(Element element) {
-        DeclaredType declaredType = (DeclaredType) element.asType();
-        var typeArguments = declaredType.getTypeArguments();
-        if (typeArguments.size() != 1) {
-            throw new JsonStructException("Type arguments size must be 1. [{}]", element);
-        }
-        return typeUtils.asElement(typeArguments.get(0));
-    }
-
     public TypeMirror entryType(TypeMirror typeMirror) {
         if (typeMirror.getKind() == TypeKind.ARRAY) {
             ArrayType arrayType = (ArrayType) typeMirror;
@@ -269,6 +260,13 @@ public class LangModels {
         throw new JsonStructException("Type arguments is not found. [{}]", typeMirror);
     }
 
+
+    /**
+     * Gets the type argument of the given {@link TypeMirror} as a {@link TypeMirror}.
+     * e.g. {@code Map<String, Integer>} -> TypeMirror of String and Integer type
+     * @param typeMirror the {@link TypeMirror}
+     * @return the type argument of the given {@link TypeMirror}
+     */
     public TypeMirror[] mapEntryTypes(TypeMirror typeMirror) {
         if (typeMirror.getKind() == TypeKind.DECLARED) {
             DeclaredType declaredType = (DeclaredType) typeMirror;
@@ -278,24 +276,6 @@ public class LangModels {
             }
         }
         throw new JsonStructException("Type arguments is not found. [{}]", typeMirror);
-    }
-
-    /**
-     * Gets the type argument of the given {@link Element} as an {@link Element}.
-     * e.g. {@code Map<String, Integer>} -> element of String and Integer type
-     * @param element the {@link Element}
-     * @return the type argument of the given {@link Element}
-     */
-    public Element[] mapEntryElement(Element element) {
-        DeclaredType declaredType = (DeclaredType) element.asType();
-        var typeArguments = declaredType.getTypeArguments();
-        if (typeArguments.size() != 2) {
-            throw new JsonStructException("Type arguments size must be 2. [{}]", element);
-        }
-        return new Element[] {
-            typeUtils.asElement(typeArguments.get(0)),
-            typeUtils.asElement(typeArguments.get(1))
-        };
     }
 
 
@@ -318,7 +298,7 @@ public class LangModels {
             return element.getEnclosedElements().stream()
                 .filter(e -> e.getKind() == ElementKind.METHOD)
                 .map(ExecutableElement.class::cast)
-                .filter(LangModels::isBeanAccessor)
+                .filter(LangUtil::isBeanAccessor)
                 .toList();
         }
 

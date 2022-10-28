@@ -13,25 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.processor.assemble;
+package com.mammb.code.jsonstruct.processor;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
+import java.lang.annotation.*;
 
 /**
- * Assembly.
+ * Specify the target class to be serialized/deserialized.
  * @author Naotsugu Kobayashi
  */
-public interface Assembly {
-
-    Element element();
-
-    default String name() {
-        return (element().getKind() == ElementKind.PARAMETER)
-            ? element().getSimpleName().toString()
-            : "";
-    }
-
-    BackingCode execute(AssembleContext ctx);
-
+@Documented
+@Target({ ElementType.PARAMETER, ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface JsonStructIgnore {
 }

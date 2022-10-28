@@ -1,5 +1,6 @@
 package com.mammb.code.jsonstruct.processor.assemble;
 
+import com.mammb.code.jsonstruct.processor.assembly.Code;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

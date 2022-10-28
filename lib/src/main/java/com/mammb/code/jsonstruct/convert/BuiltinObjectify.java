@@ -37,17 +37,20 @@ import java.util.function.Function;
  * Builtin deserializes.
  * @author Naotsugu Kobayashi
  */
-public class BuiltinType {
+public class BuiltinObjectify {
 
+    /** Locale. */
     private static final Locale locale = Locale.getDefault();
+
+    /** UTC Zone. */
     private static final ZoneId UTC = ZoneId.of("UTC");
+
 
     /**
      * Create a builtin mappings.
      * @return the builtin mappings
      */
     public static Map<Class<?>, Function<JsonValue, ?>> map() {
-
 
         Map<Class<?>, Function<JsonValue, ?>> map = new HashMap<>();
 
@@ -136,6 +139,7 @@ public class BuiltinType {
     private interface ThrowsSupplier<T> {
         T get() throws Exception;
     }
+
 
     private static Calendar asCalendar(String str) {
         DateTimeFormatter formatter = str.contains("T")

@@ -15,7 +15,7 @@
  */
 package com.mammb.code.jsonstruct.processor;
 
-import com.mammb.code.jsonstruct.processor.assemble.Code;
+import com.mammb.code.jsonstruct.processor.assembly.Code;
 
 import javax.tools.FileObject;
 import java.io.PrintWriter;

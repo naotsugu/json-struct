@@ -119,22 +119,38 @@ public class CharArray implements Serializable {
     }
 
 
+    /**
+     * Clear this array elements.
+     */
     public void clear() {
         elements = EMPTY;
         length = 0;
     }
 
 
+    /**
+     * Gets the length of this array.
+     * @return the length of this array
+     */
     public int length() {
         return length;
     }
 
 
+    /**
+     * Gets the capacity of this buffer.
+     * @return the capacity of this buffer
+     */
     public int capacity() {
         return elements.length;
     }
 
 
+    /**
+     * Grow this buffer.
+     * @param minCapacity min capacity
+     * @return a grown buffer
+     */
     private char[] grow(int minCapacity) {
         int oldCapacity = elements.length;
         if (length == 0 || elements == EMPTY) {

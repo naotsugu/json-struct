@@ -1,38 +1,87 @@
-package com.mammb.code.jsonstruct.processor.assemble;
+/*
+ * Copyright 2019-2022 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.mammb.code.jsonstruct.processor.assembly;
 
 import com.mammb.code.jsonstruct.lang.Iterate;
-import com.mammb.code.jsonstruct.lang.LangModels;
+
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
-
+/**
+ * Stringify.
+ * @author Naotsugu Kobayashi
+ */
 public class Stringify {
 
-    private final LangModels lang;
+    /** The lang model utility. */
+    private final LangUtil lang;
+
+    /** The known basic classes. */
     private final Set<String> basicClasses;
+
+    /** The backing methods. */
     private Code backingMethods;
 
+    /** Current depth. */
+    private int depth;
 
-    private Stringify(LangModels lang, Set<String> basicClasses, Code backingMethods) {
-        this.lang = lang;
-        this.basicClasses = basicClasses;
-        this.backingMethods = backingMethods;
+    /** The list of handled type fqcn. */
+    private final List<String> handledTypes;
+
+    /**
+     * Constructor.
+     * @param lang The lang model utility
+     * @param basicClasses The known basic classes
+     * @param backingMethods The backing methods
+     */
+    private Stringify(LangUtil lang, Set<String> basicClasses, Code backingMethods) {
+        this.lang = Objects.requireNonNull(lang);
+        this.basicClasses = Objects.requireNonNull(basicClasses);
+        this.backingMethods = Objects.requireNonNull(backingMethods);
+        this.handledTypes = new ArrayList<>();
     }
 
 
-    public static Stringify of(LangModels lang, Set<String> basicClasses) {
+    /**
+     * Create a new Stringify instance.
+     * @param lang The lang model utility
+     * @param basicClasses The known basic classes
+     * @return a new Stringify instance
+     */
+    public static Stringify of(LangUtil lang, Set<String> basicClasses) {
         return new Stringify(lang, basicClasses, Code.of());
     }
 
 
+    /**
+     * Build backingCode for given element.
+     * @param type The type element
+     * @return a backingCode
+     */
     public BackingCode build(TypeElement type) {
-        return BackingCode.of(object(type, AccessPath.of("object")), clearBacking());
+        return BackingCode.of(object(type, Path.of("object")), clearBacking());
     }
 
 
-    public Code toCode(TypeMirror type, AccessPath path) {
+    private Code toCode(TypeMirror type, Path path) {
         if (basicClasses.contains(type.toString())  || lang.isEnum(type)) {
             return basic(path);
         }
@@ -49,20 +98,20 @@ public class Stringify {
     }
 
 
-    public Code toCode(ExecutableElement accessor, AccessPath path) {
+    private Code toCode(ExecutableElement accessor, Path path) {
         return toCode(accessor.getReturnType(),
             path.with(accessor.getSimpleName().toString()));
     }
 
 
-    public Code basic(AccessPath path) {
+    private Code basic(Path path) {
         return Code.of("""
             .append(convert.stringify(#{path}.orElse(null)))""")
-            .interpolate("#{path}", path.elvis());
+            .interpolate("#{path}", path.elvisJoin());
     }
 
 
-    public Code object(TypeElement type, AccessPath path) {
+    private Code object(TypeElement type, Path path) {
 
         Code props = Code.of();
 
@@ -85,10 +134,10 @@ public class Stringify {
     }
 
 
-    public Code array(TypeMirror type, AccessPath path) {
+    private Code array(TypeMirror type, Path path) {
 
         TypeMirror entryType = lang.entryType(type);
-        String methodName = path.camelJoin("") + "Stringify";
+        String methodName = path.camelJoin() + "Stringify";
         buildIterableMethod(entryType, methodName);
 
         return Code.of("""
@@ -96,15 +145,15 @@ public class Stringify {
                 .append(#{methodName}(Arrays.asList(#{path}.orElse(new #{type}[0]))))
             .append("]")""")
             .interpolate("#{methodName}", methodName)
-            .interpolate("#{path}", path.elvis())
+            .interpolate("#{path}", path.elvisJoin())
             .interpolateType("#{type}", entryType.toString());
     }
 
 
-    public Code collection(TypeMirror type, AccessPath path) {
+    private Code collection(TypeMirror type, Path path) {
 
         TypeMirror entryType = lang.entryType(type);
-        String methodName = path.camelJoin("") + "Stringify";
+        String methodName = path.camelJoin() + "Stringify";
         buildIterableMethod(entryType, methodName);
 
         return Code.of("""
@@ -112,8 +161,9 @@ public class Stringify {
                 .append(#{methodName}(#{path}.orElse(List.of())))
             .append("]")""")
             .interpolate("#{methodName}", methodName)
-            .interpolate("#{path}", path.elvis());
+            .interpolate("#{path}", path.elvisJoin());
     }
+
 
     private void buildIterableMethod(TypeMirror entryType, String methodName) {
         Code backingMethod = Code.of("""
@@ -128,15 +178,15 @@ public class Stringify {
             """)
             .interpolateType("#{type}", entryType.toString())
             .interpolate("#{methodName}", methodName)
-            .interpolate("#{entry}", toCode(entryType, AccessPath.of("object")));
+            .interpolate("#{entry}", toCode(entryType, Path.of("object")));
         backingMethods.add(backingMethod);
     }
 
 
-    public Code map(TypeMirror type, AccessPath path) {
+    private Code map(TypeMirror type, Path path) {
 
         TypeMirror[] entryTypes = lang.mapEntryTypes(type);
-        String methodName = path.camelJoin("") + "Stringify";
+        String methodName = path.camelJoin() + "Stringify";
 
         TypeMirror key = entryTypes[0];
         TypeMirror val = entryTypes[1];
@@ -156,8 +206,8 @@ public class Stringify {
                 .interpolateType("#{keyType}", key.toString())
                 .interpolateType("#{valType}", val.toString())
                 .interpolate("#{methodName}", methodName)
-                .interpolate("#{keyEntry}", toCode(key, AccessPath.of("entry", "getKey")))
-                .interpolate("#{valEntry}", toCode(val, AccessPath.of("entry", "getValue")));
+                .interpolate("#{keyEntry}", toCode(key, Path.of("entry", "getKey")))
+                .interpolate("#{valEntry}", toCode(val, Path.of("entry", "getValue")));
             backingMethods.add(backingMethod);
 
             return Code.of("""
@@ -165,7 +215,7 @@ public class Stringify {
                 .append(#{methodName}(#{path}.orElse(Map.of()).entrySet()))
             .append("}")""")
                 .interpolate("#{methodName}", methodName)
-                .interpolate("#{path}", path.elvis());
+                .interpolate("#{path}", path.elvisJoin());
 
         } else {
             Code backingMethod = Code.of("""
@@ -182,8 +232,8 @@ public class Stringify {
                 .interpolateType("#{keyType}", key.toString())
                 .interpolateType("#{valType}", val.toString())
                 .interpolate("#{methodName}", methodName)
-                .interpolate("#{keyEntry}", toCode(key, AccessPath.of("entry", "getKey")))
-                .interpolate("#{valEntry}", toCode(val, AccessPath.of("entry", "getValue")));
+                .interpolate("#{keyEntry}", toCode(key, Path.of("entry", "getKey")))
+                .interpolate("#{valEntry}", toCode(val, Path.of("entry", "getValue")));
             backingMethods.add(backingMethod);
 
             return Code.of("""
@@ -191,14 +241,17 @@ public class Stringify {
                 .append(#{methodName}(#{path}.orElse(Map.of()).entrySet()))
             .append("]")""")
                 .interpolate("#{methodName}", methodName)
-                .interpolate("#{path}", path.elvis());
+                .interpolate("#{path}", path.elvisJoin());
         }
 
     }
 
+
     private Code clearBacking() {
         Code ret = backingMethods;
         backingMethods = Code.of();
+        handledTypes.clear();
+        depth = 0;
         return ret;
     }
 

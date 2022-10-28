@@ -27,14 +27,16 @@ import java.util.function.Function;
  */
 public class Converts {
 
-    /** The Builtin mapping. */
-    private final Map<Class<?>, Function<JsonValue, ?>> typeMap;
+    /** The Builtin objectify map. */
+    private final Map<Class<?>, Function<JsonValue, ?>> objectifyMap;
 
+    /** The Builtin stringify map. */
     private final Map<Class<?>, Function<?, CharSequence>> stringifyMap;
 
-    /** The Optional mapping. */
-    private final Map<Class<?>, Function<JsonValue, ?>> typeOptMap;
+    /** The Optional objectify map. */
+    private final Map<Class<?>, Function<JsonValue, ?>> objectifyOptMap;
 
+    /** The Optional stringify map. */
     private final Map<Class<?>, Function<?, CharSequence>> stringifyOptMap;
 
 
@@ -42,9 +44,9 @@ public class Converts {
      * Constructor.
      */
     private Converts() {
-        this.typeMap = BuiltinType.map();
+        this.objectifyMap = BuiltinObjectify.map();
         this.stringifyMap = BuiltinStringify.map();
-        this.typeOptMap = new HashMap<>();
+        this.objectifyOptMap = new HashMap<>();
         this.stringifyOptMap =  new HashMap<>();
     }
 
@@ -59,17 +61,18 @@ public class Converts {
 
 
     /**
-     * Gets the converter for the given class.
+     * Gets an objectify converter for the given class.
      * @param clazz the Target Classes
      * @param <T> the type of class
      * @return the converter
      */
     @SuppressWarnings("unchecked")
     public <T> Function<JsonValue, T> to(Class<?> clazz) {
-        return typeOptMap.containsKey(clazz)
-            ? (Function<JsonValue, T>) typeOptMap.get(clazz)
-            : (Function<JsonValue, T>) typeMap.get(clazz);
+        return objectifyOptMap.containsKey(clazz)
+            ? (Function<JsonValue, T>) objectifyOptMap.get(clazz)
+            : (Function<JsonValue, T>) objectifyMap.get(clazz);
     }
+
 
     /**
      * Gets the stringify for the given object.
@@ -101,7 +104,7 @@ public class Converts {
      * @param conv the convert
      */
     public void add(Class<?> clazz, Function<String, ?> conv) {
-        typeOptMap.put(clazz, adapt(conv));
+        objectifyOptMap.put(clazz, adapt(conv));
     }
 
 
@@ -111,8 +114,8 @@ public class Converts {
      */
     public Set<String> typeClasses() {
         Set<String> set = new HashSet<>();
-        typeMap.keySet().forEach(k -> set.add(k.getCanonicalName()));
-        typeOptMap.keySet().forEach(k -> set.add(k.getCanonicalName()));
+        objectifyMap.keySet().forEach(k -> set.add(k.getCanonicalName()));
+        objectifyOptMap.keySet().forEach(k -> set.add(k.getCanonicalName()));
         return set;
     }
 
@@ -127,6 +130,7 @@ public class Converts {
         stringifyOptMap.keySet().forEach(k -> set.add(k.getCanonicalName()));
         return set;
     }
+
 
     private static Function<JsonValue, ?> adapt(Function<String, ?> fun) {
         return (JsonValue v) -> fun.apply(new String(((CharSource) v).chars()));

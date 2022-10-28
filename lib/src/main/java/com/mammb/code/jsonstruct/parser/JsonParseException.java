@@ -69,6 +69,7 @@ public class JsonParseException extends RuntimeException {
         super(cause);
     }
 
+
     /**
      * Format the given format string with args.
      * @param format the format string

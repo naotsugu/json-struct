@@ -27,15 +27,39 @@ import java.util.Set;
  */
 public interface JsonObject extends JsonStructure {
 
+    /**
+     * Associates the specified json value with the specified key in this object.
+     * @param name key with which the specified json value is to be associated
+     * @param value json value to be associated with the specified key
+     */
     void put(String name, JsonValue value);
+
+    /**
+     * Gets the json value to which the specified name is mapped.
+     * @param name the name whose associated value is to be returned
+     */
     JsonValue get(String name);
+
+
+    /**
+     * Gets a {@link Set} view of the mappings contained in this map.
+     * @return a set view of the mappings contained in this map
+     */
     Set<Map.Entry<String, JsonValue>> entrySet();
 
+
+    /**
+     * Create a new JsonObject instance.
+     * @return a new JsonObject instance
+     */
     static JsonObject of() {
         return new JsonObjectImpl();
     }
 
 
+    /**
+     * JsonObject implementation.
+     */
     class JsonObjectImpl implements JsonObject {
 
         private final Map<String, JsonValue> values = new HashMap<>();

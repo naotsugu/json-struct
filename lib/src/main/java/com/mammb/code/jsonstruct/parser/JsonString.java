@@ -22,41 +22,69 @@ package com.mammb.code.jsonstruct.parser;
  */
 public interface JsonString extends JsonValue, CharSource {
 
+    /**
+     * Create a new JsonString instance with the specified {@link CharSource}.
+     * @param cs the specified {@link CharSource}
+     * @return a new JsonString instance
+     */
     static JsonString of(CharSource cs) {
         return new JsonStringImpl(cs);
     }
 
+
+    /**
+     * Create a new JsonString instance with the specified String.
+     * @param str the specified String
+     * @return a new JsonString instance
+     */
     static JsonString of(String str) {
         return new JsonStringRaw(str);
     }
 
+
+    /**
+     * JsonObject implementation.
+     */
     class JsonStringImpl implements JsonString {
+
         private final CharSource source;
-        public JsonStringImpl(CharSource cs) {
+
+        private JsonStringImpl(CharSource cs) {
             source = cs;
         }
+
         @Override
         public char[] chars() {
             return source.chars();
         }
+
         @Override
         public String toString() {
             return source.toString();
         }
+
     }
 
+    /**
+     * JsonObject implementation.
+     */
     class JsonStringRaw implements JsonString {
+
         private final String source;
-        public JsonStringRaw(String str) {
+
+        private JsonStringRaw(String str) {
             source = str;
         }
+
         @Override
         public char[] chars() {
             return source.toCharArray();
         }
+
         @Override
         public String toString() {
             return source.toString();
         }
+
     }
 }

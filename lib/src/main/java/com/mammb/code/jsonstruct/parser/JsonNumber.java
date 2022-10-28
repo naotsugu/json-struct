@@ -24,13 +24,22 @@ import java.math.BigDecimal;
  */
 public interface JsonNumber extends JsonValue, NumberSource {
 
+    /**
+     * Create a new JsonNumber instance.
+     * @return a new JsonNumber instance
+     */
     static JsonNumber of(NumberSource ns) {
         return new JsonNumberImpl(ns);
     }
 
+    /**
+     * JsonNumber implementation.
+     */
     class JsonNumberImpl implements JsonNumber {
+
         private final NumberSource source;
-        public JsonNumberImpl(NumberSource ns) {
+
+        private JsonNumberImpl(NumberSource ns) {
             this.source = ns;
         }
 

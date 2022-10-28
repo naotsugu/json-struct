@@ -23,7 +23,25 @@ import java.math.BigDecimal;
  * @author Naotsugu Kobayashi
  */
 public interface NumberSource extends CharSource {
+
+    /**
+     * Gets this JSON number as an {@code int}.
+     * @return an {@code int} representation of the JSON number
+     */
     int getInt();
+
+
+    /**
+     * Gets this JSON number as a {@code long}.
+     * @return a {@code long} representation of the JSON number
+     */
     long getLong();
+
+
+    /**
+     * Gets this JSON number as a {@code BigDecimal}.
+     * @return a {@code BigDecimal} representation of the JSON number
+     */
     BigDecimal getBigDecimal();
+
 }

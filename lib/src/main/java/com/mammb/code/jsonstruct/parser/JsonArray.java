@@ -25,17 +25,37 @@ import java.util.List;
  * @author Naotsugu Kobayashi
  */
 public interface JsonArray extends JsonStructure, Iterable<JsonValue> {
+
+    /**
+     * Gets the array value at the specified position in this array.
+     * @param index index of the value to be returned
+     * @return the value at the specified position in this array
+     */
     JsonValue get(int index);
+
+
+    /**
+     * Appends the specified JsonValue to the end of this array.
+     * @param value JsonValue to be appended to this array
+     */
     void add(JsonValue value);
 
+
+    /**
+     * Create a new JsonArray instance.
+     * @return a new JsonArray instance
+     */
     static JsonArray of() {
         return new JsonArrayImpl();
     }
 
-
+    /**
+     * JsonArray implementation.
+     */
     class JsonArrayImpl implements JsonArray {
 
         private final List<JsonValue> values = new ArrayList<>();
+
         @Override
         public JsonValue get(int index) {
             return values.get(index);

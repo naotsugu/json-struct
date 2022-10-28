@@ -24,13 +24,32 @@ import java.util.function.Function;
  */
 public interface JsonStructure extends JsonValue {
 
+    /**
+     * Gets the element identified by the specified pointer.
+     * @param pointer the specified json pointer
+     * @return the element identified by the specified pointer
+     */
     default JsonValue at(String pointer) {
         return JsonPointer.of(pointer).getValue(this);
     }
 
+
+    /**
+     * Gets the element identified by the specified pointer with the specified conversion function.
+     * @param pointer the specified json pointer
+     * @param conv the conversion function
+     * @param <T> the type to convert
+     * @return the converted element identified by the specified pointer
+     */
     default <T> T as(String pointer, Function<JsonValue, T> conv) {
         return conv.apply(at(pointer));
     }
 
+
+    /**
+     * Returns the number of elements in this structure.
+     * @return the number of elements in this structure
+     */
     int size();
+
 }

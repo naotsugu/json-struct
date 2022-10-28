@@ -24,18 +24,37 @@ import java.util.function.Function;
  */
 public interface JsonValue {
 
+    /** json null. */
     JsonValue NULL = new JsonNull();
+
+    /** json true. */
     JsonValue TRUE = new JsonTrue();
+
+    /** json false. */
     JsonValue FALSE = new JsonFalse();
+
+    /** json null instance. */
+    record JsonNull() implements JsonValue { }
+
+    /** json true instance. */
+    record JsonTrue() implements JsonValue { }
+
+    /** json false instance. */
+    record JsonFalse() implements JsonValue { }
+
 
     @Override
     String toString();
 
+
+    /**
+     * Gets the result of a conversion with the specified conversion function.
+     * @param conv the conversion function
+     * @param <T> the type to convert
+     * @return the result of a conversion
+     */
     default <T> T as(Function<JsonValue, T> conv) {
         return conv.apply(this);
     }
 
-    record JsonNull() implements JsonValue { }
-    record JsonTrue() implements JsonValue { }
-    record JsonFalse() implements JsonValue { }
 }

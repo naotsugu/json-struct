@@ -68,9 +68,16 @@ public class Converts {
      */
     @SuppressWarnings("unchecked")
     public <T> Function<JsonValue, T> to(Class<?> clazz) {
-        return objectifyOptMap.containsKey(clazz)
-            ? (Function<JsonValue, T>) objectifyOptMap.get(clazz)
-            : (Function<JsonValue, T>) objectifyMap.get(clazz);
+        if (Objects.isNull(clazz)) {
+            return v -> null;
+        }
+        if (!objectifyOptMap.isEmpty() && objectifyOptMap.containsKey(clazz)) {
+            return (Function<JsonValue, T>) objectifyOptMap.get(clazz);
+        }
+        if (objectifyMap.containsKey(clazz)) {
+            return (Function<JsonValue, T>) objectifyMap.get(clazz);
+        }
+        return v -> null;
     }
 
 
@@ -88,7 +95,7 @@ public class Converts {
         if (object instanceof Enum<?> en) {
             return "\"" + en.name() + "\"";
         }
-        if (stringifyOptMap.containsKey(object.getClass())) {
+        if (!stringifyOptMap.isEmpty() && stringifyOptMap.containsKey(object.getClass())) {
             return ((Function<T, CharSequence>) stringifyOptMap.get(object.getClass())).apply(object);
         }
         if (stringifyMap.containsKey(object.getClass())) {
@@ -105,6 +112,16 @@ public class Converts {
      */
     public void add(Class<?> clazz, Function<String, ?> conv) {
         objectifyOptMap.put(clazz, adapt(conv));
+    }
+
+
+    /**
+     * Add optional stringify mapping
+     * @param clazz the Class
+     * @param conv the convert
+     */
+    public void addStringify(Class<?> clazz, Function<?, CharSequence> conv) {
+        stringifyOptMap.put(clazz, conv);
     }
 
 
@@ -132,6 +149,11 @@ public class Converts {
     }
 
 
+    /**
+     * Transform function
+     * @param fun the string convert function
+     * @return the JsonValue convert function
+     */
     private static Function<JsonValue, ?> adapt(Function<String, ?> fun) {
         return (JsonValue v) -> fun.apply(new String(((CharSource) v).chars()));
     }

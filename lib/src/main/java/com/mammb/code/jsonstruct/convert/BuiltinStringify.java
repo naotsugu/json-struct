@@ -43,7 +43,9 @@ public class BuiltinStringify {
      * @return the builtin mappings
      */
     public static Map<Class<?>, Function<?, CharSequence>> map() {
+
         Map<Class<?>, Function<?, CharSequence>> map = new HashMap<>();
+
         map.put(Byte.class,          String::valueOf);
         map.put(Byte.TYPE,           v -> String.valueOf((byte) v));
         map.put(BigDecimal.class,    String::valueOf);
@@ -89,6 +91,12 @@ public class BuiltinStringify {
         return map;
     }
 
+
+    /**
+     * Escape the json string.
+     * @param cs the source string
+     * @return escaped string
+     */
     private static CharSequence esc(CharSequence cs) {
         StringBuilder sb = new StringBuilder();
         sb.append("\"");
@@ -125,6 +133,7 @@ public class BuiltinStringify {
         sb.append("\"");
         return sb;
     }
+
 
     private static CharSequence str(Calendar value) {
         DateTimeFormatter formatter = value.isSet(Calendar.HOUR) || value.isSet(Calendar.HOUR_OF_DAY)

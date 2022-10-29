@@ -3,6 +3,7 @@ package com.mammb.code.jsonstruct;
 import com.mammb.code.jsonstruct.processor.testdata.Book;
 import com.mammb.code.jsonstruct.processor.testdata.Food;
 import com.mammb.code.jsonstruct.processor.testdata.Gender;
+import com.mammb.code.jsonstruct.processor.testdata.Person;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -40,6 +41,24 @@ class JsonTest {
         assertEquals("material1", food.materials().get(1));
 
         assertEquals(jsonStr.trim(), json.stringify(food));
+    }
+
+    @Test
+    void testPerson() {
+
+        var json = Json.of(Person.class);
+        var jsonStr = """
+            {"fullName":{"givenName":"Bob","familyName":"Dylan"},"age":81,"gender":"MALE"}
+            """;
+
+        var person = json.from(jsonStr);
+        assertEquals("Bob", person.fullName().givenName());
+        assertEquals("Dylan", person.fullName().familyName());
+        assertEquals(81, person.age());
+        assertEquals(Gender.MALE, person.gender());
+
+        assertEquals(jsonStr.trim(), json.stringify(person));
+;
     }
 
 }

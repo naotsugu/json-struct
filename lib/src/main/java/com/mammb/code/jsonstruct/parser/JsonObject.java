@@ -34,6 +34,7 @@ public interface JsonObject extends JsonStructure {
      */
     void put(String name, JsonValue value);
 
+
     /**
      * Gets the json value to which the specified name is mapped.
      * @param name the name whose associated value is to be returned

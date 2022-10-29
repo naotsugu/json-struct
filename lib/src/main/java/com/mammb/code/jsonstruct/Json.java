@@ -77,5 +77,4 @@ public interface Json<T> {
         return Json_.of(clazz);
     }
 
-
 }

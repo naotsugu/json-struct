@@ -25,6 +25,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -175,6 +176,7 @@ public class Objectify {
 
         backingMethods.add(Code.of("""
             private List<#{type}> #{methodName}(JsonArray array) {
+                if (array == null) return List.of();
                 List<#{type}> list = new ArrayList<>();
                 for (JsonValue json : array) {
                     list.add(#{entry});
@@ -200,6 +202,7 @@ public class Objectify {
 
         backingMethods.add(Code.of("""
             private Set<#{type}> #{methodName}(JsonArray array) {
+                if (array == null) return Set.of();
                 Set<#{type}> set = new LinkedHashSet<>();
                 for (JsonValue json : array) {
                     set.add(#{entry});
@@ -225,6 +228,7 @@ public class Objectify {
 
         backingMethods.add(Code.of("""
             private #{type}[] #{methodName}(JsonArray array) {
+                if (array == null) return new #{type}[0];
                 List<#{type}> list = new ArrayList<>();
                 for (JsonValue json : array) {
                     list.add(#{entry});
@@ -250,6 +254,7 @@ public class Objectify {
 
         backingMethods.add(Code.of("""
             private Map<#{keyType}, #{valType}> #{methodName}(JsonStructure str) {
+                if (str == null) return Map.of();
                 Map<#{keyType}, #{valType}> map = new LinkedHashMap<>();
                 if (str instanceof JsonObject obj) {
                     for (Map.Entry<String, JsonValue> e : obj.entrySet()) {

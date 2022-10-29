@@ -265,6 +265,7 @@ public class Stringify {
         return ret;
     }
 
+
     private Code withStack(Element element, Function<TypeElement, Code> function) {
         if (!element.getKind().isClass()) {
             throw new JsonStructException("element must be type.[{}]", element);

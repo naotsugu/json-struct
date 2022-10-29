@@ -61,10 +61,15 @@ public class Path {
     }
 
 
-    public Path with(String name) {
+    /**
+     * Create a new path with given path added.
+     * @param path the path
+     * @return a new path added
+     */
+    public Path with(String path) {
         Path ret = Path.of();
         ret.paths.addAll(this.paths);
-        ret.paths.add(name);
+        ret.paths.add(path);
         return ret;
     }
 

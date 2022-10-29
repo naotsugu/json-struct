@@ -15,6 +15,8 @@
  */
 package com.mammb.code.jsonstruct.processor;
 
+import com.mammb.code.jsonstruct.JsonStructIgnore;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -292,6 +294,7 @@ public class LangUtil {
                 .filter(e -> e.getKind() == ElementKind.RECORD_COMPONENT)
                 .map(RecordComponentElement.class::cast)
                 .map(RecordComponentElement::getAccessor)
+                .filter(e -> e.getAnnotationsByType(JsonStructIgnore.class).length == 0)
                 .toList();
         }
 
@@ -300,6 +303,7 @@ public class LangUtil {
                 .filter(e -> e.getKind() == ElementKind.METHOD)
                 .map(ExecutableElement.class::cast)
                 .filter(LangUtil::isBeanAccessor)
+                .filter(e -> e.getAnnotationsByType(JsonStructIgnore.class).length == 0)
                 .toList();
         }
 

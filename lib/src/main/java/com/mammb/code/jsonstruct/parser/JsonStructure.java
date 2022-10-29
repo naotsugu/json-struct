@@ -30,7 +30,7 @@ public interface JsonStructure extends JsonValue {
      * @return the element identified by the specified pointer
      */
     default JsonValue at(String pointer) {
-        return JsonPointer.of(pointer).getValue(this);
+        return JsonPointer.of(pointer).asValue(this).orElse(null);
     }
 
 

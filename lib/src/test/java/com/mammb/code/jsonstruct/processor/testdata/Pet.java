@@ -19,4 +19,12 @@ public class Pet {
         return new Pet(name, owners);
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public Map<String, FullName> getOwners() {
+        return owners;
+    }
+
 }

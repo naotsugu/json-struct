@@ -2,7 +2,6 @@
 
 [![Build](https://github.com/naotsugu/json-struct/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/naotsugu/jpa-fluent-query/actions/workflows/gradle-build.yml)
 
-Under development.
 
 ## What is this
 
@@ -26,12 +25,19 @@ public record Person(FullName fullName, int age) {
 ```java
 var json = Json.of(Person.class);
 var person = json.from("""
-  {
-    "fullName": { "givenName": "Bob", "familyName": "Dylan"}
-    "age": 81
-  }
-  """);
+    {
+        "fullName": { "givenName": "Bob",
+                      "familyName": "Dylan"
+                    },
+        "age": 81,
+        "gender": "MALE"
+    }
+    """;
+
 assertEquals("Bob", person.fullName().givenName());
+assertEquals("Dylan", person.fullName().familyName());
+assertEquals(81, person.age());
+assertEquals(Gender.MALE, person.gender());
 ```
 
 
@@ -43,9 +49,20 @@ public Person from(Reader reader) {
     var json = Parser.of(reader).parse();
     return new Person(
         new FullName(
-            json.as("/fullName/givenName", convert.to(String.class)),
-            json.as("/fullName/familyName", convert.to(String.class))),
-        json.as("/age", convert.to(int.class)));
+            ((JsonStructure) json).as("/fullName/givenName", convert.to(String.class)),
+            ((JsonStructure) json).as("/fullName/familyName", convert.to(String.class))),
+        ((JsonStructure) json).as("/age", convert.to(int.class)),
+        Gender.valueOf(((JsonStructure) json).as("/gender", convert.to(String.class)))
+    );
 }
+```
+
+Similarly, the stringify would be as follows
+
+```java
+var person = json.from(jsonStr);
+
+json.stringify(person);
+// {"fullName":{"givenName":"Bob","familyName":"Dylan"},"age":81,"gender":"MALE"}
 ```
 

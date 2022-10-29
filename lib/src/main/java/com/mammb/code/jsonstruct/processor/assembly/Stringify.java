@@ -128,7 +128,7 @@ public class Stringify {
 
         for (Iterate.Entry<ExecutableElement> accessor : Iterate.of(lang.selectAccessors(type))) {
             Code prop = Code.of("""
-                .append("\\"#{name}\\": ")
+                .append("\\"#{name}\\":")
                     #{value}""")
                 .interpolate("#{name}", lang.getPropertyName(accessor.value()))
                 .interpolate("#{value}", toCode(accessor.value(), path))

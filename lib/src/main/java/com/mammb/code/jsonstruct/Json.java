@@ -56,11 +56,11 @@ public interface Json<T> {
      * @param object the object content tree to be serialized.
      * @return the {@link CharSequence} serialized from java content tree.
      */
-    default CharSequence stringify(T object) {
+    default String stringify(T object) {
         try {
             StringBuilder sb = new StringBuilder();
             stringify(object, sb);
-            return sb;
+            return sb.toString();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -65,7 +65,7 @@ class Tokenizer {
      * @return a new Tokenizer
      */
     static Tokenizer of(Reader reader) {
-        return Tokenizer.of(reader);
+        return new Tokenizer(reader, CharArray.of());
     }
 
 

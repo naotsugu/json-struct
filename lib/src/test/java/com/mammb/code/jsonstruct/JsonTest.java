@@ -13,27 +13,33 @@ class JsonTest {
 
     @Test
     void testBook() {
+
         var json = Json.of(Book.class);
-        var book = json.from("""
-            {
-                "name": "bookName"
-            }
-            """);
+        var jsonStr = """
+            {"name":"bookName"}
+            """;
+
+        var book = json.from(jsonStr);
         assertEquals("bookName", book.getName());
+
+        assertEquals(jsonStr.trim(), json.stringify(book));
     }
+
 
     @Test
     void testFood() {
+
         var json = Json.of(Food.class);
-        var food = json.from("""
-            {
-                "name": "foodName",
-                "materials": ["material0", "material1"]
-            }
-            """);
+        var jsonStr = """
+            {"name":"foodName","materials":["material0","material1"]}
+            """;
+
+        var food = json.from(jsonStr);
         assertEquals("foodName", food.name());
         assertEquals("material0", food.materials().get(0));
         assertEquals("material1", food.materials().get(1));
+
+        assertEquals(jsonStr.trim(), json.stringify(food));
     }
 
 }

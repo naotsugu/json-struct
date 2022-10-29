@@ -16,7 +16,6 @@
 package com.mammb.code.jsonstruct.processor;
 
 import com.mammb.code.jsonstruct.JsonStructIgnore;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -122,9 +121,7 @@ public class LangUtil {
             return typeElement.getQualifiedName().toString()
                 .equals(executableElement.getReturnType().toString());
         }
-
         return false;
-
     }
 
 
@@ -217,13 +214,13 @@ public class LangUtil {
 
         var ret = candidate.stream()
             .filter(this::isConstructor)
-            .filter(e -> e.getParameters().size() > 0)
+            .filter(e -> !e.getParameters().isEmpty())
             .max(Comparator.comparingInt(e -> e.getParameters().size()));
         if (ret.isPresent()) return ret;
 
         ret = candidate.stream()
             .filter(this::isStaticFactory)
-            .filter(e -> e.getParameters().size() > 0)
+            .filter(e -> !e.getParameters().isEmpty())
             .max(Comparator.comparingInt(e -> e.getParameters().size()));
         if (ret.isPresent()) return ret;
 
@@ -285,16 +282,17 @@ public class LangUtil {
     /**
      * Select the accessor method present in the given {@link Element}.
      * @param element the {@link Element}.
+     * @param exclude annotation that should be excluded from the selection
      * @return the accessor methods
      */
-    public List<ExecutableElement> selectAccessors(Element element) {
+    public List<ExecutableElement> selectAccessors(Element element, Class<? extends Annotation> exclude) {
 
         if (element.getKind() == ElementKind.RECORD) {
             return element.getEnclosedElements().stream()
                 .filter(e -> e.getKind() == ElementKind.RECORD_COMPONENT)
                 .map(RecordComponentElement.class::cast)
                 .map(RecordComponentElement::getAccessor)
-                .filter(e -> e.getAnnotationsByType(JsonStructIgnore.class).length == 0)
+                .filter(e -> e.getAnnotationsByType(exclude).length == 0)
                 .toList();
         }
 
@@ -303,7 +301,7 @@ public class LangUtil {
                 .filter(e -> e.getKind() == ElementKind.METHOD)
                 .map(ExecutableElement.class::cast)
                 .filter(LangUtil::isBeanAccessor)
-                .filter(e -> e.getAnnotationsByType(JsonStructIgnore.class).length == 0)
+                .filter(e -> e.getAnnotationsByType(exclude).length == 0)
                 .toList();
         }
 

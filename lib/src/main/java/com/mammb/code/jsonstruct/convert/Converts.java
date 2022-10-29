@@ -62,7 +62,7 @@ public class Converts {
 
     /**
      * Gets an objectify converter for the given class.
-     * @param clazz the Target Classes
+     * @param clazz the target class
      * @param <T> the type of class
      * @return the converter
      */
@@ -102,6 +102,51 @@ public class Converts {
             return ((Function<T, CharSequence>) stringifyMap.get(object.getClass())).apply(object);
         }
         return "\"" + object + "\"";
+    }
+
+
+    /**
+     * Gets the default value.
+     * @param clazz the target class
+     * @param <T> type of class
+     * @return the default value
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T defaults(Class<T> clazz) {
+        if (Objects.isNull(clazz)) {
+            return null;
+        }
+        if (clazz == Byte.TYPE || clazz == Short.TYPE || clazz == Integer.TYPE) {
+            return (T) (Object) 0;
+        }
+        if (clazz == Long.TYPE) {
+            return (T) (Object) 0L;
+        }
+        if (clazz == Float.TYPE) {
+            return (T) (Object) 0.0f;
+        }
+        if (clazz == Double.TYPE) {
+            return (T) (Object) 0.0d;
+        }
+        if (clazz == Character.TYPE) {
+            return (T) (Object) '\u0000';
+        }
+        if (clazz == Boolean.TYPE) {
+            return (T) (Object) false;
+        }
+        if (clazz == Optional.class) {
+            return (T) Optional.empty();
+        }
+        if (clazz == OptionalDouble.class) {
+            return (T) OptionalDouble.empty();
+        }
+        if (clazz == OptionalLong.class) {
+            return (T) OptionalLong.empty();
+        }
+        if (clazz == OptionalInt.class) {
+            return (T) OptionalInt.empty();
+        }
+        return null;
     }
 
 

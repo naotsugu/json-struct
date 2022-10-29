@@ -15,6 +15,7 @@
  */
 package com.mammb.code.jsonstruct.processor.assembly;
 
+import com.mammb.code.jsonstruct.JsonStructIgnore;
 import com.mammb.code.jsonstruct.lang.Iterate;
 import com.mammb.code.jsonstruct.processor.JsonStructException;
 import com.mammb.code.jsonstruct.processor.LangUtil;
@@ -126,7 +127,8 @@ public class Stringify {
 
         Code props = Code.of();
 
-        for (Iterate.Entry<ExecutableElement> accessor : Iterate.of(lang.selectAccessors(type))) {
+        for (Iterate.Entry<ExecutableElement> accessor : Iterate.of(
+                lang.selectAccessors(type, JsonStructIgnore.class))) {
             Code prop = Code.of("""
                 .append("\\"#{name}\\":")
                     #{value}""")

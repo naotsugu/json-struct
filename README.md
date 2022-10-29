@@ -26,18 +26,19 @@ public record Person(FullName fullName, int age) {
 var json = Json.of(Person.class);
 var person = json.from("""
     {
-        "fullName": { "givenName": "Bob",
-                      "familyName": "Dylan"
-                    },
+        "fullName": {
+             "givenName": "Bob",
+             "familyName": "Dylan"
+        },
         "age": 81,
         "gender": "MALE"
     }
     """;
 
-assertEquals("Bob", person.fullName().givenName());
-assertEquals("Dylan", person.fullName().familyName());
-assertEquals(81, person.age());
-assertEquals(Gender.MALE, person.gender());
+person.fullName().givenName();  // Bob
+person.fullName().familyName(); // Dylan
+person.age();                   // 81
+person.gender();                // Gender.MALE
 ```
 
 

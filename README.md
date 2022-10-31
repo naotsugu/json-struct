@@ -7,12 +7,23 @@
 
 json-struct provides a standard binding layer between Java classes and JSON documents.
 
-Annotation processor resolves bindings at build time.
+No reflection is used, annotation processor resolves bindings at build time.
 
-No reflection is used, resulting in fast operation.
+It is very fast compared to other mapping libraries.
+
 
 
 ## Usage
+
+Add dependencies.
+
+```kotlin
+dependencies {
+  implementation("com.mammb:json-struct:0.1.0")
+  annotationProcessor("com.mammb:json-struct:0.1.0")
+}
+```
+
 
 Annotate the model with `@JsonStruct`.
 
@@ -21,6 +32,7 @@ Annotate the model with `@JsonStruct`.
 public record Person(FullName fullName, int age) {
 }
 ```
+
 
 ```java
 var json = Json.of(Person.class);
@@ -68,7 +80,7 @@ json.stringify(person);
 ```
 
 
-## Benchmarking
+## Benchmark
 
 ```bash
 $ ./gradlew benchmark:jmh
@@ -82,3 +94,4 @@ MicroBench.gson     thrpt    5  72342.839 ± 2642.378  ops/s
 MicroBench.jackson  thrpt    5  20952.252 ± 1746.561  ops/s
 MicroBench.struct   thrpt    5  93881.308 ±  314.969  ops/s
 ```
+

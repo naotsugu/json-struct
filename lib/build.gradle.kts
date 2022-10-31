@@ -26,6 +26,8 @@ tasks.withType<JavaCompile> {
 }
 
 java {
+    withJavadocJar()
+    withSourcesJar()
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
     }
@@ -36,11 +38,6 @@ version = "0.1.0"
 
 val sonatypeUsername: String? by project
 val sonatypePassword: String? by project
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
 
 publishing {
     publications {

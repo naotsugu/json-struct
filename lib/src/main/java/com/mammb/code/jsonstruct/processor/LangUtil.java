@@ -141,6 +141,9 @@ public class LangUtil {
      * @return {@code true} if whether the given {@link TypeMirror} is a Enum type
      */
     public boolean isEnum(TypeMirror typeMirror) {
+        if (typeMirror.getKind() != TypeKind.DECLARED) {
+            return false;
+        }
         return typeUtils.asElement(typeMirror).getKind() == ElementKind.ENUM;
     }
 
@@ -306,6 +309,17 @@ public class LangUtil {
         }
 
         return List.of();
+    }
+
+
+    /**
+     * Gets whether the element is annotated with the given annotation.
+     * @param element the element
+     * @param ann the annotation type
+     * @return {@code true} if the element is annotated with the given annotation
+     */
+    public boolean isAnnotated(Element element, Class<? extends Annotation> ann) {
+        return element.getAnnotationsByType(ann).length > 0;
     }
 
 

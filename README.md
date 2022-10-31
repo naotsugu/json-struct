@@ -67,3 +67,17 @@ json.stringify(person);
 // {"fullName":{"givenName":"Bob","familyName":"Dylan"},"age":81,"gender":"MALE"}
 ```
 
+
+## Benchmarking
+
+```bash
+$ ./gradlew benchmark:jmh
+```
+
+
+```
+Benchmark            Mode  Cnt      Score      Error  Units
+MicroBench.gson     thrpt    5  72342.839 ± 2642.378  ops/s
+MicroBench.jackson  thrpt    5  20952.252 ± 1746.561  ops/s
+MicroBench.struct   thrpt    5  93881.308 ±  314.969  ops/s
+```

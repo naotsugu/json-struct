@@ -210,7 +210,7 @@ public class Stringify {
                 StringBuilder sb = new StringBuilder();
                 for (Map.Entry<#{keyType}, #{valType}> entry : iterable) {
                     if (sb.length() > 0) sb.append(',');
-                    sb#{keyEntry}.append(": ")
+                    sb#{keyEntry}.append(":")
                         #{valEntry};
                 }
                 return sb;

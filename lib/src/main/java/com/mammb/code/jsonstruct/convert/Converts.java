@@ -116,7 +116,15 @@ public class Converts {
         if (Objects.isNull(clazz)) {
             return null;
         }
-        if (clazz == Byte.TYPE || clazz == Short.TYPE || clazz == Integer.TYPE) {
+        if (clazz == Byte.TYPE) {
+            byte b = 0;
+            return (T) (Object) b;
+        }
+        if (clazz == Short.TYPE) {
+            short s = 0;
+            return (T) (Object) s;
+        }
+        if (clazz == Integer.TYPE) {
             return (T) (Object) 0;
         }
         if (clazz == Long.TYPE) {

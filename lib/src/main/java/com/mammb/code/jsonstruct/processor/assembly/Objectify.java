@@ -16,16 +16,15 @@
 package com.mammb.code.jsonstruct.processor.assembly;
 
 import com.mammb.code.jsonstruct.JsonStruct;
+import com.mammb.code.jsonstruct.JsonStructIgnore;
 import com.mammb.code.jsonstruct.lang.Iterate;
 import com.mammb.code.jsonstruct.processor.JsonStructException;
 import com.mammb.code.jsonstruct.processor.LangUtil;
-
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -123,7 +122,9 @@ public class Objectify {
 
         ExecutableElement constructorLike = lang.selectConstructorLike(element, JsonStruct.class).orElseThrow();
         for (Iterate.Entry<? extends VariableElement> param : Iterate.of(constructorLike.getParameters())) {
-            Code paramCode = toCode(param.value().asType(), path.with(param.value().getSimpleName().toString()));
+            Code paramCode = (lang.isAnnotated(param.value(), JsonStructIgnore.class))
+                ? defaults(param.value().asType())
+                : toCode(param.value().asType(), path.with(param.value().getSimpleName().toString()));
             paramCode.append(param.hasNext() ? "," : "");
             params.add(paramCode);
         }
@@ -135,6 +136,13 @@ public class Objectify {
             """)
             .interpolate("#{newMethod}", instantiation(constructorLike, lang))
             .interpolate("#{params}", params);
+    }
+
+
+    private Code defaults(TypeMirror type) {
+        return Code.of("""
+                json.as(convert.defaults(#{type}.class))""")
+            .interpolateType("#{type}", type.toString());
     }
 
 
@@ -189,7 +197,7 @@ public class Objectify {
             .interpolate("#{entry}", toCode(entryType, Path.of())));
 
         return Code.of("""
-            #{methodName}((JsonArray) json.at("#{path}"))""")
+            #{methodName}((JsonArray) ((JsonStructure) json).at("#{path}"))""")
             .interpolate("#{methodName}", methodName)
             .interpolateType("#{path}", path.pointerJoin());
     }
@@ -215,7 +223,7 @@ public class Objectify {
             .interpolate("#{entry}", toCode(entryType, Path.of())));
 
         return Code.of("""
-            #{methodName}((JsonArray) json.at("#{path}"))""")
+            #{methodName}((JsonArray) ((JsonStructure) json).at("#{path}"))""")
             .interpolate("#{methodName}", methodName)
             .interpolateType("#{path}", path.pointerJoin());
     }
@@ -241,7 +249,7 @@ public class Objectify {
             .interpolate("#{entry}", toCode(compType, Path.of())));
 
         return Code.of("""
-            #{methodName}((JsonArray) json.at("#{path}"))""")
+            #{methodName}((JsonArray) ((JsonStructure) json).at("#{path}"))""")
             .interpolate("#{methodName}", methodName)
             .interpolateType("#{path}", path.pointerJoin());
     }
@@ -295,7 +303,7 @@ public class Objectify {
                 """)));
 
         return Code.of("""
-            #{methodName}((JsonStructure) json.at("#{path}"))""")
+            #{methodName}((JsonStructure) ((JsonStructure) json).at("#{path}"))""")
             .interpolate("#{methodName}", methodName)
             .interpolateType("#{path}", path.pointerJoin());
     }

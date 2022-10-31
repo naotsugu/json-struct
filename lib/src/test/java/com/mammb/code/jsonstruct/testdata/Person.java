@@ -13,20 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.processor;
+package com.mammb.code.jsonstruct.testdata;
 
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
+import com.mammb.code.jsonstruct.JsonStruct;
 
 /**
- * JsonStructProcessorTest.
+ * Person.
  *
  * @author Naotsugu Kobayashi
  */
-class JsonStructProcessorTest {
-
-    @Test
-    void getSupportedSourceVersion() {
-    }
+@JsonStruct
+public record Person(FullName fullName, int age, Gender gender) {
 }

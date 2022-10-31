@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.processor.testdata;
+package com.mammb.code.jsonstruct.testdata;
 
 import com.mammb.code.jsonstruct.JsonStruct;
+import java.util.List;
 
 /**
- * Person.
+ * Food.
  *
  * @author Naotsugu Kobayashi
  */
 @JsonStruct
-public record Person(FullName fullName, int age, Gender gender) {
+public record Food(String name, List<String> materials) {
 }

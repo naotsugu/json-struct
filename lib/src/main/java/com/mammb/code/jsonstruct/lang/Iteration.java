@@ -80,7 +80,7 @@ public interface Iteration {
      */
     class Empty implements Iteration {
         @Override
-        public int index() { return -1;}
+        public int index() { return -1; }
         @Override
         public boolean hasNext() { return false; }
     }

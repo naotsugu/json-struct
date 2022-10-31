@@ -38,6 +38,7 @@ public interface JsonObject extends JsonStructure {
     /**
      * Gets the json value to which the specified name is mapped.
      * @param name the name whose associated value is to be returned
+     * @return the json value
      */
     JsonValue get(String name);
 

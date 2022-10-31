@@ -74,6 +74,7 @@ json.stringify(person);
 $ ./gradlew benchmark:jmh
 ```
 
+json-struct is faster than other Json mapping libraries.
 
 ```
 Benchmark            Mode  Cnt      Score      Error  Units

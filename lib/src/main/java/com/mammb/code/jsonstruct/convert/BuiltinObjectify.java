@@ -127,7 +127,7 @@ public class BuiltinObjectify {
     }
 
 
-    public static <T> T trying(ThrowsSupplier<T> supplier) {
+    private static <T> T trying(ThrowsSupplier<T> supplier) {
         try {
             return supplier.get();
         } catch (Exception e) {

@@ -26,11 +26,13 @@ public interface JsonNumber extends JsonValue, NumberSource {
 
     /**
      * Create a new JsonNumber instance.
+     * @param ns the number source
      * @return a new JsonNumber instance
      */
     static JsonNumber of(NumberSource ns) {
         return new JsonNumberImpl(ns);
     }
+
 
     /**
      * JsonNumber implementation.

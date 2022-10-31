@@ -119,6 +119,8 @@ public class Context implements ProcessingEnvironment {
 
     /**
      * Gets the processed entities.
+     * @param type the type
+     * @param <T> type of class
      * @return the processed entities
      */
     public <T> List<T> getProcessed(Class<T> type) {

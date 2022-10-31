@@ -98,8 +98,7 @@ public class Imports {
 
     /**
      * Add import.
-     * @param imports the imports subjects
-     * @return the type name applied import
+     * @param imports the import subjects
      */
     public void add(String imports) {
         imports.lines().filter(not(String::isBlank)).forEach(this::applySingle);

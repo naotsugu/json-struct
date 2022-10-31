@@ -68,16 +68,14 @@ public class Converts {
      */
     @SuppressWarnings("unchecked")
     public <T> Function<JsonValue, T> to(Class<?> clazz) {
-        if (Objects.isNull(clazz)) {
+        if (clazz == null) {
             return v -> null;
         }
         if (!objectifyOptMap.isEmpty() && objectifyOptMap.containsKey(clazz)) {
             return (Function<JsonValue, T>) objectifyOptMap.get(clazz);
         }
-        if (objectifyMap.containsKey(clazz)) {
-            return (Function<JsonValue, T>) objectifyMap.get(clazz);
-        }
-        return v -> null;
+        var fun = (Function<JsonValue, T>) objectifyMap.get(clazz);
+        return (fun != null) ? fun : v -> null;
     }
 
 

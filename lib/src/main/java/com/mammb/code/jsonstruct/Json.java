@@ -47,6 +47,7 @@ public interface Json<T> {
      * Writes the object content tree to a {@link Appendable}.
      * @param object the object content tree to be serialized.
      * @param writer destination of json data where serialized from java content tree
+     * @throws IOException if io error occurred
      */
     void stringify(T object, Appendable writer) throws IOException;
 

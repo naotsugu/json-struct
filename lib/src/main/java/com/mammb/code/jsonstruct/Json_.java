@@ -22,6 +22,12 @@ package com.mammb.code.jsonstruct;
  */
 public class Json_ {
 
+    /**
+     * Gets the Json object.
+     * @param clazz the class
+     * @param <T> the type of class
+     * @return the Json object
+     */
     public static <T> Json<T> of(Class<T> clazz) {
         return null;
     }

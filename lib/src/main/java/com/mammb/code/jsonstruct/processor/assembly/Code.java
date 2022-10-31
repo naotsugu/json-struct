@@ -42,7 +42,7 @@ public class Code {
     /**
      * Constructor.
      */
-    public Code(List<String> lines, Imports imports) {
+    private Code(List<String> lines, Imports imports) {
         this.lines = Objects.requireNonNull(lines);
         this.imports = Objects.requireNonNull(imports);
     }
@@ -69,6 +69,7 @@ public class Code {
 
     /**
      * Set level one indent.
+     * @return this code
      */
     public Code indent() {
         return indent(1);
@@ -177,6 +178,7 @@ public class Code {
     /**
      * Add code.
      * @param code the code
+     * @return this code
      */
     public Code add(Code code) {
         lines.addAll(code.lines);
@@ -188,6 +190,7 @@ public class Code {
     /**
      * Add imports.
      * @param other Imports
+     * @return this code
      */
     public Code add(Imports other) {
         imports.marge(other);

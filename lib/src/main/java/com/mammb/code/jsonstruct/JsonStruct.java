@@ -30,7 +30,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonStruct {
 
-    /** limit of cyclic depth. */
+    /**
+     * The limit of cyclic depth.
+     * @return limit of cyclic depth
+     */
     int cyclicDepth() default 2;
 
 }

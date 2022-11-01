@@ -9,8 +9,6 @@ json-struct provides a standard binding layer between Java classes and JSON docu
 
 No reflection is used, annotation processor resolves bindings at build time.
 
-It is very fast compared to other mapping libraries.
-
 
 
 ## Usage
@@ -86,12 +84,4 @@ json.stringify(person);
 $ ./gradlew benchmark:jmh
 ```
 
-json-struct is faster than other Json mapping libraries.
-
-```
-Benchmark            Mode  Cnt      Score      Error  Units
-MicroBench.gson     thrpt    5  72342.839 ± 2642.378  ops/s
-MicroBench.jackson  thrpt    5  20952.252 ± 1746.561  ops/s
-MicroBench.struct   thrpt    5  93881.308 ±  314.969  ops/s
-```
 

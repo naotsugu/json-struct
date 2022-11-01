@@ -103,6 +103,19 @@ public class Converts {
     }
 
 
+    @SuppressWarnings("unchecked")
+    public <T> void stringify(T object, StringifyBuilder sb) {
+        if (object == null) {
+            sb.appendNull();
+        } else if (object instanceof Enum<?> en) {
+            sb.appendStr(en.name());
+        } else if (!stringifyOptMap.isEmpty() && stringifyOptMap.containsKey(object.getClass())) {
+            sb.append(((Function<T, CharSequence>) stringifyOptMap.get(object.getClass())).apply(object));
+        } else {
+            StringifyBuiltin.apply(object, sb);
+        }
+    }
+
     /**
      * Gets the default value.
      * @param clazz the target class
@@ -195,7 +208,7 @@ public class Converts {
     public Set<String> stringifyClasses() {
         Set<String> set = new HashSet<>();
         stringifyMap.keySet().forEach(k -> set.add(k.getCanonicalName()));
-        stringifyOptMap.keySet().forEach(k -> set.add(k.getCanonicalName()));
+        set.addAll(StringifyBuiltin.typeNames());
         return set;
     }
 

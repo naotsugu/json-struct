@@ -95,18 +95,18 @@ public class StringifyBuiltin {
                  "java.lang.Long",
                  "java.lang.Short",
                  "java.math.BigDecimal",
-                 "java.math.BigInteger"    -> sb.append(object);
-            case "java.lang.Number"        -> sb.append(new BigDecimal(String.valueOf(object)).toString());
-            case "byte"                    -> sb.append(Byte.toString((byte) object));
-            case "boolean"                 -> sb.append(Boolean.toString((boolean) object));
-            case "double"                  -> sb.append(Double.toString((double) object));
-            case "float"                   -> sb.append(Float.toString((float) object));
-            case "int"                     -> sb.append(Integer.toString((int) object));
-            case "long"                    -> sb.append(Long.toString((long) object));
-            case "short"                   -> sb.append(Short.toString((short) object));
-            case "java.util.OptionalDouble"-> sb.append(((OptionalDouble) object).isPresent() ? String.valueOf(((OptionalDouble) object).getAsDouble()) : "null");
-            case "java.util.OptionalInt"   -> sb.append(((OptionalInt) object).isPresent() ? String.valueOf(((OptionalInt) object).getAsInt()) : "null");
-            case "java.util.OptionalLong"  -> sb.append(((OptionalLong) object).isPresent() ? String.valueOf(((OptionalLong) object).getAsLong()) : "null");
+                 "java.math.BigInteger"    -> sb.appendNum(object);
+            case "java.lang.Number"        -> sb.appendNum(new BigDecimal(String.valueOf(object)).toString());
+            case "byte"                    -> sb.appendNum(Byte.toString((byte) object));
+            case "boolean"                 -> sb.appendNum(Boolean.toString((boolean) object));
+            case "double"                  -> sb.appendNum(Double.toString((double) object));
+            case "float"                   -> sb.appendNum(Float.toString((float) object));
+            case "int"                     -> sb.appendNum(Integer.toString((int) object));
+            case "long"                    -> sb.appendNum(Long.toString((long) object));
+            case "short"                   -> sb.appendNum(Short.toString((short) object));
+            case "java.util.OptionalDouble"-> sb.appendNum(((OptionalDouble) object).isPresent() ? String.valueOf(((OptionalDouble) object).getAsDouble()) : "null");
+            case "java.util.OptionalInt"   -> sb.appendNum(((OptionalInt) object).isPresent() ? String.valueOf(((OptionalInt) object).getAsInt()) : "null");
+            case "java.util.OptionalLong"  -> sb.appendNum(((OptionalLong) object).isPresent() ? String.valueOf(((OptionalLong) object).getAsLong()) : "null");
 
             case "char"                    -> sb.appendStr(String.valueOf((char) object));
             case "java.util.Date"          -> sb.appendStr(DateTimeFormatter.ISO_DATE_TIME.withZone(UTC).withLocale(locale).format(((Date) object).toInstant()));

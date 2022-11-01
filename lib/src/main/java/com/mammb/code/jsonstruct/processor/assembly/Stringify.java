@@ -118,7 +118,7 @@ public class Stringify {
 
     private Code basic(Path path) {
         return Code.of("""
-            .append(convert.stringify(#{path}.orElse(null)))""")
+            .appendObj(#{path}.orElse(null))""")
             .interpolate("#{path}", path.elvisJoin());
     }
 
@@ -155,7 +155,7 @@ public class Stringify {
 
         return Code.of("""
             .append("[")
-                .append(#{methodName}(Arrays.asList(#{path}.orElse(new #{type}[0]))))
+                .appendFun(b -> #{methodName}(Arrays.asList(#{path}.orElse(new #{type}[0])), b))
             .append("]")""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{path}", path.elvisJoin())
@@ -171,7 +171,7 @@ public class Stringify {
 
         return Code.of("""
             .append("[")
-                .append(#{methodName}(#{path}.orElse(List.of())))
+                .appendFun(b -> #{methodName}(#{path}.orElse(List.of()), b))
             .append("]")""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{path}", path.elvisJoin());
@@ -180,18 +180,16 @@ public class Stringify {
 
     private void buildIterableMethod(TypeMirror entryType, String methodName) {
         Code backingMethod = Code.of("""
-            private CharSequence #{methodName}(Iterable<#{type}> iterable) {
-                StringBuilder sb = new StringBuilder();
-                for (#{type} object : iterable) {
-                    if (sb.length() > 0) sb.append(',');
+            private void #{methodName}(Iterable<#{type}> iterable, StringifyBuilder sb) {
+                for (Iterate.Entry<#{type}> entry : Iterate.of(iterable)) {
+                    if (!entry.isFirst()) sb.append(',');
                     sb#{entry};
                 }
-                return sb;
             }
             """)
             .interpolateType("#{type}", entryType.toString())
             .interpolate("#{methodName}", methodName)
-            .interpolate("#{entry}", toCode(entryType, Path.of("object")));
+            .interpolate("#{entry}", toCode(entryType, Path.of("entry", "value")));
         backingMethods.add(backingMethod);
     }
 
@@ -206,52 +204,48 @@ public class Stringify {
 
         if (basicClasses.contains(key.toString())) {
             Code backingMethod = Code.of("""
-            private CharSequence #{methodName}(Iterable<Map.Entry<#{keyType}, #{valType}>> iterable) {
-                StringBuilder sb = new StringBuilder();
-                for (Map.Entry<#{keyType}, #{valType}> entry : iterable) {
-                    if (sb.length() > 0) sb.append(',');
+            private void #{methodName}(Iterable<Map.Entry<#{keyType}, #{valType}>> iterable, StringifyBuilder sb) {
+                for (Iterate.Entry<Map.Entry<#{keyType}, #{valType}>> entry : Iterate.of(iterable)) {
+                    if (!entry.isFirst()) sb.append(',');
                     sb#{keyEntry}.append(":")
                         #{valEntry};
                 }
-                return sb;
             }
             """)
                 .interpolateType("#{keyType}", key.toString())
                 .interpolateType("#{valType}", val.toString())
                 .interpolate("#{methodName}", methodName)
-                .interpolate("#{keyEntry}", toCode(key, Path.of("entry", "getKey")))
-                .interpolate("#{valEntry}", toCode(val, Path.of("entry", "getValue")));
+                .interpolate("#{keyEntry}", toCode(key, Path.of("entry", "value", "getKey")))
+                .interpolate("#{valEntry}", toCode(val, Path.of("entry", "value", "getValue")));
             backingMethods.add(backingMethod);
 
             return Code.of("""
             .append("{")
-                .append(#{methodName}(#{path}.orElse(Map.of()).entrySet()))
+                .appendFun(b -> #{methodName}(#{path}.orElse(Map.of()).entrySet(), b))
             .append("}")""")
                 .interpolate("#{methodName}", methodName)
                 .interpolate("#{path}", path.elvisJoin());
 
         } else {
             Code backingMethod = Code.of("""
-            private CharSequence #{methodName}(Iterable<Map.Entry<#{keyType}, #{valType}>> iterable) {
-                StringBuilder sb = new StringBuilder();
-                for (Map.Entry<#{keyType}, #{valType}> entry : iterable) {
-                    if (sb.length() > 0) sb.append(',');
+            private void #{methodName}(Iterable<Map.Entry<#{keyType}, #{valType}>> iterable, StringifyBuilder sb) {
+                for (Iterate.Entry<Map.Entry<#{keyType}, #{valType}>> entry : Iterate.of(iterable)) {
+                    if (!entry.isFirst()) sb.append(',');
                     sb#{keyEntry}.append(",")
                         #{valEntry};
                 }
-                return sb;
             }
             """)
                 .interpolateType("#{keyType}", key.toString())
                 .interpolateType("#{valType}", val.toString())
                 .interpolate("#{methodName}", methodName)
-                .interpolate("#{keyEntry}", toCode(key, Path.of("entry", "getKey")))
-                .interpolate("#{valEntry}", toCode(val, Path.of("entry", "getValue")));
+                .interpolate("#{keyEntry}", toCode(key, Path.of("entry", "value", "getKey")))
+                .interpolate("#{valEntry}", toCode(val, Path.of("entry", "value", "getValue")));
             backingMethods.add(backingMethod);
 
             return Code.of("""
             .append("[")
-                .append(#{methodName}(#{path}.orElse(Map.of()).entrySet()))
+                .appendFun(b -> #{methodName}(#{path}.orElse(Map.of()).entrySet(), b))
             .append("]")""")
                 .interpolate("#{methodName}", methodName)
                 .interpolate("#{path}", path.elvisJoin());

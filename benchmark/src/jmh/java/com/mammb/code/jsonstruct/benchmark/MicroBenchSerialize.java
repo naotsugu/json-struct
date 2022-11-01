@@ -11,7 +11,7 @@ import org.openjdk.jmh.annotations.Warmup;
 
 @Fork(1)
 @Warmup(iterations = 2, time = 10)
-public class MicroBench {
+public class MicroBenchSerialize {
 
     private static final String str = """
             {
@@ -34,31 +34,27 @@ public class MicroBench {
               }
             }""";
 
+    private static final Json<Glossary> json = Json.of(Glossary.class);
+    private static final Gson gson = new Gson();
+    private static final ObjectMapper jackson = new ObjectMapper();
+    private static final Glossary glossary = json.from(str);
 
     @Benchmark
     public String struct() {
-        Json<Glossary> json = Json.of(Glossary.class);
-        Glossary glossary = json.from(str);
         return json.stringify(glossary);
     }
 
     @Benchmark
     public String gson() {
-        Gson gson = new Gson();
-        Glossary glossary = gson.fromJson(str, Glossary.class);
         return gson.toJson(glossary);
     }
 
     @Benchmark
     public String jackson() throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        Glossary glossary = mapper.readValue(str, Glossary.class);
-        return mapper.writeValueAsString(glossary);
+        return jackson.writeValueAsString(glossary);
     }
 
-
     public static void main(String[] args) throws Exception {
-
         var mb = new MicroBenchSerialize();
 
         System.out.println("-- struct -------------------------------------------");

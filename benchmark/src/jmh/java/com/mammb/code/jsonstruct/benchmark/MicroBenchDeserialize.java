@@ -11,7 +11,7 @@ import org.openjdk.jmh.annotations.Warmup;
 
 @Fork(1)
 @Warmup(iterations = 2, time = 10)
-public class MicroBench {
+public class MicroBenchDeserialize {
 
     private static final String str = """
             {
@@ -34,46 +34,43 @@ public class MicroBench {
               }
             }""";
 
+    static Json<Glossary> json = Json.of(Glossary.class);
+    static Gson gson = new Gson();
+    static ObjectMapper jackson = new ObjectMapper();
 
     @Benchmark
-    public String struct() {
-        Json<Glossary> json = Json.of(Glossary.class);
-        Glossary glossary = json.from(str);
-        return json.stringify(glossary);
+    public Glossary struct() {
+        return json.from(str);
     }
 
     @Benchmark
-    public String gson() {
-        Gson gson = new Gson();
-        Glossary glossary = gson.fromJson(str, Glossary.class);
-        return gson.toJson(glossary);
+    public Glossary gson() {
+        return gson.fromJson(str, Glossary.class);
     }
 
     @Benchmark
-    public String jackson() throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        Glossary glossary = mapper.readValue(str, Glossary.class);
-        return mapper.writeValueAsString(glossary);
+    public Glossary jackson() throws JsonProcessingException {
+        return jackson.readValue(str, Glossary.class);
     }
 
 
     public static void main(String[] args) throws Exception {
 
-        var mb = new MicroBenchSerialize();
+        var mb = new MicroBenchDeserialize();
 
         System.out.println("-- struct -------------------------------------------");
-        var struct = mb.struct();
+        var struct = gson.toJson(mb.struct());
         System.out.println(struct);
 
         System.out.println("-- gson ---------------------------------------------");
-        var gson = mb.gson();
-        System.out.println(gson);
+        var gson_ = gson.toJson(mb.gson());
+        System.out.println(gson_);
 
         System.out.println("-- jackson ------------------------------------------");
-        var jackson = mb.jackson();
+        var jackson = gson.toJson(mb.jackson());
         System.out.println(jackson);
 
-        System.out.println("match: " + gson.equals(struct));
+        System.out.println("match: " + gson_.equals(struct));
         System.out.println("match: " + jackson.equals(struct));
 
     }

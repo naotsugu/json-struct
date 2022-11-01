@@ -96,8 +96,9 @@ public class JsonStructEntity {
 
         Imports imports = Imports.of("""
             import com.mammb.code.jsonstruct.Json;
-            import com.mammb.code.jsonstruct.convert.Converts;
+            import com.mammb.code.jsonstruct.convert.*;
             import com.mammb.code.jsonstruct.parser.*;
+            import com.mammb.code.jsonstruct.lang.*;
             import javax.annotation.processing.Generated;
             import java.io.*;
             import java.util.*;
@@ -122,7 +123,7 @@ public class JsonStructEntity {
 
                     @Override
                     public void stringify(#{entityName} object, Appendable writer) throws IOException {
-                        writer
+                        StringifyBuilder.of(writer, convert)
                             #{stringifyCode};
                     }
 

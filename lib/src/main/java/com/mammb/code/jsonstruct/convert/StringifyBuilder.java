@@ -1,23 +1,58 @@
 package com.mammb.code.jsonstruct.convert;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 public class StringifyBuilder {
 
     private final Appendable appendable;
 
-    public StringifyBuilder(Appendable appendable) {
+    private final Converts convert;
+
+
+    public StringifyBuilder(Appendable appendable, Converts convert) {
         this.appendable = appendable;
+        this.convert = convert;
+    }
+
+    public static StringifyBuilder of(Appendable appendable, Converts convert) {
+        return new StringifyBuilder(appendable, convert);
     }
 
 
+    public StringifyBuilder appendObj(Object object) {
+        convert.stringify(object, this);
+        return this;
+    }
 
-    StringifyBuilder append(Object object) {
+    public StringifyBuilder appendFun(Consumer<StringifyBuilder> fun) {
+        fun.accept(this);
+        return this;
+    }
+
+
+    public StringifyBuilder append(CharSequence cs) {
+        appendOn(cs);
+        return this;
+    }
+
+    public StringifyBuilder append(char ch) {
+        appendOn(ch);
+        return this;
+    }
+
+
+    StringifyBuilder appendNull() {
+        appendOn("null");
+        return this;
+    }
+
+    StringifyBuilder appendNum(Object object) {
         appendOn(String.valueOf(object));
         return this;
     }
 
-    StringifyBuilder append(CharSequence cs) {
+    StringifyBuilder appendNum(CharSequence cs) {
         appendOn(cs);
         return this;
     }
@@ -61,6 +96,7 @@ public class StringifyBuilder {
         }
         return this;
     }
+
 
     private StringifyBuilder appendEscOn(CharSequence cs) {
         int len = cs.length();

@@ -51,7 +51,7 @@ class Tokenizer {
      * @param ca CharArray
      */
     private Tokenizer(Reader reader, CharArray ca) {
-        this.reader = reader.markSupported() ? reader : new BufferedReader(reader);
+        this.reader = reader;
         this.ca = ca;
         this.prev = null;
         this.line = 1;

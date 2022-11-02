@@ -21,7 +21,14 @@ public class StringifyBuilder {
 
 
     public StringifyBuilder appendObj(Object object) {
-        convert.stringify(object, this);
+        if (object instanceof CharSequence) {
+            // bypass
+            appendOn('"');
+            appendEscOn((CharSequence) object);
+            appendOn('"');
+        } else {
+            convert.stringify(object, this);
+        }
         return this;
     }
 
@@ -60,45 +67,45 @@ public class StringifyBuilder {
 
     StringifyBuilder appendStr(Object object) {
         if (object == null) {
-            appendOn("null");
-        } else {
-            appendOn("\"").appendEscOn(String.valueOf(object)).appendOn("\"");
+            return appendNull();
         }
+        appendOn('"');
+        appendEscOn(String.valueOf(object));
+        appendOn('"');
         return this;
     }
 
 
     StringifyBuilder appendStr(CharSequence cs) {
         if (cs == null) {
-            appendOn("null");
-        } else {
-            appendOn("\"").appendEscOn(cs).appendOn("\"");
+            return appendNull();
         }
+        appendOn('"');
+        appendEscOn(cs);
+        appendOn('"');
         return this;
     }
 
 
-    private StringifyBuilder appendOn(CharSequence cs) {
+    private void appendOn(CharSequence cs) {
         try {
             appendable.append(cs);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return this;
     }
 
 
-    private StringifyBuilder appendOn(char ch) {
+    private void appendOn(char ch) {
         try {
             appendable.append(ch);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return this;
     }
 
 
-    private StringifyBuilder appendEscOn(CharSequence cs) {
+    private void appendEscOn(CharSequence cs) {
         int len = cs.length();
         for (int i = 0; i < len; i++) {
             int begin = i, end = i;
@@ -116,20 +123,19 @@ public class StringifyBuilder {
             }
 
             switch (c) {
-                case '"', '\\' -> appendOn('\\').appendOn(c);
-                case '\b' -> appendOn('\\').appendOn('b');
-                case '\f' -> appendOn('\\').appendOn('f');
-                case '\n' -> appendOn('\\').appendOn('n');
-                case '\r' -> appendOn('\\').appendOn('r');
-                case '\t' -> appendOn('\\').appendOn('t');
+                case '"', '\\' -> { appendOn('\\'); appendOn(c); }
+                case '\b' -> appendOn("\\b");
+                case '\f' -> appendOn("\\f");
+                case '\n' -> appendOn("\\n");
+                case '\r' -> appendOn("\\r");
+                case '\t' -> appendOn("\\t");
                 default -> {
                     String hex = "000" + Integer.toHexString(c);
-                    appendOn("\\u").appendOn(hex.substring(hex.length() - 4));
+                    appendOn("\\u");
+                    appendOn(hex.substring(hex.length() - 4));
                 }
             }
         }
-        return this;
     }
-
 
 }

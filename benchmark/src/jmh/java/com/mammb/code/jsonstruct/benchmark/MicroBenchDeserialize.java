@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.mammb.code.jsonstruct.Json;
 import com.mammb.code.jsonstruct.benchmark.data.Glossary;
+import com.mammb.code.jsonstruct.lang.StringReader;
+import com.mammb.code.jsonstruct.parser.JsonStructure;
+import com.mammb.code.jsonstruct.parser.Parser;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Warmup;
@@ -38,17 +41,17 @@ public class MicroBenchDeserialize {
     static Gson gson = new Gson();
     static ObjectMapper jackson = new ObjectMapper();
 
-    @Benchmark
+    //@Benchmark
     public Glossary struct() {
         return json.from(str);
     }
 
-    @Benchmark
+    //@Benchmark
     public Glossary gson() {
         return gson.fromJson(str, Glossary.class);
     }
 
-    @Benchmark
+    //@Benchmark
     public Glossary jackson() throws JsonProcessingException {
         return jackson.readValue(str, Glossary.class);
     }

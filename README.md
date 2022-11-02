@@ -84,4 +84,13 @@ json.stringify(person);
 $ ./gradlew benchmark:jmh
 ```
 
+##### Serialize
+
+```
+Benchmark                     Mode  Cnt        Score      Error  Units
+MicroBenchSerialize.gson     thrpt    5   413219.857 ± 2066.694  ops/s
+MicroBenchSerialize.jackson  thrpt    5  1268956.639 ± 6092.968  ops/s
+MicroBenchSerialize.struct   thrpt    5  1671086.739 ± 5282.317  ops/s
+```
+
 

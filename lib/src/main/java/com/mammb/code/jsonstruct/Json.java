@@ -59,7 +59,7 @@ public interface Json<T> {
      */
     default String stringify(T object) {
         try {
-            StringBuilder sb = new StringBuilder(500);
+            StringBuilder sb = new StringBuilder(256);
             stringify(object, sb);
             return sb.toString();
         } catch (IOException e) {

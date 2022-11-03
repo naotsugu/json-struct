@@ -68,6 +68,9 @@ public interface JsonObject extends JsonStructure {
 
         @Override
         public void put(String name, JsonValue value) {
+            if (name == null) {
+                throw new JsonParseException();
+            }
             values.put(name, value);
         }
 

@@ -16,11 +16,9 @@
 package com.mammb.code.jsonstruct.parser;
 
 import com.mammb.code.jsonstruct.lang.CharArray;
-
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.function.Consumer;
-
 import static com.mammb.code.jsonstruct.parser.Token.Type.*;
 
 /**
@@ -101,12 +99,12 @@ public class Parser {
      * @return JsonObject
      */
     JsonObject parseObject(JsonObject obj) {
-        String name = "";
+        Token name = null;
         for (;;) {
             prev = curr;
             curr = tokenizer.next();
             if (prev == null || prev.type != COLON) {
-                name = "";
+                name = null;
             }
             switch (curr.type) {
                 case CURLY_OPEN ->
@@ -122,15 +120,15 @@ public class Parser {
                 case NULL ->
                     keying(name, k -> obj.put(k, JsonValue.NULL));
                 case STRING -> {
-                    if (!name.isEmpty())
-                        obj.put(name, JsonString.of((CharSource) curr));
+                    if (name != null)
+                        keying(name, k -> obj.put(k, JsonString.of((CharSource) curr)));
                 }
                 case COLON -> {
-                    if (prev != null && prev.type == STRING) name = prev.toString();
+                    if (prev != null && prev.type == STRING) name = prev;
                     else throw new JsonParseException();
                 }
                 case COMMA -> {
-                    if (!name.isEmpty() || prev == null ||
+                    if (name != null || prev == null ||
                         prev.type == CURLY_OPEN || prev.type == SQUARE_OPEN ||
                         prev.type == COLON || prev.type == COMMA)
                         throw new JsonParseException();
@@ -185,14 +183,14 @@ public class Parser {
 
     /**
      * Apply key
-     * @param key the key
+     * @param name the name token
      * @param consumer Key consuming actions
      */
-    private void keying(String key, Consumer<String> consumer) {
-        if (key.isEmpty()) {
+    private void keying(Token name, Consumer<String> consumer) {
+        if (name == null) {
             throw new JsonParseException();
         }
-        consumer.accept(key);
+        consumer.accept(name.toString());
     }
 
 }

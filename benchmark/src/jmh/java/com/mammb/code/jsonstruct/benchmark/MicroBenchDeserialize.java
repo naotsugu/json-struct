@@ -43,7 +43,9 @@ public class MicroBenchDeserialize {
 
     @Benchmark
     public Glossary struct() {
-        return json.from(str);
+        JsonStructure json = Parser.of(new StringReader(str)).parse();
+        return null;
+        //return json.from(str);
     }
 
     //@Benchmark

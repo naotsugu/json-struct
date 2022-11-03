@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.HexFormat;
 
-import static com.mammb.code.jsonstruct.parser.Token.Type.*;
-
 /**
  * Tokenizer.
  *
@@ -37,14 +35,11 @@ class Tokenizer {
     /** CharArray. */
     private final CharArray ca;
 
-    /** Previously read character. */
-    private Integer prev;
-
     /** number of current line. */
     private int line;
 
     /** number of current column. */
-    private int colm;
+    private int col;
 
 
     /**
@@ -55,9 +50,8 @@ class Tokenizer {
     private Tokenizer(Reader reader, CharArray ca) {
         this.reader = reader.markSupported() ? reader : new BufferedReader(reader);
         this.ca = ca;
-        this.prev = null;
         this.line = 1;
-        this.colm = 0;
+        this.col = 0;
     }
 
 
@@ -95,8 +89,8 @@ class Tokenizer {
      * Get the number of current column.
      * @return the number of current column
      */
-    int getColm() {
-        return colm;
+    int getCol() {
+        return col;
     }
 
 
@@ -130,15 +124,25 @@ class Tokenizer {
      * @return token
      */
     private Token readString() {
-        int start = ca.length();
+        final int start = ca.length();
         for (;;) {
+            markReader();
+            int count = 0;
             int ch = read();
+            while (ch >= ' ' && ch != '"' && ch != '\\') {
+                ch = read();
+                count++;
+            }
+
+            resetReader();
+            ca.add(reader, count);
+            col += (count + 1);
+            skipReader(1);
+
             if (ch == '"') {
                 break;
             } else if (ch == '\\') {
                 ca.add((char) unescape(read()));
-            } else if (ch >= 0x20) {
-                ca.add((char) ch);
             } else {
                 throw syntaxError(ch);
             }
@@ -146,13 +150,15 @@ class Tokenizer {
         return Token.string(ca.subArray(start));
     }
 
+
     /**
      * Read number.
      * @return token
      */
     private Token readNumber(int ch)  {
 
-        int start = ca.length();
+        final int start = ca.length();
+        markReader();
 
         boolean frac = false;
         boolean exp = false;
@@ -200,7 +206,8 @@ class Tokenizer {
             if (count == 0) throw syntaxError(ch);
         }
 
-        prev = ch;
+        resetReader(ca.length() - start - 1);
+        col--;
 
         return Token.number(ca.subArray(start), frac, exp);
 
@@ -275,21 +282,55 @@ class Tokenizer {
      */
     private int read() {
         try {
-            if (prev != null) {
-                int ret = prev;
-                prev = null;
-                return ret;
-            }
             int ret = reader.read();
             if (ret == '\n') {
                 line++;
-                colm = 0;
+                col = 0;
             } else {
-                colm++;
+                col++;
             }
             return ret;
         } catch (IOException e) {
             throw new JsonParseException(e);
+        }
+    }
+
+
+    private void markReader() {
+        try {
+            reader.mark(Integer.MAX_VALUE);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    private void resetReader(int skip) {
+        try {
+            reader.reset();
+            if (skip > 0 ) {
+                reader.skip(skip);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    private void resetReader() {
+        try {
+            reader.reset();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    private void skipReader(int skip) {
+        try {
+            reader.skip(skip);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -300,7 +341,7 @@ class Tokenizer {
      * @return a JsonParseException
      */
     private JsonParseException syntaxError(int ch) {
-        return new JsonParseException("Unexpected char. [{}] line:{}, column:{}", ch, line, colm);
+        return new JsonParseException("Unexpected char. [{}] line:{}, column:{}", ch, line, col);
     }
 
 }

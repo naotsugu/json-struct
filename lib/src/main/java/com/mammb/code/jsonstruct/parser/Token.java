@@ -126,7 +126,6 @@ class Token {
     static class Str extends Token implements CharSource {
 
         private final CharSource source;
-        private String str;
 
         private Str(CharSource source) {
             super(Type.STRING);
@@ -135,17 +134,12 @@ class Token {
 
         @Override
         public char[] chars() {
-            return toString().toCharArray();
+            return source.chars();
         }
 
         @Override
         public String toString() {
-            String ret = str;
-            if (ret == null) {
-                str = ret = source.toString();
-                return ret;
-            }
-            return ret;
+            return source.toString();
         }
 
     }

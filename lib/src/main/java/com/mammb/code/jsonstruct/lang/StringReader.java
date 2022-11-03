@@ -15,6 +15,7 @@
  */
 package com.mammb.code.jsonstruct.lang;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.util.Objects;
 
@@ -93,6 +94,17 @@ public class StringReader extends Reader {
     @Override
     public void reset() {
         next = mark;
+    }
+
+
+    @Override
+    public long skip(long n) {
+        if (next >= length)
+            return 0;
+        long r = Math.min(length - next, n);
+        r = Math.max(-next, r);
+        next += r;
+        return r;
     }
 
 

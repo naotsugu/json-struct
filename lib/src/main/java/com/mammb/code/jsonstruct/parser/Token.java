@@ -16,6 +16,7 @@
 package com.mammb.code.jsonstruct.parser;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 /**
  * The Json token.
@@ -47,6 +48,16 @@ class Token {
 
 
     /**
+     * Create a string token.
+     * @param str the source of token
+     * @return a string token
+     */
+    public static Token string(String str) {
+        return new StrRaw(str);
+    }
+
+
+    /**
      * Create a number token.
      * @param source the source of token
      * @param frac fraction?
@@ -58,47 +69,26 @@ class Token {
     }
 
 
-    /**
-     * Create a token for a given type.
-     * @param type the type of token
-     * @return a token
-     */
-    public static Token of(Type type) {
-        return switch (type) {
-            case CURLY_OPEN   -> Token.CURLY_OPEN;
-            case SQUARE_OPEN  -> Token.SQUARE_OPEN;
-            case CURLY_CLOSE  -> Token.CURLY_CLOSE;
-            case SQUARE_CLOSE -> Token.SQUARE_CLOSE;
-            case COLON -> Token.COLON;
-            case COMMA -> Token.COMMA;
-            case TRUE  -> Token.TRUE;
-            case FALSE -> Token.FALSE;
-            case NULL  -> Token.NULL;
-            case EOF   -> Token.EOF;
-            default -> throw new IllegalArgumentException();
-        };
-    }
-
     /** Token true. */
-    private static final Token TRUE  = new Token(Type.TRUE);
+    static final Token TRUE  = new Token(Type.TRUE);
     /** Token false. */
-    private static final Token FALSE = new Token(Type.FALSE);
+    static final Token FALSE = new Token(Type.FALSE);
     /** Token null. */
-    private static final Token NULL  = new Token(Type.NULL);
+    static final Token NULL  = new Token(Type.NULL);
     /** Token eof. */
-    private static final Token EOF   = new Token(Type.EOF);
+    static final Token EOF   = new Token(Type.EOF);
     /** Token colon. */
-    private static final Token COLON = new Token(Type.COLON);
+    static final Token COLON = new Token(Type.COLON);
     /** Token comma. */
-    private static final Token COMMA = new Token(Type.COMMA);
+    static final Token COMMA = new Token(Type.COMMA);
     /** Token curly open. */
-    private static final Token CURLY_OPEN = new Token(Type.CURLY_OPEN);
+    static final Token CURLY_OPEN = new Token(Type.CURLY_OPEN);
     /** Token curly close. */
-    private static final Token CURLY_CLOSE = new Token(Type.CURLY_CLOSE);
+    static final Token CURLY_CLOSE = new Token(Type.CURLY_CLOSE);
     /** Token square open. */
-    private static final Token SQUARE_OPEN = new Token(Type.SQUARE_OPEN);
+    static final Token SQUARE_OPEN = new Token(Type.SQUARE_OPEN);
     /** Token square close. */
-    private static final Token SQUARE_CLOSE = new Token(Type.SQUARE_CLOSE);
+    static final Token SQUARE_CLOSE = new Token(Type.SQUARE_CLOSE);
 
 
     /**
@@ -136,26 +126,51 @@ class Token {
     static class Str extends Token implements CharSource {
 
         private final CharSource source;
-        private char[] chars;
+        private String str;
 
         private Str(CharSource source) {
             super(Type.STRING);
-            this.source = source;
+            this.source = Objects.requireNonNull(source);
         }
 
         @Override
         public char[] chars() {
-            char[] ret = chars;
+            return toString().toCharArray();
+        }
+
+        @Override
+        public String toString() {
+            String ret = str;
             if (ret == null) {
-                chars = ret = source.chars();
+                str = ret = source.toString();
                 return ret;
             }
             return ret;
         }
 
+    }
+
+
+    /**
+     * String token.
+     */
+    static class StrRaw extends Token implements CharSource {
+
+        private final String str;
+
+        private StrRaw(String str) {
+            super(Type.STRING);
+            this.str = Objects.requireNonNull(str);
+        }
+
+        @Override
+        public char[] chars() {
+            return str.toCharArray();
+        }
+
         @Override
         public String toString() {
-            return new String(chars());
+            return str;
         }
 
     }

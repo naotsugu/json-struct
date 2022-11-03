@@ -102,7 +102,7 @@ public class BuiltinObjectify {
 
     private static String str(JsonValue val) {
         if (val instanceof CharSource cs) {
-            return new String(cs.chars());
+            return cs.toString();
         } else {
             throw new JsonStructException("Illegal value.[{}]", val);
         }

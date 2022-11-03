@@ -30,14 +30,11 @@ public class Converts {
     /** The Builtin objectify map. */
     private final Map<Class<?>, Function<JsonValue, ?>> objectifyMap;
 
-    /** The Builtin stringify map. */
-    private final Map<Class<?>, Function<?, CharSequence>> stringifyMap;
-
     /** The Optional objectify map. */
     private final Map<Class<?>, Function<JsonValue, ?>> objectifyOptMap;
 
     /** The Optional stringify map. */
-    private final Map<Class<?>, Function<?, CharSequence>> stringifyOptMap;
+    private final Map<Class<?>, Function<?, CharSequence>> stringifyMap;
 
 
     /**
@@ -45,9 +42,8 @@ public class Converts {
      */
     private Converts() {
         this.objectifyMap = BuiltinObjectify.map();
-        this.stringifyMap = BuiltinStringify.map();
         this.objectifyOptMap = new HashMap<>();
-        this.stringifyOptMap =  new HashMap<>();
+        this.stringifyMap =  new HashMap<>();
     }
 
 
@@ -71,6 +67,10 @@ public class Converts {
         if (clazz == null) {
             return v -> null;
         }
+        if (CharSequence.class.isAssignableFrom(clazz)) {
+            // bypass
+            return v -> (T) v.toString();
+        }
         if (!objectifyOptMap.isEmpty() && objectifyOptMap.containsKey(clazz)) {
             return (Function<JsonValue, T>) objectifyOptMap.get(clazz);
         }
@@ -80,41 +80,24 @@ public class Converts {
 
 
     /**
-     * Gets the stringify for the given object.
+     * Stringify for the given object.
      * @param object the target object
-     * @param <T> the type of class
-     * @return the converter
+     * @param <T> the type of object
+     * @param sb StringifyBuilder
      */
-    @SuppressWarnings("unchecked")
-    public <T> CharSequence stringify(T object) {
-        if (Objects.isNull(object)) {
-            return "null";
-        }
-        if (object instanceof Enum<?> en) {
-            return "\"" + en.name() + "\"";
-        }
-        if (!stringifyOptMap.isEmpty() && stringifyOptMap.containsKey(object.getClass())) {
-            return ((Function<T, CharSequence>) stringifyOptMap.get(object.getClass())).apply(object);
-        }
-        if (stringifyMap.containsKey(object.getClass())) {
-            return ((Function<T, CharSequence>) stringifyMap.get(object.getClass())).apply(object);
-        }
-        return "\"" + object + "\"";
-    }
-
-
     @SuppressWarnings("unchecked")
     public <T> void stringify(T object, StringifyBuilder sb) {
         if (object == null) {
             sb.appendNull();
         } else if (object instanceof Enum<?> en) {
             sb.appendStr(en.name());
-        } else if (!stringifyOptMap.isEmpty() && stringifyOptMap.containsKey(object.getClass())) {
-            sb.append(((Function<T, CharSequence>) stringifyOptMap.get(object.getClass())).apply(object));
+        } else if (!stringifyMap.isEmpty() && stringifyMap.containsKey(object.getClass())) {
+            sb.append(((Function<T, CharSequence>) stringifyMap.get(object.getClass())).apply(object));
         } else {
-            StringifyBuiltin.apply(object, sb);
+            BuiltinStringify.apply(object, sb);
         }
     }
+
 
     /**
      * Gets the default value.
@@ -185,7 +168,7 @@ public class Converts {
      * @param conv the convert
      */
     public void addStringify(Class<?> clazz, Function<?, CharSequence> conv) {
-        stringifyOptMap.put(clazz, conv);
+        stringifyMap.put(clazz, conv);
     }
 
 
@@ -208,7 +191,7 @@ public class Converts {
     public Set<String> stringifyClasses() {
         Set<String> set = new HashSet<>();
         stringifyMap.keySet().forEach(k -> set.add(k.getCanonicalName()));
-        set.addAll(StringifyBuiltin.typeNames());
+        set.addAll(BuiltinStringify.typeNames());
         return set;
     }
 

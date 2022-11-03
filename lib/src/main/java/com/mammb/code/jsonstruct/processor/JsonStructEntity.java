@@ -117,8 +117,8 @@ public class JsonStructEntity {
                     @Override
                     public #{entityName} from(Reader reader) {
                         JsonStructure json = Parser.of(reader).parse();
-                        return
-                            #{objectifyCode};
+                        var ret = #{objectifyCode};
+                        return ret;
                     }
 
                     @Override

@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.parser;
+package com.mammb.code.jsonstruct.lang;
 
+import com.mammb.code.jsonstruct.parser.CharSource;
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -55,12 +56,12 @@ public class CharArray implements Serializable {
 
 
     /**
-     * Create a char array from given value.
-     * @param value char
+     * Create a char array with default capacity.
+     * @param capacity capacity
      * @return CharArray
      */
-    public static CharArray of(char value) {
-        return new CharArray(new char[] { value }, 1);
+    public static CharArray of(int capacity) {
+        return new CharArray(new char[capacity], 0);
     }
 
 
@@ -79,6 +80,9 @@ public class CharArray implements Serializable {
      * @param values the char values
      */
     public void add(char[] values) {
+        if (values == null || values.length == 0) {
+            return;
+        }
         if (length + values.length > elements.length) {
             elements = grow(values.length);
         }
@@ -111,7 +115,7 @@ public class CharArray implements Serializable {
 
     /**
      * Gets an array containing all the elements in this array in proper sequence.
-     * @return an array containing all of the elements in this array in proper sequence
+     * @return an array containing all the elements in this array in proper sequence
      */
     public char[] array() {
         return Arrays.copyOf(elements, length);
@@ -125,7 +129,7 @@ public class CharArray implements Serializable {
      * @return the subArray
      */
     public CharSource subArray(int start, int end) {
-        return new SubArray(this, start, end);
+        return new SubArray(elements, start, end);
     }
 
 
@@ -135,7 +139,17 @@ public class CharArray implements Serializable {
      * @return the subArray
      */
     public CharSource subArray(int start) {
-        return new SubArray(this, start, length);
+        return new SubArray(elements, start, length);
+    }
+
+
+    /**
+     * Gets the string that is a sub array of this array.
+     * @param start the beginning index, inclusive
+     * @return the string that is a sub array of this array
+     */
+    public String subString(int start) {
+        return new String(elements, start, length - start);
     }
 
 
@@ -145,6 +159,16 @@ public class CharArray implements Serializable {
     public void clear() {
         elements = EMPTY;
         length = 0;
+    }
+
+
+    /**
+     * Reset this array elements.
+     * @return this char array
+     */
+    public CharArray reset() {
+        length = 0;
+        return this;
     }
 
 
@@ -174,7 +198,7 @@ public class CharArray implements Serializable {
     private char[] grow(int minCapacity) {
         int oldCapacity = elements.length;
         if (length == 0 || elements == EMPTY) {
-            return elements = new char[Math.max(10, minCapacity)];
+            return elements = new char[Math.max(32, minCapacity)];
         } else {
             return elements = Arrays.copyOf(elements, newCapacity(oldCapacity,
                     minCapacity - oldCapacity,
@@ -207,20 +231,20 @@ public class CharArray implements Serializable {
 
     /**
      * The SubArray record.
-     * @param source the CharArray
+     * @param chars the char array
      * @param start the beginning index, inclusive.
      * @param end the ending index, exclusive.
      */
-    private record SubArray(CharArray source, int start, int end) implements CharSource, Serializable {
+    private record SubArray(char[] chars, int start, int end) implements CharSource, Serializable {
 
         @Override
         public char[] chars() {
-            return Arrays.copyOfRange(source.elements, start, end);
+            return Arrays.copyOfRange(chars, start, end);
         }
 
         @Override
         public String toString() {
-            return new String(chars());
+            return new String(chars, start, end - start);
         }
 
     }

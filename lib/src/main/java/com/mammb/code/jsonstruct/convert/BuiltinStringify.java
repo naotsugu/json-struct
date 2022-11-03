@@ -23,10 +23,10 @@ import java.nio.file.Path;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * Builtin serializes.
+ *
  * @author Naotsugu Kobayashi
  */
 public class BuiltinStringify {
@@ -37,101 +37,113 @@ public class BuiltinStringify {
     /** UTC Zone. */
     private static final ZoneId UTC = ZoneId.of("UTC");
 
+    /** the name of builtin classes. */
+    private static final Set<String> typeNames = typeNames();
+
 
     /**
-     * Create a builtin mappings.
-     * @return the builtin mappings
+     * Gets the builtin class names.
+     * @return the builtin class names
      */
-    public static Map<Class<?>, Function<?, CharSequence>> map() {
-
-        Map<Class<?>, Function<?, CharSequence>> map = new HashMap<>();
-
-        map.put(Byte.class,          String::valueOf);
-        map.put(Byte.TYPE,           v -> String.valueOf((byte) v));
-        map.put(BigDecimal.class,    String::valueOf);
-        map.put(BigInteger.class,    String::valueOf);
-        map.put(Boolean.class,       String::valueOf);
-        map.put(Boolean.TYPE,        v -> String.valueOf((boolean) v));
-        map.put(Calendar.class,      v -> esc(str((Calendar) v)));
-        map.put(Character.class,     v -> esc(String.valueOf(v)));
-        map.put(Character.TYPE,      v -> esc(String.valueOf((char) v)));
-        map.put(Date.class,          v -> esc(DateTimeFormatter.ISO_DATE_TIME.withZone(UTC).withLocale(locale).format(((Date) v).toInstant())));
-        map.put(Double.class,        String::valueOf);
-        map.put(Double.TYPE,         v -> String.valueOf((double) v));
-        map.put(Duration.class,      v -> esc(String.valueOf(v)));
-        map.put(Float.class,         String::valueOf);
-        map.put(Float.TYPE,          v -> String.valueOf((float) v));
-        map.put(Integer.class,       String::valueOf);
-        map.put(Integer.TYPE,        v -> String.valueOf((int) v));
-        map.put(Instant.class,       v -> esc(DateTimeFormatter.ISO_INSTANT.withLocale(locale).format((Instant) v)));
-        map.put(LocalDateTime.class, v -> esc(DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale).format((LocalDateTime) v)));
-        map.put(LocalDate.class,     v -> esc(DateTimeFormatter.ISO_LOCAL_DATE.withZone(UTC).withLocale(locale).format((LocalDate) v)));
-        map.put(LocalTime.class,     v -> esc(DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale).format((LocalTime) v)));
-        map.put(Long.class,          String::valueOf);
-        map.put(Long.TYPE,           v -> String.valueOf((long) v));
-        map.put(Number.class,        v -> new BigDecimal(String.valueOf(v)).toString());
-        map.put(OffsetDateTime.class,v -> esc(DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale).format((OffsetDateTime) v)));
-        map.put(OffsetTime.class,    v -> esc(DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale).format((OffsetTime) v)));
-        map.put(OptionalDouble.class,v -> ((OptionalDouble) v).isPresent() ? String.valueOf(((OptionalDouble) v).getAsDouble()) : "null");
-        map.put(OptionalInt.class,   v -> ((OptionalInt) v).isPresent() ? String.valueOf(((OptionalInt) v).getAsInt()) : "null");
-        map.put(OptionalLong.class,  v -> ((OptionalLong) v).isPresent() ? String.valueOf(((OptionalLong) v).getAsLong()) : "null");
-        map.put(Path.class,          v -> esc(String.valueOf(v)));
-        map.put(Period.class,        v -> esc(String.valueOf(v)));
-        map.put(Short.class,         String::valueOf);
-        map.put(Short.TYPE,          v -> String.valueOf((short) v));
-        map.put(String.class,        v -> esc((String) v));
-        map.put(TimeZone.class,      v -> esc(((TimeZone) v).getID()));
-        map.put(URI.class,           v -> esc(String.valueOf(v)));
-        map.put(URL.class,           v -> esc(String.valueOf(v)));
-        map.put(UUID.class,          v -> esc(String.valueOf(v)));
-        map.put(ZonedDateTime.class, v -> esc(DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(locale).format((ZonedDateTime) v)));
-        map.put(ZoneId.class,        v -> esc(((ZoneId) v).getId()));
-        map.put(ZoneOffset.class,    v -> esc(((ZoneOffset) v).getId()));
-
-        return map;
+    public static Set<String> typeNames() {
+        Set<String> set = new HashSet<>();
+        // java.lang.*
+        set.add(String.class.getCanonicalName());
+        set.add(CharSequence.class.getCanonicalName());
+        set.add(Byte.class.getCanonicalName());
+        set.add(Byte.TYPE.getCanonicalName());
+        set.add(Boolean.class.getCanonicalName());
+        set.add(Boolean.TYPE.getCanonicalName());
+        set.add(Character.class.getCanonicalName());
+        set.add(Character.TYPE.getCanonicalName());
+        set.add(Double.class.getCanonicalName());
+        set.add(Double.TYPE.getCanonicalName());
+        set.add(Float.class.getCanonicalName());
+        set.add(Float.TYPE.getCanonicalName());
+        set.add(Integer.class.getCanonicalName());
+        set.add(Integer.TYPE.getCanonicalName());
+        set.add(Long.class.getCanonicalName());
+        set.add(Long.TYPE.getCanonicalName());
+        set.add(Short.class.getCanonicalName());
+        set.add(Short.TYPE.getCanonicalName());
+        set.add(Number.class.getCanonicalName());
+        // java.math.*
+        set.add(BigDecimal.class.getCanonicalName());
+        set.add(BigInteger.class.getCanonicalName());
+        // java.nio.file.*
+        set.add(Path.class.getCanonicalName());
+        // java.net.*
+        set.add(URI.class.getCanonicalName());
+        set.add(URL.class.getCanonicalName());
+        // java.util.*
+        set.add(UUID.class.getCanonicalName());
+        set.add(Date.class.getCanonicalName());
+        set.add(Calendar.class.getCanonicalName());
+        set.add(OptionalDouble.class.getCanonicalName());
+        set.add(OptionalInt.class.getCanonicalName());
+        set.add(OptionalLong.class.getCanonicalName());
+        set.add(TimeZone.class.getCanonicalName());
+        // java.time.*
+        set.add(Duration.class.getCanonicalName());
+        set.add(Period.class.getCanonicalName());
+        set.add(Instant.class.getCanonicalName());
+        set.add(LocalDateTime.class.getCanonicalName());
+        set.add(LocalDate.class.getCanonicalName());
+        set.add(LocalTime.class.getCanonicalName());
+        set.add(OffsetDateTime.class.getCanonicalName());
+        set.add(OffsetTime.class.getCanonicalName());
+        set.add(ZonedDateTime.class.getCanonicalName());
+        set.add(ZoneId.class.getCanonicalName());
+        set.add(ZoneOffset.class.getCanonicalName());
+        return set;
     }
 
 
     /**
-     * Escape the json string.
-     * @param cs the source string
-     * @return escaped string
+     * Convert with builtin.
+     * @param object the target of convert
+     * @param sb the StringifyBuilder
      */
-    private static CharSequence esc(CharSequence cs) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("\"");
-        int len = cs.length();
-        for (int i = 0; i < len; i++) {
-            int begin = i, end = i;
-            char c = cs.charAt(i);
-            while (c >= ' ' && c != '"' && c != '\\') {
-                // RFC 4627  unescaped = %x20-21 / %x23-5B / %x5D-10FFFF
-                i++; end = i;
-                if (i >= len) break;
-                c = cs.charAt(i);
-            }
+    public static void apply(Object object, StringifyBuilder sb) {
 
-            if (begin < end) {
-                sb.append(cs.subSequence(begin, end));
-                if (i == len)  break;
-            }
+        switch (object.getClass().getCanonicalName()) {
 
-            switch (c) {
-                case '"', '\\' -> sb.append('\\').append(c);
-                case '\b' ->  sb.append('\\').append('b');
-                case '\f' ->  sb.append('\\').append('f');
-                case '\n' ->  sb.append('\\').append('n');
-                case '\r' ->  sb.append('\\').append('r');
-                case '\t' ->  sb.append('\\').append('t');
-                default -> {
-                    String hex = "000" + Integer.toHexString(c);
-                    String code = "\\u" + hex.substring(hex.length() - 4);
-                    sb.append(code);
-                }
-            }
+            case "java.lang.Byte",
+                 "java.lang.Boolean",
+                 "java.lang.Double",
+                 "java.lang.Float",
+                 "java.lang.Integer",
+                 "java.lang.Long",
+                 "java.lang.Short",
+                 "java.math.BigDecimal",
+                 "java.math.BigInteger"    -> sb.appendNum(object);
+            case "java.lang.Number"        -> sb.appendNum(new BigDecimal(String.valueOf(object)).toString());
+            case "byte"                    -> sb.appendNum(Byte.toString((byte) object));
+            case "boolean"                 -> sb.appendNum(Boolean.toString((boolean) object));
+            case "double"                  -> sb.appendNum(Double.toString((double) object));
+            case "float"                   -> sb.appendNum(Float.toString((float) object));
+            case "int"                     -> sb.appendNum(Integer.toString((int) object));
+            case "long"                    -> sb.appendNum(Long.toString((long) object));
+            case "short"                   -> sb.appendNum(Short.toString((short) object));
+            case "java.util.OptionalDouble"-> sb.appendNum(((OptionalDouble) object).isPresent() ? String.valueOf(((OptionalDouble) object).getAsDouble()) : "null");
+            case "java.util.OptionalInt"   -> sb.appendNum(((OptionalInt) object).isPresent() ? String.valueOf(((OptionalInt) object).getAsInt()) : "null");
+            case "java.util.OptionalLong"  -> sb.appendNum(((OptionalLong) object).isPresent() ? String.valueOf(((OptionalLong) object).getAsLong()) : "null");
+
+            case "char"                    -> sb.appendStr(String.valueOf((char) object));
+            case "java.util.Date"          -> sb.appendStr(DateTimeFormatter.ISO_DATE_TIME.withZone(UTC).withLocale(locale).format(((Date) object).toInstant()));
+            case "java.util.Calendar"      -> sb.appendStr(str((Calendar) object));
+            case "java.util.TimeZone"      -> sb.appendStr(((TimeZone) object).getID());
+            case "java.time.Instant"       -> sb.appendStr(DateTimeFormatter.ISO_INSTANT.withLocale(locale).format((Instant) object));
+            case "java.time.LocalDateTime" -> sb.appendStr(DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale).format((LocalDateTime) object));
+            case "java.time.LocalDate"     -> sb.appendStr(DateTimeFormatter.ISO_LOCAL_DATE.withZone(UTC).withLocale(locale).format((LocalDate) object));
+            case "java.time.LocalTime"     -> sb.appendStr(DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale).format((LocalTime) object));
+            case "java.time.OffsetDateTime"-> sb.appendStr(DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale).format((OffsetDateTime) object));
+            case "java.time.OffsetTime"    -> sb.appendStr(DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale).format((OffsetTime) object));
+            case "java.time.ZonedDateTime" -> sb.appendStr(DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(locale).format((ZonedDateTime) object));
+            case "java.time.ZoneId"        -> sb.appendStr(((ZoneId) object).getId());
+            case "java.time.ZoneOffset"    -> sb.appendStr(((ZoneOffset) object).getId());
+            default -> sb.appendStr(object);
         }
-        sb.append("\"");
-        return sb;
     }
 
 

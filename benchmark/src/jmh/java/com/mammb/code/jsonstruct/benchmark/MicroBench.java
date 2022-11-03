@@ -35,21 +35,21 @@ public class MicroBench {
             }""";
 
 
-    @Benchmark
+    //@Benchmark
     public String struct() {
         Json<Glossary> json = Json.of(Glossary.class);
         Glossary glossary = json.from(str);
         return json.stringify(glossary);
     }
 
-    @Benchmark
+    //@Benchmark
     public String gson() {
         Gson gson = new Gson();
         Glossary glossary = gson.fromJson(str, Glossary.class);
         return gson.toJson(glossary);
     }
 
-    @Benchmark
+    //@Benchmark
     public String jackson() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         Glossary glossary = mapper.readValue(str, Glossary.class);

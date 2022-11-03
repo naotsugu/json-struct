@@ -41,7 +41,7 @@ public class MicroBenchDeserialize {
     static Gson gson = new Gson();
     static ObjectMapper jackson = new ObjectMapper();
 
-    //@Benchmark
+    @Benchmark
     public Glossary struct() {
         return json.from(str);
     }

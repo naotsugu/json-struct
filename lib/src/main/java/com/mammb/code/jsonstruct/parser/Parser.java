@@ -15,6 +15,8 @@
  */
 package com.mammb.code.jsonstruct.parser;
 
+import com.mammb.code.jsonstruct.lang.CharArray;
+
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.function.Consumer;
@@ -54,6 +56,17 @@ public class Parser {
      */
     public static Parser of(Reader reader) {
         return new Parser(Tokenizer.of(reader));
+    }
+
+
+    /**
+     * Create a new Parser.
+     * @param reader the Reader
+     * @param ca the CharArray
+     * @return a new Parser
+     */
+    public static Parser of(Reader reader, CharArray ca) {
+        return new Parser(Tokenizer.of(reader, ca));
     }
 
 

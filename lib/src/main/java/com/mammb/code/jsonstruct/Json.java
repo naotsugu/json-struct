@@ -17,7 +17,7 @@ package com.mammb.code.jsonstruct;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.io.StringReader;
+import com.mammb.code.jsonstruct.lang.StringReader;
 
 /**
  * Json.

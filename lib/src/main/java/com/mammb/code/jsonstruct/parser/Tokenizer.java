@@ -15,6 +15,8 @@
  */
 package com.mammb.code.jsonstruct.parser;
 
+import com.mammb.code.jsonstruct.lang.CharArray;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -51,7 +53,7 @@ class Tokenizer {
      * @param ca CharArray
      */
     private Tokenizer(Reader reader, CharArray ca) {
-        this.reader = reader;
+        this.reader = reader.markSupported() ? reader : new BufferedReader(reader);
         this.ca = ca;
         this.prev = null;
         this.line = 1;
@@ -70,12 +72,24 @@ class Tokenizer {
 
 
     /**
+     * Create a new Tokenizer.
+     * @param reader the reader
+     * @param ca the CharArray
+     * @return a new Tokenizer
+     */
+    static Tokenizer of(Reader reader, CharArray ca) {
+        return new Tokenizer(reader, ca);
+    }
+
+
+    /**
      * Get the number of current line.
      * @return the number of current line
      */
     int getLine() {
         return line;
     }
+
 
     /**
      * Get the number of current column.
@@ -94,19 +108,19 @@ class Tokenizer {
         int ch = read();
         return switch (ch) {
             case '"' -> readString();
-            case '{' -> Token.of(CURLY_OPEN);
-            case '[' -> Token.of(SQUARE_OPEN);
-            case ':' -> Token.of(COLON);
-            case ',' -> Token.of(COMMA);
+            case '{' -> Token.CURLY_OPEN;
+            case '[' -> Token.SQUARE_OPEN;
+            case ':' -> Token.COLON;
+            case ',' -> Token.COMMA;
             case 't' -> readTrue();
             case 'f' -> readFalse();
             case 'n' -> readNull();
-            case ']' -> Token.of(SQUARE_CLOSE);
-            case '}' -> Token.of(CURLY_CLOSE);
+            case ']' -> Token.SQUARE_CLOSE;
+            case '}' -> Token.CURLY_CLOSE;
             case '0','1','2','3','4','5','6','7','8','9','-' -> readNumber(ch);
             case ' ', '\t', '\r', '\n' -> next();
-            case -1 -> Token.of(EOF);
-            default -> throw unexpectedChar(ch);
+            case -1 -> Token.EOF;
+            default -> throw syntaxError(ch);
         };
     }
 
@@ -122,16 +136,15 @@ class Tokenizer {
             if (ch == '"') {
                 break;
             } else if (ch == '\\') {
-                ca.add((char) unescape());
+                ca.add((char) unescape(read()));
             } else if (ch >= 0x20) {
                 ca.add((char) ch);
             } else {
-                throw unexpectedChar(ch);
+                throw syntaxError(ch);
             }
         }
         return Token.string(ca.subArray(start));
     }
-
 
     /**
      * Read number.
@@ -147,7 +160,7 @@ class Tokenizer {
         if (ch == '-') {
             ca.add((char) ch);
             ch = read();
-            if (ch < '0' || ch > '9') throw unexpectedChar(ch);
+            if (ch < '0' || ch > '9') throw syntaxError(ch);
         }
 
         if (ch == '0') {
@@ -168,7 +181,7 @@ class Tokenizer {
                 ch = read();
                 count++;
             } while (ch >= '0' && ch <= '9');
-            if (count == 1) throw unexpectedChar(ch);
+            if (count == 1) throw syntaxError(ch);
         }
 
         if (ch == 'e' || ch == 'E') {
@@ -184,7 +197,7 @@ class Tokenizer {
                 ca.add((char) ch);
                 ch = read();
             }
-            if (count == 0) throw unexpectedChar(ch);
+            if (count == 0) throw syntaxError(ch);
         }
 
         prev = ch;
@@ -199,10 +212,10 @@ class Tokenizer {
      * @return token
      */
     private Token readTrue() {
-        if (read() != 'r') throw unexpectedChar('r');
-        if (read() != 'u') throw unexpectedChar('u');
-        if (read() != 'e') throw unexpectedChar('e');
-        return Token.of(TRUE);
+        if (read() != 'r') throw syntaxError('r');
+        if (read() != 'u') throw syntaxError('u');
+        if (read() != 'e') throw syntaxError('e');
+        return Token.TRUE;
     }
 
 
@@ -211,11 +224,11 @@ class Tokenizer {
      * @return token
      */
     private Token readFalse() {
-        if (read() != 'a') throw unexpectedChar('a');
-        if (read() != 'l') throw unexpectedChar('l');
-        if (read() != 's') throw unexpectedChar('s');
-        if (read() != 'e') throw unexpectedChar('e');
-        return Token.of(FALSE);
+        if (read() != 'a') throw syntaxError('a');
+        if (read() != 'l') throw syntaxError('l');
+        if (read() != 's') throw syntaxError('s');
+        if (read() != 'e') throw syntaxError('e');
+        return Token.FALSE;
     }
 
 
@@ -224,10 +237,10 @@ class Tokenizer {
      * @return token
      */
     private Token readNull() {
-        if (read() != 'u') throw unexpectedChar('u');
-        if (read() != 'l') throw unexpectedChar('l');
-        if (read() != 'l') throw unexpectedChar('l');
-        return Token.of(NULL);
+        if (read() != 'u') throw syntaxError('u');
+        if (read() != 'l') throw syntaxError('l');
+        if (read() != 'l') throw syntaxError('l');
+        return Token.NULL;
     }
 
 
@@ -235,8 +248,7 @@ class Tokenizer {
      * Unescape.
      * @return unescaped read character
      */
-    private int unescape() {
-        int ch = read();
+    private int unescape(int ch) {
         return switch (ch) {
             case 'b' -> '\b';
             case 't' -> '\t';
@@ -252,7 +264,7 @@ class Tokenizer {
                 }
                 yield unicode;
             }
-            default -> throw unexpectedChar(ch);
+            default -> throw syntaxError(ch);
         };
     }
 
@@ -287,7 +299,7 @@ class Tokenizer {
      * @param ch character
      * @return a JsonParseException
      */
-    private JsonParseException unexpectedChar(int ch) {
+    private JsonParseException syntaxError(int ch) {
         return new JsonParseException("Unexpected char. [{}] line:{}, column:{}", ch, line, colm);
     }
 

@@ -83,14 +83,12 @@ public class CharArray implements Serializable {
      * @param values the char values
      */
     public void add(char[] values) {
-        if (values == null || values.length == 0) {
-            return;
-        }
-        if (length + values.length > elements.length) {
+        int len = values.length;
+        if (length + len > elements.length) {
             elements = grow(values.length);
         }
-        System.arraycopy(values, 0, elements, length, values.length);
-        length += values.length;
+        System.arraycopy(values, 0, elements, length, len);
+        length += len;
     }
 
 
@@ -112,13 +110,11 @@ public class CharArray implements Serializable {
      * @param len the length of read
      */
     public void add(Reader reader, int len) {
-        if (len < 1) return;
         try {
             if (length + len > elements.length) {
                 elements = grow(len);
             }
-            reader.read(elements, length, len);
-            length += len;
+            length += Math.max(0, reader.read(elements, length, len));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -175,6 +171,20 @@ public class CharArray implements Serializable {
     }
 
 
+    public String popString() {
+        int len = length;
+        length = 0;
+        return new String(elements, 0, len);
+    }
+
+
+    public char[] popChars() {
+        int len = length;
+        length = 0;
+        return Arrays.copyOf(elements, len);
+    }
+
+
     /**
      * Clear this array elements.
      */
@@ -219,7 +229,7 @@ public class CharArray implements Serializable {
      */
     private char[] grow(int minCapacity) {
         int oldCapacity = elements.length;
-        if (length == 0 || elements == EMPTY) {
+        if (oldCapacity == 0) {
             return elements = new char[Math.max(32, minCapacity)];
         } else {
             return elements = Arrays.copyOf(elements, newCapacity(oldCapacity,

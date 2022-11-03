@@ -16,8 +16,8 @@
 package com.mammb.code.jsonstruct.parser;
 
 import com.mammb.code.jsonstruct.lang.CharArray;
+import com.mammb.code.jsonstruct.lang.StringReader;
 import java.io.Reader;
-import java.io.StringReader;
 import java.util.function.Consumer;
 import static com.mammb.code.jsonstruct.parser.Token.Type.*;
 

@@ -61,7 +61,7 @@ class Tokenizer {
      * @return a new Tokenizer
      */
     static Tokenizer of(Reader reader) {
-        return new Tokenizer(reader, CharArray.of());
+        return new Tokenizer(reader, CharArray.of(32));
     }
 
 
@@ -124,7 +124,6 @@ class Tokenizer {
      * @return token
      */
     private Token readString() {
-        final int start = ca.length();
         for (;;) {
             markReader();
             int count = 0;
@@ -147,7 +146,7 @@ class Tokenizer {
                 throw syntaxError(ch);
             }
         }
-        return Token.string(ca.subArray(start));
+        return Token.string(ca.popString());
     }
 
 
@@ -157,9 +156,7 @@ class Tokenizer {
      */
     private Token readNumber(int ch)  {
 
-        final int start = ca.length();
         markReader();
-
         boolean frac = false;
         boolean exp = false;
 
@@ -206,10 +203,11 @@ class Tokenizer {
             if (count == 0) throw syntaxError(ch);
         }
 
-        resetReader(ca.length() - start - 1);
+        resetReader();
+        skipReader(ca.length() - 1);
         col--;
 
-        return Token.number(ca.subArray(start), frac, exp);
+        return Token.number(ca.popChars(), frac, exp);
 
     }
 
@@ -299,18 +297,6 @@ class Tokenizer {
     private void markReader() {
         try {
             reader.mark(Integer.MAX_VALUE);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    private void resetReader(int skip) {
-        try {
-            reader.reset();
-            if (skip > 0 ) {
-                reader.skip(skip);
-            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

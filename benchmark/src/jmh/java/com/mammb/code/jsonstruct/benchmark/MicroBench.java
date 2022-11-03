@@ -51,15 +51,15 @@ public class MicroBench {
 
     //@Benchmark
     public String jackson() throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        Glossary glossary = mapper.readValue(str, Glossary.class);
-        return mapper.writeValueAsString(glossary);
+        ObjectMapper jackson = new ObjectMapper();
+        Glossary glossary = jackson.readValue(str, Glossary.class);
+        return jackson.writeValueAsString(glossary);
     }
 
 
     public static void main(String[] args) throws Exception {
 
-        var mb = new MicroBenchSerialize();
+        var mb = new MicroBench();
 
         System.out.println("-- struct -------------------------------------------");
         var struct = mb.struct();

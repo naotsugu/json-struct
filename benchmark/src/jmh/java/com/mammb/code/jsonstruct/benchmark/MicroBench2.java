@@ -5,17 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.mammb.code.jsonstruct.Json;
 import com.mammb.code.jsonstruct.benchmark.data.Glossary;
-import com.mammb.code.jsonstruct.lang.CharArray;
-import com.mammb.code.jsonstruct.lang.StringReader;
-import com.mammb.code.jsonstruct.parser.JsonStructure;
-import com.mammb.code.jsonstruct.parser.Parser;
-import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Warmup;
 
 @Fork(1)
 @Warmup(iterations = 2, time = 10)
-public class MicroBenchDeserialize {
+public class MicroBench2 {
 
     private static final String str = """
             {
@@ -37,46 +32,46 @@ public class MicroBenchDeserialize {
                 ]
               }
             }""";
+    private static final Json<Glossary> json = Json.of(Glossary.class);
+    private static final Gson gson = new Gson();
+    private static final ObjectMapper jackson = new ObjectMapper();
 
-    static Json<Glossary> json = Json.of(Glossary.class);
-    static Gson gson = new Gson();
-    static ObjectMapper jackson = new ObjectMapper();
-
-    @Benchmark
-    public Glossary struct() {
-        JsonStructure json = Parser.of(str).parse();
-        return null;
-        //return json.from(str);
+    //@Benchmark
+    public String struct() {
+        Glossary glossary = json.from(str);
+        return json.stringify(glossary);
     }
 
     //@Benchmark
-    public Glossary gson() {
-        return gson.fromJson(str, Glossary.class);
+    public String gson() {
+        Glossary glossary = gson.fromJson(str, Glossary.class);
+        return gson.toJson(glossary);
     }
 
     //@Benchmark
-    public Glossary jackson() throws JsonProcessingException {
-        return jackson.readValue(str, Glossary.class);
+    public String jackson() throws JsonProcessingException {
+        Glossary glossary = jackson.readValue(str, Glossary.class);
+        return jackson.writeValueAsString(glossary);
     }
 
 
     public static void main(String[] args) throws Exception {
 
-        var mb = new MicroBenchDeserialize();
+        var mb = new MicroBench2();
 
         System.out.println("-- struct -------------------------------------------");
-        var struct = gson.toJson(mb.struct());
+        var struct = mb.struct();
         System.out.println(struct);
 
         System.out.println("-- gson ---------------------------------------------");
-        var gson_ = gson.toJson(mb.gson());
-        System.out.println(gson_);
+        var gson = mb.gson();
+        System.out.println(gson);
 
         System.out.println("-- jackson ------------------------------------------");
-        var jackson = gson.toJson(mb.jackson());
+        var jackson = mb.jackson();
         System.out.println(jackson);
 
-        System.out.println("match: " + gson_.equals(struct));
+        System.out.println("match: " + gson.equals(struct));
         System.out.println("match: " + jackson.equals(struct));
 
     }

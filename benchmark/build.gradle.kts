@@ -10,6 +10,7 @@ repositories {
 dependencies {
     jmh("com.google.code.gson:gson:2.10")
     jmh("com.fasterxml.jackson.core:jackson-databind:2.13.4.2")
+    jmh(project(":lib", "archives"))
     implementation(project(":lib", "archives"))
     annotationProcessor(project(":lib", "archives"))
 }

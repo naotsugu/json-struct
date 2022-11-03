@@ -69,6 +69,18 @@ class Token {
     }
 
 
+    /**
+     * Create a number token.
+     * @param chars the source of token
+     * @param frac fraction?
+     * @param exp exponential?
+     * @return a number token
+     */
+    public static Token number(char[] chars, boolean frac, boolean exp) {
+        return new Num(chars, frac, exp);
+    }
+
+
     /** Token true. */
     static final Token TRUE  = new Token(Type.TRUE);
     /** Token false. */
@@ -129,7 +141,7 @@ class Token {
 
         private Str(CharSource source) {
             super(Type.STRING);
-            this.source = Objects.requireNonNull(source);
+            this.source = source;
         }
 
         @Override
@@ -154,7 +166,7 @@ class Token {
 
         private StrRaw(String str) {
             super(Type.STRING);
-            this.str = Objects.requireNonNull(str);
+            this.str = str;
         }
 
         @Override
@@ -184,6 +196,14 @@ class Token {
         private Num(CharSource source, boolean frac, boolean exp) {
             super(Type.NUMBER);
             this.source = source;
+            this.frac = frac;
+            this.exp = exp;
+        }
+
+        private Num(char[] chars, boolean frac, boolean exp) {
+            super(Type.NUMBER);
+            this.source = null;
+            this.chars = chars;
             this.frac = frac;
             this.exp = exp;
         }

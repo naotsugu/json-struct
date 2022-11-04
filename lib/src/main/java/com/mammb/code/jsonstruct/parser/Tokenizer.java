@@ -100,6 +100,9 @@ class Tokenizer {
      */
     Token next() {
         int ch = read();
+        while (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n') {
+            ch = read();
+        }
         return switch (ch) {
             case '"' -> readString();
             case '{' -> Token.CURLY_OPEN;
@@ -112,7 +115,6 @@ class Tokenizer {
             case ']' -> Token.SQUARE_CLOSE;
             case '}' -> Token.CURLY_CLOSE;
             case '0','1','2','3','4','5','6','7','8','9','-' -> readNumber(ch);
-            case ' ', '\t', '\r', '\n' -> next();
             case -1 -> Token.EOF;
             default -> throw syntaxError(ch);
         };

@@ -5,16 +5,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.mammb.code.jsonstruct.Json;
 import com.mammb.code.jsonstruct.benchmark.data.Glossary;
-import com.mammb.code.jsonstruct.lang.CharArray;
-import com.mammb.code.jsonstruct.lang.StringReader;
 import com.mammb.code.jsonstruct.parser.JsonStructure;
 import com.mammb.code.jsonstruct.parser.Parser;
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.annotations.*;
+
+import java.util.concurrent.TimeUnit;
 
 @Fork(1)
-@Warmup(iterations = 2, time = 10)
+@Warmup(iterations = 2, time = 3)
+@Measurement(iterations = 2, time = 3)
+@BenchmarkMode(Mode.AverageTime)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class MicroBenchDeserialize {
 
     private static final String str = """
@@ -44,18 +45,18 @@ public class MicroBenchDeserialize {
 
     @Benchmark
     public Glossary struct() {
-        JsonStructure json = Parser.of(str).parse();
+        JsonStructure json = Parser.of(str).parse(); //  1805.148 ns/op
         return null;
         //return json.from(str);
     }
 
-    //@Benchmark
-    public Glossary gson() {
+    @Benchmark
+    public Glossary gson() { // 1699.341 ns/op
         return gson.fromJson(str, Glossary.class);
     }
 
-    //@Benchmark
-    public Glossary jackson() throws JsonProcessingException {
+    @Benchmark
+    public Glossary jackson() throws JsonProcessingException { // 1658.562 ns/op
         return jackson.readValue(str, Glossary.class);
     }
 

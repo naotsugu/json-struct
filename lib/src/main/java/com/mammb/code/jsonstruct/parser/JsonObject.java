@@ -15,8 +15,7 @@
  */
 package com.mammb.code.jsonstruct.parser;
 
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,8 +30,9 @@ public interface JsonObject extends JsonStructure {
      * Associates the specified json value with the specified key in this object.
      * @param name key with which the specified json value is to be associated
      * @param value json value to be associated with the specified key
+     * @return the previous value associated with key, or null if there was no mapping for key
      */
-    void put(String name, JsonValue value);
+    JsonValue put(String name, JsonValue value);
 
 
     /**
@@ -62,31 +62,11 @@ public interface JsonObject extends JsonStructure {
     /**
      * JsonObject implementation.
      */
-    class JsonObjectImpl implements JsonObject {
-
-        private final Map<String, JsonValue> values = new HashMap<>();
-
-        @Override
-        public void put(String name, JsonValue value) {
-            if (name == null) {
-                throw new JsonParseException();
-            }
-            values.put(name, value);
-        }
+    class JsonObjectImpl extends LinkedHashMap<String, JsonValue> implements JsonObject {
 
         @Override
         public JsonValue get(String name) {
-            return values.get(name);
-        }
-
-        @Override
-        public int size() {
-            return values.size();
-        }
-
-        @Override
-        public Set<Map.Entry<String, JsonValue>> entrySet() {
-            return values.entrySet();
+            return super.get(name);
         }
     }
 

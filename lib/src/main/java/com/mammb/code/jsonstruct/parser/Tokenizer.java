@@ -16,10 +16,7 @@
 package com.mammb.code.jsonstruct.parser;
 
 import com.mammb.code.jsonstruct.lang.CharArray;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
+import com.mammb.code.jsonstruct.lang.CharReader;
 import java.util.HexFormat;
 
 /**
@@ -30,7 +27,7 @@ import java.util.HexFormat;
 class Tokenizer {
 
     /** Reader. */
-    private final Reader reader;
+    private final CharReader reader;
 
     /** CharArray. */
     private final CharArray ca;
@@ -47,8 +44,8 @@ class Tokenizer {
      * @param reader the reader
      * @param ca CharArray
      */
-    private Tokenizer(Reader reader, CharArray ca) {
-        this.reader = reader.markSupported() ? reader : new BufferedReader(reader);
+    private Tokenizer(CharReader reader, CharArray ca) {
+        this.reader = reader;
         this.ca = ca;
         this.line = 1;
         this.col = 0;
@@ -60,7 +57,7 @@ class Tokenizer {
      * @param reader the reader
      * @return a new Tokenizer
      */
-    static Tokenizer of(Reader reader) {
+    static Tokenizer of(CharReader reader) {
         return new Tokenizer(reader, CharArray.of(32));
     }
 
@@ -71,7 +68,7 @@ class Tokenizer {
      * @param ca the CharArray
      * @return a new Tokenizer
      */
-    static Tokenizer of(Reader reader, CharArray ca) {
+    static Tokenizer of(CharReader reader, CharArray ca) {
         return new Tokenizer(reader, ca);
     }
 
@@ -99,10 +96,7 @@ class Tokenizer {
      * @return a next token
      */
     Token next() {
-        int ch = read();
-        while (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n') {
-            ch = read();
-        }
+        int ch = reader.readNextChar();
         return switch (ch) {
             case '"' -> readString();
             case '{' -> Token.CURLY_OPEN;
@@ -127,23 +121,12 @@ class Tokenizer {
      */
     private Token readString() {
         for (;;) {
-            markReader();
-            int count = 0;
-            int ch = read();
-            while (ch >= ' ' && ch != '"' && ch != '\\') {
-                ch = read();
-                count++;
-            }
-
-            resetReader();
-            ca.add(reader, count);
-            col += (count + 1);
-            skipReader(1);
-
+            ca.add(reader, reader.length(c -> c >= ' ' && c != '"' && c != '\\'));
+            int ch = reader.read();
             if (ch == '"') {
                 break;
             } else if (ch == '\\') {
-                ca.add((char) unescape(read()));
+                ca.add((char) unescape(reader.read()));
             } else {
                 throw syntaxError(ch);
             }
@@ -158,23 +141,22 @@ class Tokenizer {
      */
     private Token readNumber(int ch)  {
 
-        markReader();
         boolean frac = false;
         boolean exp = false;
 
         if (ch == '-') {
             ca.add((char) ch);
-            ch = read();
+            ch = reader.read();
             if (ch < '0' || ch > '9') throw syntaxError(ch);
         }
 
         if (ch == '0') {
             ca.add((char) ch);
-            ch = read();
+            ch = reader.read();
         } else {
             do {
                 ca.add((char) ch);
-                ch = read();
+                ch = reader.read();
             } while (ch >= '0' && ch <= '9');
         }
 
@@ -183,7 +165,7 @@ class Tokenizer {
             int count = 0;
             do {
                 ca.add((char) ch);
-                ch = read();
+                ch = reader.read();
                 count++;
             } while (ch >= '0' && ch <= '9');
             if (count == 1) throw syntaxError(ch);
@@ -192,23 +174,20 @@ class Tokenizer {
         if (ch == 'e' || ch == 'E') {
             exp = true;
             ca.add((char) ch);
-            ch = read();
+            ch = reader.read();
             if (ch == '+' || ch == '-') {
                 ca.add((char) ch);
-                ch = read();
+                ch = reader.read();
             }
             int count;
             for (count = 0; ch >= '0' && ch <= '9'; count++) {
                 ca.add((char) ch);
-                ch = read();
+                ch = reader.read();
             }
             if (count == 0) throw syntaxError(ch);
         }
 
-        resetReader();
-        skipReader(ca.length() - 1);
-        col--;
-
+        reader.stepBack();
         return Token.number(ca.popChars(), frac, exp);
 
     }
@@ -219,9 +198,9 @@ class Tokenizer {
      * @return token
      */
     private Token readTrue() {
-        if (read() != 'r') throw syntaxError('r');
-        if (read() != 'u') throw syntaxError('u');
-        if (read() != 'e') throw syntaxError('e');
+        if (reader.read() != 'r') throw syntaxError('r');
+        if (reader.read() != 'u') throw syntaxError('u');
+        if (reader.read() != 'e') throw syntaxError('e');
         return Token.TRUE;
     }
 
@@ -231,10 +210,10 @@ class Tokenizer {
      * @return token
      */
     private Token readFalse() {
-        if (read() != 'a') throw syntaxError('a');
-        if (read() != 'l') throw syntaxError('l');
-        if (read() != 's') throw syntaxError('s');
-        if (read() != 'e') throw syntaxError('e');
+        if (reader.read() != 'a') throw syntaxError('a');
+        if (reader.read() != 'l') throw syntaxError('l');
+        if (reader.read() != 's') throw syntaxError('s');
+        if (reader.read() != 'e') throw syntaxError('e');
         return Token.FALSE;
     }
 
@@ -244,9 +223,9 @@ class Tokenizer {
      * @return token
      */
     private Token readNull() {
-        if (read() != 'u') throw syntaxError('u');
-        if (read() != 'l') throw syntaxError('l');
-        if (read() != 'l') throw syntaxError('l');
+        if (reader.read() != 'u') throw syntaxError('u');
+        if (reader.read() != 'l') throw syntaxError('l');
+        if (reader.read() != 'l') throw syntaxError('l');
         return Token.NULL;
     }
 
@@ -266,60 +245,13 @@ class Tokenizer {
             case 'u' -> {
                 int unicode = 0;
                 for (int i = 0; i < 4; i++) {
-                    int c = read();
+                    int c = reader.read();
                     unicode = (unicode << 4) | HexFormat.fromHexDigit(c);
                 }
                 yield unicode;
             }
             default -> throw syntaxError(ch);
         };
-    }
-
-
-    /**
-     * Read a next character
-     * @return a next character
-     */
-    private int read() {
-        try {
-            int ret = reader.read();
-            if (ret == '\n') {
-                line++;
-                col = 0;
-            } else {
-                col++;
-            }
-            return ret;
-        } catch (IOException e) {
-            throw new JsonParseException(e);
-        }
-    }
-
-
-    private void markReader() {
-        try {
-            reader.mark(Integer.MAX_VALUE);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    private void resetReader() {
-        try {
-            reader.reset();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    private void skipReader(int skip) {
-        try {
-            reader.skip(skip);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 

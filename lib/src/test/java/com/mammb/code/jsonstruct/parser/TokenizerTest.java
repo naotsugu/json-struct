@@ -16,7 +16,7 @@
 package com.mammb.code.jsonstruct.parser;
 
 import org.junit.jupiter.api.Test;
-import java.io.StringReader;
+import com.mammb.code.jsonstruct.lang.StringReader;
 import static org.junit.jupiter.api.Assertions.*;
 import static com.mammb.code.jsonstruct.parser.Token.Type.*;
 
@@ -29,7 +29,7 @@ class TokenizerTest {
 
     @Test
     void read() {
-        var r = new StringReader("""
+        var r = StringReader.of("""
                 { "name"   : "John Smith",
                   "price"  : 2300,
                   "color"  : [ "red", "green" ],

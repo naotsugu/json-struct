@@ -17,6 +17,8 @@ package com.mammb.code.jsonstruct;
 
 import java.io.IOException;
 import java.io.Reader;
+
+import com.mammb.code.jsonstruct.lang.CharReader;
 import com.mammb.code.jsonstruct.lang.StringReader;
 
 /**
@@ -30,7 +32,7 @@ public interface Json<T> {
      * @param reader Reader
      * @return the class instance
      */
-    T from(Reader reader);
+    T from(CharReader reader);
 
 
     /**

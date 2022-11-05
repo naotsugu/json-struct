@@ -15,19 +15,16 @@
  */
 package com.mammb.code.jsonstruct.lang;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
- * A character stream whose source is a string.
- *
+ * StringReader.
  * @author Naotsugu Kobayashi
  */
-public class StringReader extends Reader {
+public class StringReader implements CharReader {
 
     /** the source string. */
-    private String str;
+    private String string;
 
     /** the source length. */
     private int length;
@@ -35,85 +32,86 @@ public class StringReader extends Reader {
     /** index of next reading. */
     private int next;
 
-    /** marked index. */
-    private int mark;
-
 
     /**
-     * Creates a new string reader.
-     * @param s String providing the character stream.
+     * Constructor.
+     * @param string the source string
      */
-    public StringReader(String s) {
-        this.str = s;
-        this.length = s.length();
+    public StringReader(String string) {
+        this.string = string;
+        this.length = string.length();
         this.next = 0;
-        this.mark = 0;
     }
 
 
     /**
-     * Reads a single character.
-     * @return The character read, or -1 if the end of the stream has been reached
+     * Create a new StringReader for given string.
+     * @param string the source string
+     * @return a new StringReader
      */
+    public static StringReader of(String string) {
+        return new StringReader(string);
+    }
+
+
+    @Override
     public int read() {
-        if (next >= length)
-            return -1;
-        return str.charAt(next++);
+        return (next >= length) ? -1 : string.charAt(next++);
+    }
+
+
+    @Override
+    public int readNextChar() {
+        int ch;
+        do {
+            ch = (next >= length) ? -1 : string.charAt(next++);
+        } while (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n');
+        return ch;
+    }
+
+
+    @Override
+    public int length(Predicate<Character> until) {
+        for (int i = next; i < length; i++) {
+            if (until.test(string.charAt(i))) {
+                continue;
+            }
+            return i - next;
+        }
+        return -1;
     }
 
 
     @Override
     public int read(char[] chars, int off, int len) {
-        Objects.checkFromIndexSize(off, len, chars.length);
-        if (len == 0) {
-            return 0;
-        }
-        if (next >= length)
-            return -1;
+
+        if (chars.length < off + len) throw new IndexOutOfBoundsException(off + len);
+        if (len == 0) return 0;
+        if (next >= length) return -1;
+
         int n = Math.min(length - next, len);
-        str.getChars(next, next + n, chars, off);
+        string.getChars(next, next + n, chars, off);
         next += n;
+
         return n;
     }
 
 
     @Override
-    public boolean markSupported() {
-        return true;
+    public void skip(int n) {
+        next += Math.min(length - next, n);
     }
 
 
     @Override
-    public void mark(int readAheadLimit) {
-        if (readAheadLimit < 0)
-            throw new IllegalArgumentException("Read-ahead limit < 0");
-        mark = next;
-    }
-
-
-    @Override
-    public void reset() {
-        next = mark;
-    }
-
-
-    @Override
-    public long skip(long n) {
-        if (next >= length)
-            return 0;
-        long r = Math.min(length - next, n);
-        r = Math.max(-next, r);
-        next += r;
-        return r;
+    public void stepBack() {
+        next--;
     }
 
 
     @Override
     public void close() {
-        str = null;
-        length = 0;
-        next = 0;
-        mark = 0;
+        string = null;
     }
 
 }

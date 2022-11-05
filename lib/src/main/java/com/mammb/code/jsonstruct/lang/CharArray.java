@@ -16,9 +16,6 @@
 package com.mammb.code.jsonstruct.lang;
 
 import com.mammb.code.jsonstruct.parser.CharSource;
-
-import java.io.IOException;
-import java.io.Reader;
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -109,15 +106,11 @@ public class CharArray implements Serializable {
      * @param reader the reader
      * @param len the length of read
      */
-    public void add(Reader reader, int len) {
-        try {
-            if (length + len > elements.length) {
-                elements = grow(len);
-            }
-            length += Math.max(0, reader.read(elements, length, len));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public void add(CharReader reader, int len) {
+        if (length + len > elements.length) {
+            elements = grow(len);
         }
+        length += Math.max(0, reader.read(elements, length, len));
     }
 
 
@@ -171,6 +164,10 @@ public class CharArray implements Serializable {
     }
 
 
+    /**
+     * Pop string from this char array.
+     * @return Popped string
+     */
     public String popString() {
         int len = length;
         length = 0;
@@ -178,6 +175,10 @@ public class CharArray implements Serializable {
     }
 
 
+    /**
+     * Pop character from this char array.
+     * @return Popped character
+     */
     public char[] popChars() {
         int len = length;
         length = 0;

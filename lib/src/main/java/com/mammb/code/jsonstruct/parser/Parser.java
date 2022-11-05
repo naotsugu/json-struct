@@ -16,8 +16,8 @@
 package com.mammb.code.jsonstruct.parser;
 
 import com.mammb.code.jsonstruct.lang.CharArray;
+import com.mammb.code.jsonstruct.lang.CharReader;
 import com.mammb.code.jsonstruct.lang.StringReader;
-import java.io.Reader;
 import java.util.function.Consumer;
 import static com.mammb.code.jsonstruct.parser.Token.Type.*;
 
@@ -52,7 +52,7 @@ public class Parser {
      * @param reader the Reader
      * @return a new Parser
      */
-    public static Parser of(Reader reader) {
+    public static Parser of(CharReader reader) {
         return new Parser(Tokenizer.of(reader));
     }
 
@@ -63,7 +63,7 @@ public class Parser {
      * @param ca the CharArray
      * @return a new Parser
      */
-    public static Parser of(Reader reader, CharArray ca) {
+    public static Parser of(CharReader reader, CharArray ca) {
         return new Parser(Tokenizer.of(reader, ca));
     }
 

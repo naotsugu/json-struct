@@ -16,8 +16,6 @@
 package com.mammb.code.jsonstruct.parser;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * JsonArray.
@@ -37,8 +35,9 @@ public interface JsonArray extends JsonStructure, Iterable<JsonValue> {
     /**
      * Appends the specified JsonValue to the end of this array.
      * @param value JsonValue to be appended to this array
+     * @return {@code true} (as specified by Collection.add)
      */
-    void add(JsonValue value);
+    boolean add(JsonValue value);
 
 
     /**
@@ -53,29 +52,6 @@ public interface JsonArray extends JsonStructure, Iterable<JsonValue> {
     /**
      * JsonArray implementation.
      */
-    class JsonArrayImpl implements JsonArray {
-
-        private final List<JsonValue> values = new ArrayList<>();
-
-        @Override
-        public JsonValue get(int index) {
-            return values.get(index);
-        }
-
-        @Override
-        public void add(JsonValue value) {
-            values.add(value);
-        }
-
-        @Override
-        public int size() {
-            return values.size();
-        }
-
-        @Override
-        public Iterator<JsonValue> iterator() {
-            return values.iterator();
-        }
-    }
+    class JsonArrayImpl extends ArrayList<JsonValue> implements JsonArray { }
 
 }

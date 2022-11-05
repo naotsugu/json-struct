@@ -17,7 +17,7 @@ package com.mammb.code.jsonstruct.processor.assembly;
 
 import com.mammb.code.jsonstruct.JsonStructIgnore;
 import com.mammb.code.jsonstruct.lang.Iterate;
-import com.mammb.code.jsonstruct.processor.JsonStructException;
+import com.mammb.code.jsonstruct.JsonStructException;
 import com.mammb.code.jsonstruct.processor.LangUtil;
 
 import javax.lang.model.element.Element;

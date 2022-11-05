@@ -18,6 +18,7 @@ package com.mammb.code.jsonstruct.parser;
 import com.mammb.code.jsonstruct.lang.CharArray;
 import com.mammb.code.jsonstruct.lang.CharReader;
 import java.util.HexFormat;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Tokenizer.
@@ -25,6 +26,8 @@ import java.util.HexFormat;
  * @author Naotsugu Kobayashi
  */
 class Tokenizer {
+
+    private static final ConcurrentHashMap<String, Token> tokenCache = new ConcurrentHashMap<>();
 
     /** Reader. */
     private final CharReader reader;
@@ -121,8 +124,10 @@ class Tokenizer {
      */
     private Token readString() {
         for (;;) {
-            ca.add(reader, reader.length(c -> c >= ' ' && c != '"' && c != '\\'));
+            int len = reader.length(c -> c >= ' ' && c != '"' && c != '\\');
+            ca.add(reader, len);
             int ch = reader.read();
+            col += len + 1;
             if (ch == '"') {
                 break;
             } else if (ch == '\\') {
@@ -146,16 +151,19 @@ class Tokenizer {
 
         if (ch == '-') {
             ca.add((char) ch);
+            col++;
             ch = reader.read();
             if (ch < '0' || ch > '9') throw syntaxError(ch);
         }
 
         if (ch == '0') {
             ca.add((char) ch);
+            col++;
             ch = reader.read();
         } else {
             do {
                 ca.add((char) ch);
+                col++;
                 ch = reader.read();
             } while (ch >= '0' && ch <= '9');
         }
@@ -165,6 +173,7 @@ class Tokenizer {
             int count = 0;
             do {
                 ca.add((char) ch);
+                col++;
                 ch = reader.read();
                 count++;
             } while (ch >= '0' && ch <= '9');
@@ -174,14 +183,17 @@ class Tokenizer {
         if (ch == 'e' || ch == 'E') {
             exp = true;
             ca.add((char) ch);
+            col++;
             ch = reader.read();
             if (ch == '+' || ch == '-') {
                 ca.add((char) ch);
+                col++;
                 ch = reader.read();
             }
             int count;
             for (count = 0; ch >= '0' && ch <= '9'; count++) {
                 ca.add((char) ch);
+                col++;
                 ch = reader.read();
             }
             if (count == 0) throw syntaxError(ch);

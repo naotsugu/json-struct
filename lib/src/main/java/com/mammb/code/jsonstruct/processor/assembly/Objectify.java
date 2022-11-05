@@ -18,7 +18,8 @@ package com.mammb.code.jsonstruct.processor.assembly;
 import com.mammb.code.jsonstruct.JsonStruct;
 import com.mammb.code.jsonstruct.JsonStructIgnore;
 import com.mammb.code.jsonstruct.lang.Iterate;
-import com.mammb.code.jsonstruct.processor.JsonStructException;
+import com.mammb.code.jsonstruct.JsonStructException;
+import com.mammb.code.jsonstruct.parser.JsonPointer;
 import com.mammb.code.jsonstruct.processor.LangUtil;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
@@ -41,8 +42,8 @@ public class Objectify {
     /** The known basic classes. */
     private final Set<String> basicClasses;
 
-    /** The backing methods. */
-    private Code backingMethods;
+    /** The backing codes. */
+    private Code backingCodes;
 
     /** The max cyclic depth. */
     private final int cyclicDepth;
@@ -55,13 +56,13 @@ public class Objectify {
      * Constructor.
      * @param lang The lang model utility
      * @param basicClasses The known basic classes
-     * @param backingMethods The backing methods
+     * @param backingCodes The backing methods
      * @param cyclicDepth The max cyclic depth
      */
-    private Objectify(LangUtil lang, Set<String> basicClasses, Code backingMethods, int cyclicDepth) {
+    private Objectify(LangUtil lang, Set<String> basicClasses, Code backingCodes, int cyclicDepth) {
         this.lang = Objects.requireNonNull(lang);
         this.basicClasses = Objects.requireNonNull(basicClasses);
-        this.backingMethods = Objects.requireNonNull(backingMethods);
+        this.backingCodes = Objects.requireNonNull(backingCodes);
         this.cyclicDepth = cyclicDepth;
         this.stack = new ArrayDeque<>();
     }
@@ -155,8 +156,8 @@ public class Objectify {
         }
 
         return Code.of("""
-            ((JsonStructure) json).as("#{name}", convert.to(#{type}.class))""")
-            .interpolate("#{name}", path.pointerJoin())
+            ((JsonStructure) json).as(#{pointerName}, convert.to(#{type}.class))""")
+            .interpolate("#{pointerName}", createPointer(path))
             .interpolateType("#{type}", type.toString())
             .add(Imports.of("com.mammb.code.jsonstruct.parser.JsonStructure"));
     }
@@ -171,8 +172,8 @@ public class Objectify {
         }
 
         return Code.of("""
-                #{enumType}.valueOf(((JsonStructure) json).as("#{name}", convert.to(String.class)))""")
-            .interpolate("#{name}", path.pointerJoin())
+                #{enumType}.valueOf(((JsonStructure) json).as(#{pointerName}, convert.to(String.class)))""")
+            .interpolate("#{pointerName}", createPointer(path))
             .interpolateType("#{enumType}", type.toString());
     }
 
@@ -182,7 +183,7 @@ public class Objectify {
         TypeMirror entryType = lang.entryType(type);
         String methodName = path.camelJoin() + "ObjectifyList";
 
-        backingMethods.add(Code.of("""
+        backingCodes.add(Code.of("""
             private List<#{type}> #{methodName}(JsonArray array) {
                 if (array == null) return List.of();
                 List<#{type}> list = new ArrayList<>();
@@ -197,9 +198,9 @@ public class Objectify {
             .interpolate("#{entry}", toCode(entryType, Path.of())));
 
         return Code.of("""
-            #{methodName}((JsonArray) ((JsonStructure) json).at("#{path}"))""")
+            #{methodName}((JsonArray) ((JsonStructure) json).at(#{pointerName}))""")
             .interpolate("#{methodName}", methodName)
-            .interpolateType("#{path}", path.pointerJoin());
+            .interpolate("#{pointerName}", createPointer(path));
     }
 
 
@@ -208,7 +209,7 @@ public class Objectify {
         TypeMirror entryType = lang.entryType(type);
         String methodName = path.camelJoin() + "ObjectifySet";
 
-        backingMethods.add(Code.of("""
+        backingCodes.add(Code.of("""
             private Set<#{type}> #{methodName}(JsonArray array) {
                 if (array == null) return Set.of();
                 Set<#{type}> set = new LinkedHashSet<>();
@@ -223,9 +224,9 @@ public class Objectify {
             .interpolate("#{entry}", toCode(entryType, Path.of())));
 
         return Code.of("""
-            #{methodName}((JsonArray) ((JsonStructure) json).at("#{path}"))""")
+            #{methodName}((JsonArray) ((JsonStructure) json).at(#{pointerName}))""")
             .interpolate("#{methodName}", methodName)
-            .interpolateType("#{path}", path.pointerJoin());
+            .interpolate("#{pointerName}", createPointer(path));
     }
 
 
@@ -234,7 +235,7 @@ public class Objectify {
         TypeMirror compType = lang.entryType(type);
         String methodName = path.camelJoin() + "ObjectifyArray";
 
-        backingMethods.add(Code.of("""
+        backingCodes.add(Code.of("""
             private #{type}[] #{methodName}(JsonArray array) {
                 if (array == null) return new #{type}[0];
                 List<#{type}> list = new ArrayList<>();
@@ -249,9 +250,9 @@ public class Objectify {
             .interpolate("#{entry}", toCode(compType, Path.of())));
 
         return Code.of("""
-            #{methodName}((JsonArray) ((JsonStructure) json).at("#{path}"))""")
+            #{methodName}((JsonArray) ((JsonStructure) json).at(#{pointerName}))""")
             .interpolate("#{methodName}", methodName)
-            .interpolateType("#{path}", path.pointerJoin());
+            .interpolate("#{pointerName}", createPointer(path));
     }
 
 
@@ -260,7 +261,7 @@ public class Objectify {
         TypeMirror[] entryTypes = lang.mapEntryTypes(type);
         String methodName = path.camelJoin() + "ObjectifyMap";
 
-        backingMethods.add(Code.of("""
+        backingCodes.add(Code.of("""
             private Map<#{keyType}, #{valType}> #{methodName}(JsonStructure str) {
                 if (str == null) return Map.of();
                 Map<#{keyType}, #{valType}> map = new LinkedHashMap<>();
@@ -299,19 +300,29 @@ public class Objectify {
             .add(Imports.of("""
                 import com.mammb.code.jsonstruct.lang.*;
                 import com.mammb.code.jsonstruct.parser.*;
-                import com.mammb.code.jsonstruct.processor.JsonStructException;
+                import com.mammb.code.jsonstruct.JsonStructException;
                 """)));
 
         return Code.of("""
-            #{methodName}((JsonStructure) ((JsonStructure) json).at("#{path}"))""")
+            #{methodName}((JsonStructure) ((JsonStructure) json).at(#{pointerName}))""")
             .interpolate("#{methodName}", methodName)
-            .interpolateType("#{path}", path.pointerJoin());
+            .interpolate("#{pointerName}", createPointer(path));
+    }
+
+
+    private String createPointer(Path path) {
+        String pointerName = path.camelJoin() + "Pointer";
+        backingCodes.addHead(Code.of("""
+            private static final JsonPointer #{pointerName} = JsonPointer.of("#{name}");""")
+            .interpolate("#{pointerName}", pointerName)
+            .interpolate("#{name}", path.pointerJoin()));
+        return pointerName;
     }
 
 
     private Code backingWithClear() {
-        Code ret = backingMethods;
-        backingMethods = Code.of();
+        Code ret = backingCodes;
+        backingCodes = Code.of();
         stack.clear();
         return ret;
     }

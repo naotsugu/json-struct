@@ -43,19 +43,19 @@ public class MicroBenchDeserialize {
     static Gson gson = new Gson();
     static ObjectMapper jackson = new ObjectMapper();
 
-    @Benchmark
+    //@Benchmark
     public Glossary struct() {
-        JsonStructure json = Parser.of(str).parse(); //  1805.148 ns/op
+        JsonStructure json = Parser.of(str).parse(); //  1719.155 ns/op
         return null;
         //return json.from(str);
     }
 
-    @Benchmark
+    //@Benchmark
     public Glossary gson() { // 1699.341 ns/op
         return gson.fromJson(str, Glossary.class);
     }
 
-    @Benchmark
+    //@Benchmark
     public Glossary jackson() throws JsonProcessingException { // 1658.562 ns/op
         return jackson.readValue(str, Glossary.class);
     }

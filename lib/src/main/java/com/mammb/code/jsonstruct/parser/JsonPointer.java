@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * JsonPointer.
@@ -143,21 +144,6 @@ public class JsonPointer {
     }
 
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        JsonPointer that = (JsonPointer) o;
-        return val.equals(that.val);
-    }
-
-
-    @Override
-    public int hashCode() {
-        return val.hashCode();
-    }
-
-
     /**
      * Parse token as index
      * @param token the token
@@ -193,6 +179,21 @@ public class JsonPointer {
         return (str.indexOf('~') != -1)
             ? str.replace("~1", "/").replace("~0", "~")
             : str;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JsonPointer that = (JsonPointer) o;
+        return val.equals(that.val);
+    }
+
+
+    @Override
+    public int hashCode() {
+        return val.hashCode();
     }
 
 }

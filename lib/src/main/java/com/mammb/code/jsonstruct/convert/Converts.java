@@ -17,7 +17,6 @@ package com.mammb.code.jsonstruct.convert;
 
 import com.mammb.code.jsonstruct.parser.CharSource;
 import com.mammb.code.jsonstruct.parser.JsonValue;
-
 import java.util.*;
 import java.util.function.Function;
 
@@ -27,11 +26,8 @@ import java.util.function.Function;
  */
 public class Converts {
 
-    /** The Builtin objectify map. */
-    private final Map<Class<?>, Function<JsonValue, ?>> objectifyMap;
-
     /** The Optional objectify map. */
-    private final Map<Class<?>, Function<JsonValue, ?>> objectifyOptMap;
+    private final Map<Class<?>, Function<JsonValue, ?>> objectifyMap;
 
     /** The Optional stringify map. */
     private final Map<Class<?>, Function<?, CharSequence>> stringifyMap;
@@ -41,8 +37,7 @@ public class Converts {
      * Constructor.
      */
     private Converts() {
-        this.objectifyMap = BuiltinObjectify.map();
-        this.objectifyOptMap = new HashMap<>();
+        this.objectifyMap = new HashMap<>();
         this.stringifyMap =  new HashMap<>();
     }
 
@@ -71,11 +66,10 @@ public class Converts {
             // bypass
             return v -> (T) v.toString();
         }
-        if (!objectifyOptMap.isEmpty() && objectifyOptMap.containsKey(clazz)) {
-            return (Function<JsonValue, T>) objectifyOptMap.get(clazz);
+        if (!objectifyMap.isEmpty() && objectifyMap.containsKey(clazz)) {
+            return (Function<JsonValue, T>) objectifyMap.get(clazz);
         }
-        var fun = (Function<JsonValue, T>) objectifyMap.get(clazz);
-        return (fun != null) ? fun : v -> null;
+        return (Function<JsonValue, T>) BuiltinObjectify.to(clazz);
     }
 
 
@@ -158,7 +152,7 @@ public class Converts {
      * @param conv the convert
      */
     public void add(Class<?> clazz, Function<String, ?> conv) {
-        objectifyOptMap.put(clazz, adapt(conv));
+        objectifyMap.put(clazz, adapt(conv));
     }
 
 
@@ -179,7 +173,7 @@ public class Converts {
     public Set<String> typeClasses() {
         Set<String> set = new HashSet<>();
         objectifyMap.keySet().forEach(k -> set.add(k.getCanonicalName()));
-        objectifyOptMap.keySet().forEach(k -> set.add(k.getCanonicalName()));
+        set.addAll(BuiltinObjectify.typeNames());
         return set;
     }
 

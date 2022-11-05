@@ -38,15 +38,36 @@ public interface CharReader extends Closeable {
     int readNextChar();
 
 
+    /**
+     * Get the length of time until the condition given as a predicate is satisfied.
+     * The cursor does not move forward.
+     * @param until a predicate
+     * @return the length
+     */
     int length(Predicate<Character> until);
 
 
+    /**
+     * Reads characters into a portion of an array.
+     * @param chars destination buffer
+     * @param off offset at which to start storing characters
+     * @param len maximum number of characters to read
+     * @return The number of characters read, or -1 if the end of the stream has been reached
+     */
     int read(char[] chars, int off, int len);
 
 
+    /**
+     * Skips characters.
+     * @param n the number of characters to skip
+     */
     void skip(int n);
 
 
+    /**
+     * Step back a single read.
+     * This is one shot operation.
+     */
     void stepBack();
 
 }

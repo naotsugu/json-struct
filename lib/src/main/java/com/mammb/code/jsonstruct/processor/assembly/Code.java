@@ -188,6 +188,18 @@ public class Code {
 
 
     /**
+     * Add code at head.
+     * @param code the code
+     * @return this code
+     */
+    public Code addHead(Code code) {
+        lines.addAll(0, code.lines);
+        imports.marge(code.imports);
+        return this;
+    }
+
+
+    /**
      * Add imports.
      * @param other Imports
      * @return this code

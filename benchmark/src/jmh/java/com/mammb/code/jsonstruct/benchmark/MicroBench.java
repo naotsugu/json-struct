@@ -6,11 +6,20 @@ import com.google.gson.Gson;
 import com.mammb.code.jsonstruct.Json;
 import com.mammb.code.jsonstruct.benchmark.data.Glossary;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Warmup;
 
+import java.util.concurrent.TimeUnit;
+
 @Fork(1)
-@Warmup(iterations = 2, time = 10)
+@Warmup(iterations = 5, time = 5)
+@Measurement(iterations = 3, time = 5)
+@BenchmarkMode(Mode.AverageTime)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class MicroBench {
 
     private static final String str = """
@@ -22,11 +31,11 @@ public class MicroBench {
                   {
                     "id": "SGML",
                     "sortAs": "SGML",
-                    "glossTerm": "Standard Generalized Markup Language",
+                    "glossTerm": "Standard Markup Language",
                     "acronym": "SGML",
                     "abbrev": "ISO 8879:1986",
                     "def": {
-                      "para": "A meta-markup language, used to create markup languages such as DocBook.",
+                      "para": "A meta-markup language.",
                       "seeAlso": ["GML", "XML"]
                     }
                   }
@@ -34,22 +43,21 @@ public class MicroBench {
               }
             }""";
 
-
-    //@Benchmark
+    @Benchmark
     public String struct() {
         Json<Glossary> json = Json.of(Glossary.class);
         Glossary glossary = json.from(str);
         return json.stringify(glossary);
     }
 
-    //@Benchmark
+    @Benchmark
     public String gson() {
         Gson gson = new Gson();
         Glossary glossary = gson.fromJson(str, Glossary.class);
         return gson.toJson(glossary);
     }
 
-    //@Benchmark
+    @Benchmark
     public String jackson() throws JsonProcessingException {
         ObjectMapper jackson = new ObjectMapper();
         Glossary glossary = jackson.readValue(str, Glossary.class);

@@ -45,6 +45,109 @@ public class BuiltinObjectify {
     /** UTC Zone. */
     private static final ZoneId UTC = ZoneId.of("UTC");
 
+    /**
+     * Gets the builtin class names.
+     * @return the builtin class names
+     */
+    public static Set<String> typeNames() {
+        Set<String> set = new HashSet<>();
+        // java.lang.*
+        set.add(String.class.getCanonicalName());
+        set.add(CharSequence.class.getCanonicalName());
+        set.add(Byte.class.getCanonicalName());
+        set.add(Byte.TYPE.getCanonicalName());
+        set.add(Boolean.class.getCanonicalName());
+        set.add(Boolean.TYPE.getCanonicalName());
+        set.add(Character.class.getCanonicalName());
+        set.add(Character.TYPE.getCanonicalName());
+        set.add(Double.class.getCanonicalName());
+        set.add(Double.TYPE.getCanonicalName());
+        set.add(Float.class.getCanonicalName());
+        set.add(Float.TYPE.getCanonicalName());
+        set.add(Integer.class.getCanonicalName());
+        set.add(Integer.TYPE.getCanonicalName());
+        set.add(Long.class.getCanonicalName());
+        set.add(Long.TYPE.getCanonicalName());
+        set.add(Short.class.getCanonicalName());
+        set.add(Short.TYPE.getCanonicalName());
+        set.add(Number.class.getCanonicalName());
+        // java.math.*
+        set.add(BigDecimal.class.getCanonicalName());
+        set.add(BigInteger.class.getCanonicalName());
+        // java.nio.file.*
+        set.add(Path.class.getCanonicalName());
+        // java.net.*
+        set.add(URI.class.getCanonicalName());
+        set.add(URL.class.getCanonicalName());
+        // java.util.*
+        set.add(UUID.class.getCanonicalName());
+        set.add(Date.class.getCanonicalName());
+        set.add(Calendar.class.getCanonicalName());
+        set.add(OptionalDouble.class.getCanonicalName());
+        set.add(OptionalInt.class.getCanonicalName());
+        set.add(OptionalLong.class.getCanonicalName());
+        set.add(TimeZone.class.getCanonicalName());
+        // java.time.*
+        set.add(Duration.class.getCanonicalName());
+        set.add(Period.class.getCanonicalName());
+        set.add(Instant.class.getCanonicalName());
+        set.add(LocalDateTime.class.getCanonicalName());
+        set.add(LocalDate.class.getCanonicalName());
+        set.add(LocalTime.class.getCanonicalName());
+        set.add(OffsetDateTime.class.getCanonicalName());
+        set.add(OffsetTime.class.getCanonicalName());
+        set.add(ZonedDateTime.class.getCanonicalName());
+        set.add(ZoneId.class.getCanonicalName());
+        set.add(ZoneOffset.class.getCanonicalName());
+        return set;
+    }
+
+
+    /**
+     * Gets the builtin converter.
+     * @param clazz the target class
+     * @return the converter
+     */
+    public static Function<JsonValue, ?> to(Class<?> clazz) {
+        return switch (clazz.getCanonicalName()) {
+            case "java.lang.String"             -> v -> v.toString();
+            case "byte", "java.lang.Byte"       -> v -> Byte.parseByte(v.toString());
+            case "boolean", "java.lang.Boolean" -> v -> v.equals(JsonValue.TRUE);
+            case "double", "java.lang.Double"   -> v -> Double.parseDouble(v.toString());
+            case "float", "java.lang.Float"     -> v -> Float.parseFloat(v.toString());
+            case "int", "java.lang.Integer"     -> v -> asNs(v).getInt();
+            case "long", "java.lang.Long"       -> v -> asNs(v).getLong();
+            case "short", "java.lang.Short"     -> v -> Short.parseShort(v.toString());
+            case "java.math.BigDecimal",
+                 "java.lang.Number"             -> v -> asNs(v).getBigDecimal();
+            case "java.math.BigInteger"         -> v -> asNs(v).getBigDecimal().toBigInteger();
+            case "java.util.OptionalDouble"     -> v -> v.equals(JsonValue.NULL) ? OptionalDouble.empty() : OptionalDouble.of(Double.parseDouble(v.toString()));
+            case "java.util.OptionalInt"        -> v -> v.equals(JsonValue.NULL) ? OptionalInt.empty() : OptionalInt.of(asNs(v).getInt());
+            case "java.util.OptionalLong"       -> v -> v.equals(JsonValue.NULL) ? OptionalLong.empty() : OptionalLong.of(asNs(v).getLong());
+
+            case "char", "java.lang.Character"  -> v -> asCs(v).chars()[0];
+            case "java.util.Date"               -> v -> asDate(v.toString());
+            case "java.util.Calendar"           -> v -> asCalendar(v.toString());
+            case "java.util.TimeZone"           -> v -> asTimeZone(v.toString());
+            case "java.time.Instant"            -> v -> Instant.from(DateTimeFormatter.ISO_INSTANT.withZone(UTC).withLocale(locale).parse(v.toString()));
+            case "java.time.LocalDateTime"      -> v -> LocalDateTime.parse(v.toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale));
+            case "java.time.LocalDate"          -> v -> LocalDate.parse(v.toString(), DateTimeFormatter.ISO_LOCAL_DATE.withLocale(locale));
+            case "java.time.LocalTime"          -> v -> LocalTime.parse(v.toString(), DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale));
+            case "java.time.OffsetDateTime"     -> v -> OffsetDateTime.parse(v.toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale));
+            case "java.time.OffsetTime"         -> v -> OffsetTime.parse(v.toString(), DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale));
+            case "java.time.ZonedDateTime"      -> v -> ZonedDateTime.parse(v.toString(), DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(locale));
+            case "java.time.ZoneId"             -> v -> ZoneId.of(v.toString());
+            case "java.time.ZoneOffset"         -> v -> ZoneOffset.of(v.toString());
+            case "java.time.Duration"           -> v -> Duration.parse(v.toString());
+            case "java.nio.file.Path"           -> v -> Paths.get(v.toString());
+            case "java.time.Period"             -> v -> Period.parse(v.toString());
+            case "java.net.URI"                 -> v -> URI.create(v.toString());
+            case "java.net.URL"                 -> v -> trying(() -> new URL(v.toString()));
+            case "java.util.UUID"               -> v -> UUID.fromString(v.toString());
+            default                             -> v -> null;
+        };
+    }
+
 
     /**
      * Create a builtin mappings.

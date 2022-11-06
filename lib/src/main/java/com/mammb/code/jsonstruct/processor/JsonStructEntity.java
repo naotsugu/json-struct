@@ -18,7 +18,6 @@ package com.mammb.code.jsonstruct.processor;
 import com.mammb.code.jsonstruct.JsonStruct;
 import com.mammb.code.jsonstruct.convert.Converts;
 import com.mammb.code.jsonstruct.processor.assembly.*;
-
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -127,7 +126,7 @@ public class JsonStructEntity {
                             #{stringifyCode};
                     }
 
-                    #{backingMethods}
+                    #{backingCodes}
                 }
                 """)
             .interpolateType("#{processorName}", JsonStructProcessor.class.getName())
@@ -135,7 +134,7 @@ public class JsonStructEntity {
             .interpolateType("#{entityName}", getClassName())
             .interpolate("#{objectifyCode}", objectifyCode.code())
             .interpolate("#{stringifyCode}", stringifyCode.code())
-            .interpolate("#{backingMethods}", objectifyCode.backingMethods().add(stringifyCode.backingMethods()))
+            .interpolate("#{backingCodes}", objectifyCode.backingCodes().add(stringifyCode.backingCodes()))
             .add(imports);
     }
 

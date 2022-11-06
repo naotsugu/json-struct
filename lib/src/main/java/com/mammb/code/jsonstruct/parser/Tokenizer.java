@@ -35,12 +35,6 @@ class Tokenizer {
     /** CharArray. */
     private final CharArray ca;
 
-    /** number of current line. */
-    private int line;
-
-    /** number of current column. */
-    private int col;
-
 
     /**
      * Constructor.
@@ -50,8 +44,6 @@ class Tokenizer {
     private Tokenizer(CharReader reader, CharArray ca) {
         this.reader = reader;
         this.ca = ca;
-        this.line = 1;
-        this.col = 0;
     }
 
 
@@ -73,24 +65,6 @@ class Tokenizer {
      */
     static Tokenizer of(CharReader reader, CharArray ca) {
         return new Tokenizer(reader, ca);
-    }
-
-
-    /**
-     * Get the number of current line.
-     * @return the number of current line
-     */
-    int getLine() {
-        return line;
-    }
-
-
-    /**
-     * Get the number of current column.
-     * @return the number of current column
-     */
-    int getCol() {
-        return col;
     }
 
 
@@ -127,7 +101,6 @@ class Tokenizer {
             int len = reader.length(c -> c >= ' ' && c != '"' && c != '\\');
             ca.add(reader, len);
             int ch = reader.read();
-            col += len + 1;
             if (ch == '"') {
                 break;
             } else if (ch == '\\') {
@@ -151,19 +124,16 @@ class Tokenizer {
 
         if (ch == '-') {
             ca.add((char) ch);
-            col++;
             ch = reader.read();
             if (ch < '0' || ch > '9') throw syntaxError(ch);
         }
 
         if (ch == '0') {
             ca.add((char) ch);
-            col++;
             ch = reader.read();
         } else {
             do {
                 ca.add((char) ch);
-                col++;
                 ch = reader.read();
             } while (ch >= '0' && ch <= '9');
         }
@@ -173,7 +143,6 @@ class Tokenizer {
             int count = 0;
             do {
                 ca.add((char) ch);
-                col++;
                 ch = reader.read();
                 count++;
             } while (ch >= '0' && ch <= '9');
@@ -183,17 +152,14 @@ class Tokenizer {
         if (ch == 'e' || ch == 'E') {
             exp = true;
             ca.add((char) ch);
-            col++;
             ch = reader.read();
             if (ch == '+' || ch == '-') {
                 ca.add((char) ch);
-                col++;
                 ch = reader.read();
             }
             int count;
             for (count = 0; ch >= '0' && ch <= '9'; count++) {
                 ca.add((char) ch);
-                col++;
                 ch = reader.read();
             }
             if (count == 0) throw syntaxError(ch);
@@ -273,7 +239,7 @@ class Tokenizer {
      * @return a JsonParseException
      */
     private JsonParseException syntaxError(int ch) {
-        return new JsonParseException("Unexpected char. [{}] line:{}, column:{}", ch, line, col);
+        return new JsonParseException("Unexpected char. [{}] index:{}", ch, reader.getPosition());
     }
 
 }

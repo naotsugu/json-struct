@@ -190,7 +190,7 @@ public class Stringify {
             .interpolateType("#{type}", entryType.toString())
             .interpolate("#{methodName}", methodName)
             .interpolate("#{entry}", toCode(entryType, Path.of("entry", "value")));
-        backingMethods.add(backingMethod);
+        backingMethods.addEmptyLine().add(backingMethod);
     }
 
 
@@ -217,7 +217,7 @@ public class Stringify {
                 .interpolate("#{methodName}", methodName)
                 .interpolate("#{keyEntry}", toCode(key, Path.of("entry", "value", "getKey")))
                 .interpolate("#{valEntry}", toCode(val, Path.of("entry", "value", "getValue")));
-            backingMethods.add(backingMethod);
+            backingMethods.addEmptyLine().add(backingMethod);
 
             return Code.of("""
             .append("{")
@@ -241,7 +241,7 @@ public class Stringify {
                 .interpolate("#{methodName}", methodName)
                 .interpolate("#{keyEntry}", toCode(key, Path.of("entry", "value", "getKey")))
                 .interpolate("#{valEntry}", toCode(val, Path.of("entry", "value", "getValue")));
-            backingMethods.add(backingMethod);
+            backingMethods.addEmptyLine().add(backingMethod);
 
             return Code.of("""
             .append("[")

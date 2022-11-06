@@ -5,11 +5,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.mammb.code.jsonstruct.Json;
 import com.mammb.code.jsonstruct.benchmark.data.Glossary;
+import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Warmup;
+import java.util.concurrent.TimeUnit;
 
 @Fork(1)
-@Warmup(iterations = 2, time = 10)
+@Warmup(iterations = 2, time = 3)
+@Measurement(iterations = 2, time = 3)
+@BenchmarkMode(Mode.AverageTime)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class MicroBenchSerialize {
 
     private static final String str = """
@@ -51,26 +59,6 @@ public class MicroBenchSerialize {
     // @Benchmark
     public String jackson() throws JsonProcessingException {
         return jackson.writeValueAsString(glossary);
-    }
-
-    public static void main(String[] args) throws Exception {
-        var mb = new MicroBenchSerialize();
-
-        System.out.println("-- struct -------------------------------------------");
-        var struct = mb.struct();
-        System.out.println(struct);
-
-        System.out.println("-- gson ---------------------------------------------");
-        var gson = mb.gson();
-        System.out.println(gson);
-
-        System.out.println("-- jackson ------------------------------------------");
-        var jackson = mb.jackson();
-        System.out.println(jackson);
-
-        System.out.println("match: " + gson.equals(struct));
-        System.out.println("match: " + jackson.equals(struct));
-
     }
 
 }

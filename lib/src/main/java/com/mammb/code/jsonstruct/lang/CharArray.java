@@ -155,16 +155,6 @@ public class CharArray implements Serializable {
 
 
     /**
-     * Gets the string that is a sub array of this array.
-     * @param start the beginning index, inclusive
-     * @return the string that is a sub array of this array
-     */
-    public String subString(int start) {
-        return new String(elements, start, length - start);
-    }
-
-
-    /**
      * Pop string from this char array.
      * @return Popped string
      */

@@ -12,7 +12,6 @@ import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Warmup;
-
 import java.util.concurrent.TimeUnit;
 
 @Fork(1)

@@ -112,6 +112,14 @@ public class StringReader implements CharReader {
     @Override
     public void close() {
         string = null;
+        length = 0;
+        next = 0;
+    }
+
+
+    @Override
+    public int getPosition() {
+        return next;
     }
 
 }

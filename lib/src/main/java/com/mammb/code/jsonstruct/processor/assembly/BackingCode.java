@@ -25,17 +25,17 @@ public class BackingCode {
     private final Code code;
 
     /** the backing code. */
-    private final Code backingMethods;
+    private final Code backingCodes;
 
 
     /**
      * Constructor.
      * @param code the code
-     * @param backingMethods the backingMethods
+     * @param backingCodes the backingCodes
      */
-    private BackingCode(Code code, Code backingMethods) {
+    private BackingCode(Code code, Code backingCodes) {
         this.code = code;
-        this.backingMethods = backingMethods;
+        this.backingCodes = backingCodes;
     }
 
 
@@ -66,7 +66,7 @@ public class BackingCode {
      */
     public BackingCode add(BackingCode other) {
         code.add(other.code);
-        backingMethods.add(other.backingMethods);
+        backingCodes.add(other.backingCodes);
         return this;
     }
 
@@ -81,11 +81,11 @@ public class BackingCode {
 
 
     /**
-     * Gets the backingMethods.
-     * @return the backingMethods
+     * Gets the backingCodes.
+     * @return the backingCodes
      */
-    public Code backingMethods() {
-        return backingMethods;
+    public Code backingCodes() {
+        return backingCodes;
     }
 
 }

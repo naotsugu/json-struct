@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class CharArrayPool {
 
-    /** the queue */
+    /** The queue reference. */
     private volatile WeakReference<ConcurrentLinkedQueue<CharArray>> queueRef;
 
 
@@ -32,7 +32,7 @@ public class CharArrayPool {
      * Create a new CharArrayPool.
      * @return a new CharArrayPool
      */
-    public static final CharArrayPool of() {
+    public static CharArrayPool of() {
         return new CharArrayPool();
     }
 
@@ -57,7 +57,12 @@ public class CharArrayPool {
     }
 
 
+    /**
+     * Get a queue.
+     * @return a queue
+     */
     private ConcurrentLinkedQueue<CharArray> getQueue() {
+
         WeakReference<ConcurrentLinkedQueue<CharArray>> ref = queueRef;
         if (ref != null) {
             ConcurrentLinkedQueue<CharArray> queue = ref.get();

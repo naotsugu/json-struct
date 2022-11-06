@@ -29,6 +29,9 @@ public class CharBufferReader implements CharReader {
     /** The reader within. */
     private Reader in;
 
+    /** The position of reader. */
+    private int position;
+
     /** The read buffer. */
     private char[] buf;
 
@@ -51,6 +54,7 @@ public class CharBufferReader implements CharReader {
      */
     private CharBufferReader(Reader in) {
         this.in = (in.markSupported()) ? in : new BufferedReader(in);
+        this.position = 0;
         this.buf = new char[64]; // small cache
         this.limit = 0;
         this.next = 0;
@@ -70,6 +74,7 @@ public class CharBufferReader implements CharReader {
 
     @Override
     public int read() {
+        position++;
         if (stepBack) {
             stepBack = false;
             return latestRead;
@@ -85,6 +90,7 @@ public class CharBufferReader implements CharReader {
         int ch;
         do {
             ch = read();
+            position++;
         } while (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n');
         return ch;
     }
@@ -113,7 +119,7 @@ public class CharBufferReader implements CharReader {
     @Override
     public int read(char[] chars, int off, int len) {
         try {
-            // TODO check the size of index
+            position += len;
             if (stepBack) {
                 chars[off] = (char) latestRead;
                 stepBack = false;
@@ -129,12 +135,14 @@ public class CharBufferReader implements CharReader {
 
     @Override
     public void skip(int n) {
+        position += n;
         for (int i = 0; i < n; i++) read();
     }
 
 
     @Override
     public void stepBack() {
+        position--;
         stepBack = true;
     }
 
@@ -143,6 +151,10 @@ public class CharBufferReader implements CharReader {
     public void close() {
         try {
             in.close();
+            position = 0;
+            buf = null;
+            limit = 0;
+            next = -1;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -165,6 +177,12 @@ public class CharBufferReader implements CharReader {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    @Override
+    public int getPosition() {
+        return position;
     }
 
 }

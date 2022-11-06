@@ -65,6 +65,7 @@ public interface JsonString extends JsonValue, CharSource {
 
     }
 
+
     /**
      * JsonObject implementation.
      */
@@ -87,4 +88,5 @@ public interface JsonString extends JsonValue, CharSource {
         }
 
     }
+
 }

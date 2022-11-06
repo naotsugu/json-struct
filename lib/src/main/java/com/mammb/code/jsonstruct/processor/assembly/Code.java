@@ -188,6 +188,16 @@ public class Code {
 
 
     /**
+     * Add empty line.
+     * @return this code
+     */
+    public Code addEmptyLine() {
+        lines.add("\n");
+        return this;
+    }
+
+
+    /**
      * Add code at head.
      * @param code the code
      * @return this code

@@ -1,8 +1,6 @@
 package com.mammb.code.jsonstruct.benchmark;
 
 import org.openjdk.jmh.annotations.*;
-
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 @Fork(1)

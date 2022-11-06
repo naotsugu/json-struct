@@ -26,6 +26,7 @@ public interface CharReader extends Closeable {
 
     /**
      * Reads a single character.
+     *
      * @return The character read, or -1 if the end of the stream has been reached
      */
     int read();
@@ -33,6 +34,7 @@ public interface CharReader extends Closeable {
 
     /**
      * Reads a next character with skipping white space.
+     *
      * @return The character read, or -1 if the end of the stream has been reached
      */
     int readNextChar();
@@ -41,6 +43,7 @@ public interface CharReader extends Closeable {
     /**
      * Get the length of time until the condition given as a predicate is satisfied.
      * The cursor does not move forward.
+     *
      * @param until a predicate
      * @return the length
      */
@@ -49,9 +52,10 @@ public interface CharReader extends Closeable {
 
     /**
      * Reads characters into a portion of an array.
+     *
      * @param chars destination buffer
-     * @param off offset at which to start storing characters
-     * @param len maximum number of characters to read
+     * @param off   offset at which to start storing characters
+     * @param len   maximum number of characters to read
      * @return The number of characters read, or -1 if the end of the stream has been reached
      */
     int read(char[] chars, int off, int len);
@@ -59,6 +63,7 @@ public interface CharReader extends Closeable {
 
     /**
      * Skips characters.
+     *
      * @param n the number of characters to skip
      */
     void skip(int n);
@@ -69,5 +74,12 @@ public interface CharReader extends Closeable {
      * This is one shot operation.
      */
     void stepBack();
+
+
+    /**
+     * Get the next index,
+     * @return the next index
+     */
+    int getPosition();
 
 }

@@ -26,6 +26,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -51,6 +52,9 @@ public class Objectify {
     /** The stack of handling type fqcn. */
     private final Deque<Name> stack;
 
+    /** The processed pointer names. */
+    private final Set<String> processedPointers;
+
 
     /**
      * Constructor.
@@ -65,6 +69,7 @@ public class Objectify {
         this.backingCodes = Objects.requireNonNull(backingCodes);
         this.cyclicDepth = cyclicDepth;
         this.stack = new ArrayDeque<>();
+        this.processedPointers = new HashSet<>();
     }
 
 
@@ -114,7 +119,6 @@ public class Objectify {
         }
         return withStack(lang.asTypeElement(type), element -> object(element, path));
     }
-
 
 
     private Code object(TypeElement element, Path path) {
@@ -183,7 +187,7 @@ public class Objectify {
         TypeMirror entryType = lang.entryType(type);
         String methodName = path.camelJoin() + "ObjectifyList";
 
-        backingCodes.add(Code.of("""
+        backingCodes.addEmptyLine().add(Code.of("""
             private List<#{type}> #{methodName}(JsonArray array) {
                 if (array == null) return List.of();
                 List<#{type}> list = new ArrayList<>();
@@ -209,7 +213,7 @@ public class Objectify {
         TypeMirror entryType = lang.entryType(type);
         String methodName = path.camelJoin() + "ObjectifySet";
 
-        backingCodes.add(Code.of("""
+        backingCodes.addEmptyLine().add(Code.of("""
             private Set<#{type}> #{methodName}(JsonArray array) {
                 if (array == null) return Set.of();
                 Set<#{type}> set = new LinkedHashSet<>();
@@ -235,7 +239,7 @@ public class Objectify {
         TypeMirror compType = lang.entryType(type);
         String methodName = path.camelJoin() + "ObjectifyArray";
 
-        backingCodes.add(Code.of("""
+        backingCodes.addEmptyLine().add(Code.of("""
             private #{type}[] #{methodName}(JsonArray array) {
                 if (array == null) return new #{type}[0];
                 List<#{type}> list = new ArrayList<>();
@@ -261,7 +265,7 @@ public class Objectify {
         TypeMirror[] entryTypes = lang.mapEntryTypes(type);
         String methodName = path.camelJoin() + "ObjectifyMap";
 
-        backingCodes.add(Code.of("""
+        backingCodes.addEmptyLine().add(Code.of("""
             private Map<#{keyType}, #{valType}> #{methodName}(JsonStructure str) {
                 if (str == null) return Map.of();
                 Map<#{keyType}, #{valType}> map = new LinkedHashMap<>();
@@ -312,10 +316,14 @@ public class Objectify {
 
     private String createPointer(Path path) {
         String pointerName = path.camelJoin() + "Pointer";
+        if (processedPointers.contains(pointerName)) {
+            return pointerName;
+        }
         backingCodes.addHead(Code.of("""
             private static final JsonPointer #{pointerName} = JsonPointer.of("#{name}");""")
             .interpolate("#{pointerName}", pointerName)
             .interpolate("#{name}", path.pointerJoin()));
+        processedPointers.add(pointerName);
         return pointerName;
     }
 
@@ -324,6 +332,7 @@ public class Objectify {
         Code ret = backingCodes;
         backingCodes = Code.of();
         stack.clear();
+        processedPointers.clear();
         return ret;
     }
 

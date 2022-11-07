@@ -261,7 +261,7 @@ public class Objectify {
 
     private Code map(TypeMirror type, Path path) {
 
-        TypeMirror[] entryTypes = lang.mapEntryTypes(type);
+        TypeMirror[] entryTypes = lang.biEntryTypes(type);
         String methodName = uniqueName(path.camelJoin() + "ObjectifyMap");
 
         backingCodes.addEmptyLine().add(Code.of("""

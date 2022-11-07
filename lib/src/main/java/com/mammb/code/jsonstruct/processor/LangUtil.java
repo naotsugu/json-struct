@@ -155,9 +155,7 @@ public class LangUtil {
      * @return {@code true} if whether the given {@link TypeMirror} is a List type
      */
     public boolean isListLike(TypeMirror typeMirror) {
-        TypeMirror list = elementUtils.getTypeElement("java.util.List").asType();
-        TypeMirror erasure = typeUtils.erasure(typeMirror);
-        return typeUtils.isAssignable(erasure, list);
+        return isAssignable(typeMirror, "java.util.List");
     }
 
 
@@ -167,9 +165,7 @@ public class LangUtil {
      * @return {@code true} if whether the given {@link TypeMirror} is a Set type
      */
     public boolean isSetLike(TypeMirror typeMirror) {
-        TypeMirror list = elementUtils.getTypeElement("java.util.Set").asType();
-        TypeMirror erasure = typeUtils.erasure(typeMirror);
-        return typeUtils.isAssignable(erasure, list);
+        return isAssignable(typeMirror, "java.util.Set");
     }
 
 
@@ -179,7 +175,18 @@ public class LangUtil {
      * @return {@code true} if whether the given {@link TypeMirror} is a Map type
      */
     public boolean isMapLike(TypeMirror typeMirror) {
-        TypeMirror list = elementUtils.getTypeElement("java.util.Map").asType();
+        return isAssignable(typeMirror, "java.util.Map");
+    }
+
+
+    /**
+     * Gets whether the given {@link TypeMirror} is a given fqcn type.
+     * @param typeMirror the {@link TypeMirror}
+     * @param fqcn the fqcn of type
+     * @return {@code true} if whether the given {@link TypeMirror} is a given fqcn type
+     */
+    public boolean isAssignable(TypeMirror typeMirror, String fqcn) {
+        TypeMirror list = elementUtils.getTypeElement(fqcn).asType();
         TypeMirror erasure = typeUtils.erasure(typeMirror);
         return typeUtils.isAssignable(erasure, list);
     }
@@ -271,7 +278,7 @@ public class LangUtil {
      * @param typeMirror the {@link TypeMirror}
      * @return the type argument of the given {@link TypeMirror}
      */
-    public TypeMirror[] mapEntryTypes(TypeMirror typeMirror) {
+    public TypeMirror[] biEntryTypes(TypeMirror typeMirror) {
         if (typeMirror.getKind() == TypeKind.DECLARED) {
             DeclaredType declaredType = (DeclaredType) typeMirror;
             var typeArguments = declaredType.getTypeArguments();

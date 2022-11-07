@@ -15,10 +15,12 @@
  */
 package com.mammb.code.jsonstruct.processor;
 
+import com.mammb.code.jsonstruct.JsonStructException;
 import com.mammb.code.jsonstruct.processor.assembly.Code;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 
 /**
@@ -70,7 +72,30 @@ public class JsonStructConvertEntity {
      * @return the code
      */
     public Code build() {
-        return Code.of();
+
+        TypeMirror typeMirror = element.asType();
+        if (!lang.isAssignable(typeMirror, "java.util.function.Function")) {
+            throw new JsonStructException();
+        }
+
+        TypeMirror[] typeArgs = lang.biEntryTypes(typeMirror);
+        if (lang.isAssignable(typeArgs[0], "java.lang.String")) {
+            return Code.of("""
+                converts.addObjectify(#{className}.class, #{converterClass}.#{converterName});""")
+                .interpolateType("#{className}", typeArgs[1].toString())
+                .interpolateType("#{converterClass}", element.getEnclosingElement().toString())
+                .interpolate("#{converterName}", element.getSimpleName().toString());
+
+        } else if (lang.isAssignable(typeArgs[1], "java.lang.CharSequence")) {
+            return Code.of("""
+                converts.addStringify(#{className}.class, #{converterClass}.#{converterName});""")
+                .interpolateType("#{className}", typeArgs[0].toString())
+                .interpolateType("#{converterClass}", element.getEnclosingElement().toString())
+                .interpolate("#{converterName}", element.getSimpleName().toString());
+        } else {
+            throw new JsonStructException();
+        }
+
     }
 
 

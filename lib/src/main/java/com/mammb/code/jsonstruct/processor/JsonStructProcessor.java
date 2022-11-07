@@ -16,6 +16,8 @@
 package com.mammb.code.jsonstruct.processor;
 
 import com.mammb.code.jsonstruct.JsonStruct;
+import com.mammb.code.jsonstruct.JsonStructConvert;
+
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
@@ -24,6 +26,7 @@ import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -31,7 +34,10 @@ import java.util.Set;
  * Main annotation processor.
  * @author Naotsugu Kobayashi
  */
-@SupportedAnnotationTypes({ JsonStructEntity.ANNOTATION_TYPE })
+@SupportedAnnotationTypes({
+    JsonStructEntity.ANNOTATION_TYPE,
+    JsonStructConvertEntity.ANNOTATION_TYPE,
+})
 @SupportedOptions({ Context.DEBUG_OPTION_KEY })
 public class JsonStructProcessor extends AbstractProcessor {
 
@@ -70,16 +76,19 @@ public class JsonStructProcessor extends AbstractProcessor {
             var writer = JsonStructClassWriter.of(context);
 
             for (Element element : roundEnv.getElementsAnnotatedWith(JsonStruct.class)) {
-
                 var entity = JsonStructEntity.of(context, element);
                 if (entity.isPresent() && !context.isProcessed(entity.get())) {
                     writer.write(entity.get());
                     context.addProcessed(entity.get());
                 }
-
             }
 
-            JsonClassWriter.of(context).write();
+            Set<JsonStructConvertEntity> converts = new HashSet<>();
+            for (Element element : roundEnv.getElementsAnnotatedWith(JsonStructConvert.class)) {
+                JsonStructConvertEntity.of(context, element).ifPresent(converts::add);
+            }
+
+            JsonClassWriter.of(context, converts).write();
 
         } catch (Exception e) {
             e.printStackTrace();

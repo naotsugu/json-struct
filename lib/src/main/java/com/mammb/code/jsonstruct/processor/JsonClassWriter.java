@@ -20,6 +20,7 @@ import com.mammb.code.jsonstruct.processor.assembly.Imports;
 import javax.tools.FileObject;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Set;
 
 /**
  * JsonStructClassWriter.
@@ -30,23 +31,29 @@ public class JsonClassWriter {
     /** Context of processing. */
     private final Context context;
 
+    /** ConvertEntities. */
+    private final Set<JsonStructConvertEntity> convertEntities;
+
 
     /**
      * Constructor.
      * @param context the context of processing
+     * @param convertEntities the convert entities
      */
-    private JsonClassWriter(Context context) {
+    private JsonClassWriter(Context context, Set<JsonStructConvertEntity> convertEntities) {
         this.context = context;
+        this.convertEntities = convertEntities;
     }
 
 
     /**
      * Create a criteria {@link JsonClassWriter} instance.
      * @param context the context of processing
+     * @param convertEntities the convert entities
      * @return the class writer
      */
-    public static JsonClassWriter of(Context context) {
-        return new JsonClassWriter(context);
+    public static JsonClassWriter of(Context context, Set<JsonStructConvertEntity> convertEntities) {
+        return new JsonClassWriter(context, convertEntities);
     }
 
 
@@ -71,7 +78,7 @@ public class JsonClassWriter {
 
                 private static final Converts converts = Converts.of();
                 static {
-                    // converts.addAll(null);
+                    #{converts}
                 }
 
                 public static <T> Json<T> of(Class<T> clazz) {
@@ -84,6 +91,7 @@ public class JsonClassWriter {
             """)
             .interpolateType("#{processorName}", JsonStructProcessor.class.getName())
             .interpolateType("#{className}", className)
+            .interpolate("#{converts}", convertStatements(convertEntities))
             .interpolate("#{cases}", caseExpression(context.getProcessed(JsonStructEntity.class)))
             .add(imports);
 
@@ -113,6 +121,15 @@ public class JsonClassWriter {
                     case "#{qualifiedName}" -> (Json<T>) new #{type}(converts);""")
                     .interpolate("#{qualifiedName}", entity.getQualifiedName())
                     .interpolateType("#{type}", entity.getQualifiedName() + "_"));
+        }
+        return code;
+    }
+
+
+    private static Code convertStatements(Set<JsonStructConvertEntity> entities) {
+        var code = Code.of();
+        for (JsonStructConvertEntity entity : entities) {
+            code.add(entity.build());
         }
         return code;
     }

@@ -197,7 +197,7 @@ public class Stringify {
 
     private Code map(TypeMirror type, Path path) {
 
-        TypeMirror[] entryTypes = lang.mapEntryTypes(type);
+        TypeMirror[] entryTypes = lang.biEntryTypes(type);
         String methodName = uniqueName(path.camelJoin() + "Stringify");
 
         TypeMirror key = entryTypes[0];

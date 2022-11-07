@@ -151,8 +151,17 @@ public class Converts {
      * @param clazz the Class
      * @param conv the convert
      */
-    public void add(Class<?> clazz, Function<String, ?> conv) {
+    public void addObjectify(Class<?> clazz, Function<String, ?> conv) {
         objectifyMap.put(clazz, adapt(conv));
+    }
+
+
+    /**
+     * Add optional mapping
+     * @param map the optional map
+     */
+    public void addObjectify(Map<Class<?> , Function<String, ?>> map) {
+        map.forEach(this::addObjectify);
     }
 
 
@@ -163,6 +172,15 @@ public class Converts {
      */
     public void addStringify(Class<?> clazz, Function<?, CharSequence> conv) {
         stringifyMap.put(clazz, conv);
+    }
+
+
+    /**
+     * Add optional stringify mapping
+     * @param map the optional map
+     */
+    public void addStringify(Map<Class<?>, Function<?, CharSequence>> map) {
+        map.forEach(this::addStringify);
     }
 
 

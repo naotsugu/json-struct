@@ -9,7 +9,6 @@ json-struct provides a standard binding layer between Java classes and JSON docu
 
 * No reflection is used
 * Annotation processor resolves bindings at build time
-* No reflection is used
 * Small and fast
 * No Dependency Libraries
 * Constructor binding (for immutable)

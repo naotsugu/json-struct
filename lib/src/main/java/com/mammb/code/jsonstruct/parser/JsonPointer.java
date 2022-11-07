@@ -80,7 +80,7 @@ public class JsonPointer {
      * @param structure the target referenced by this {@code JsonPointer}
      * @return {@code true} if this pointer points to a value in a specified structure.
      */
-    public boolean containsValue(JsonStructure structure) {
+    public boolean containsValue(JsonValue structure) {
         return asValue(structure).isPresent();
     }
 
@@ -91,7 +91,7 @@ public class JsonPointer {
      * @return the referenced value in the target
      * @throws JsonParseException if not exists
      */
-    public JsonValue getValue(JsonStructure structure) {
+    public JsonValue getValue(JsonValue structure) {
         return asValue(structure).orElseThrow(JsonParseException::new);
     }
 
@@ -101,7 +101,7 @@ public class JsonPointer {
      * @param structure the target referenced by this {@code JsonPointer}
      * @return the referenced value in the target
      */
-    public Optional<JsonValue> asValue(JsonStructure structure) {
+    public Optional<JsonValue> asValue(JsonValue structure) {
         if (tokens.size() == 1) {
             return Optional.of(structure);
         }

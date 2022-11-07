@@ -80,6 +80,7 @@ public class CharBufferReader implements CharReader {
             return latestRead;
         }
         if (next >= limit) fillBuffer();
+        if (next == limit) return -1;
         latestRead = buf[next++];
         return latestRead;
     }
@@ -90,7 +91,6 @@ public class CharBufferReader implements CharReader {
         int ch;
         do {
             ch = read();
-            position++;
         } while (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n');
         return ch;
     }
@@ -99,15 +99,22 @@ public class CharBufferReader implements CharReader {
     @Override
     public int length(Predicate<Character> until) {
         try {
+            int length = 0;
             if (stepBack && !until.test((char) latestRead)) {
-                return 0;
+                return length;
+            }
+            for (int i = next  + (stepBack ? 1 : 0); i < limit; i++, length++) {
+                int ch = buf[i];
+                if (!until.test((char) ch)) {
+                    return length;
+                }
             }
             in.mark(Integer.MAX_VALUE);
-            for (int i = stepBack ? 1 : 0; ; i++) {
+            for (;; length++) {
                 int ch = in.read();
                 if (ch == -1 || !until.test((char) ch)) {
                     in.reset();
-                    return i;
+                    return length;
                 }
             }
         } catch (IOException e) {
@@ -135,7 +142,6 @@ public class CharBufferReader implements CharReader {
 
     @Override
     public void skip(int n) {
-        position += n;
         for (int i = 0; i < n; i++) read();
     }
 

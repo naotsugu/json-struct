@@ -13,35 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.parser;
+package com.mammb.code.jsonstruct.processor.assembly;
 
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test for {@link Parser}.
+ * Test for {@link Imports}.
  *
  * @author Naotsugu Kobayashi
  */
-class ParserTest {
+class ImportsTest {
 
     @Test
-    void testParse() {
-        var p = Parser.of("""
-        {
-          "key1" : "val1",
-          "key2" : 100
-        }
-        """);
+    void test() {
+        var imports = Imports.of();
+        assertEquals("String", imports.apply("java.lang.String"));
 
-        var obj = (JsonObject) p.parse();
-        assertTrue(obj.get("key1") instanceof JsonString);
-        assertEquals("val1", obj.get("key1").toString());
+        imports.add("import java.util.function.Function;");
+        imports.add("java.util.function.Consumer");
+        imports.marge(Imports.of("java.util.Arrays"));
 
-        assertTrue(obj.get("key2") instanceof JsonNumber);
-        assertEquals(100, ((NumberSource) obj.get("key2")).getInt());
-
+        var str = imports.toString();
+        assertEquals("""
+           import java.util.Arrays;
+           import java.util.function.Consumer;
+           import java.util.function.Function;""", str);
     }
-
 }

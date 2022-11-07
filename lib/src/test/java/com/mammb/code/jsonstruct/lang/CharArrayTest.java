@@ -13,34 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.parser;
+package com.mammb.code.jsonstruct.lang;
 
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test for {@link Parser}.
- *
+ * Test for {@link CharArray}.
  * @author Naotsugu Kobayashi
  */
-class ParserTest {
+class CharArrayTest {
 
     @Test
-    void testParse() {
-        var p = Parser.of("""
-        {
-          "key1" : "val1",
-          "key2" : 100
-        }
-        """);
+    void testAdd() {
 
-        var obj = (JsonObject) p.parse();
-        assertTrue(obj.get("key1") instanceof JsonString);
-        assertEquals("val1", obj.get("key1").toString());
+        var ca = CharArray.of();
 
-        assertTrue(obj.get("key2") instanceof JsonNumber);
-        assertEquals(100, ((NumberSource) obj.get("key2")).getInt());
+        ca.add('1');
+        assertEquals(1, ca.length());
+        assertEquals('1', ca.get(0));
+
+        ca.add(new char[] { '2', '3' });
+        assertEquals(3, ca.length());
+        assertEquals('2', ca.get(1));
+        assertEquals('3', ca.get(2));
+
+    }
+
+
+    @Test
+    void testAddCharReader() {
+
+        var ca = CharArray.of();
+
+        ca.add(StringReader.of("abc"), 2);
+        assertEquals(2, ca.length());
+        assertEquals('a', ca.get(0));
+        assertEquals('b', ca.get(1));
 
     }
 

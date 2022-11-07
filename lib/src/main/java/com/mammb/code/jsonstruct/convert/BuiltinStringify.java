@@ -147,6 +147,11 @@ public class BuiltinStringify {
     }
 
 
+    /**
+     * Stringify calendar.
+     * @param value calendar value
+     * @return string
+     */
     private static CharSequence str(Calendar value) {
         DateTimeFormatter formatter = value.isSet(Calendar.HOUR) || value.isSet(Calendar.HOUR_OF_DAY)
             ? DateTimeFormatter.ISO_DATE_TIME

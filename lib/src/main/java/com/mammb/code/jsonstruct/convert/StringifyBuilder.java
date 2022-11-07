@@ -60,10 +60,10 @@ public class StringifyBuilder {
      * @return this builder
      */
     public StringifyBuilder appendObj(Object object) {
-        if (object instanceof CharSequence) {
+        if (object instanceof CharSequence cs) {
             // bypass
             appendOn('"');
-            appendEscOn((CharSequence) object);
+            appendEscOn(cs);
             appendOn('"');
         } else {
             convert.stringify(object, this);

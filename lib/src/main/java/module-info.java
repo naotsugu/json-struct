@@ -15,7 +15,7 @@
  */
 
 /**
- * jsonstruct.
+ * Json Struct.
  */
 module com.mammb.code.jsonstruct {
     exports com.mammb.code.jsonstruct;

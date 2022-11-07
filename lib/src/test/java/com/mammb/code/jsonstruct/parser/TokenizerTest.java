@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static com.mammb.code.jsonstruct.parser.Token.Type.*;
 
 /**
- * TokenizerTest.
+ * Test for {@link Tokenizer}.
  *
  * @author Naotsugu Kobayashi
  */

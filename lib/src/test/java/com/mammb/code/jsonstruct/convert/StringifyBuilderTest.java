@@ -13,35 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.parser;
+package com.mammb.code.jsonstruct.convert;
 
 import org.junit.jupiter.api.Test;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test for {@link Parser}.
- *
+ * Test for {@link StringifyBuilder}.
  * @author Naotsugu Kobayashi
  */
-class ParserTest {
+class StringifyBuilderTest {
 
     @Test
-    void testParse() {
-        var p = Parser.of("""
-        {
-          "key1" : "val1",
-          "key2" : 100
-        }
-        """);
+    void testBuilder() {
+        Appendable appendable = new StringBuilder();
+        var sb = StringifyBuilder.of(appendable, Converts.of());
+        sb.append('{');
+        sb.appendStr("name").append(':').appendObj(LocalDate.now()).append(',');
+        sb.appendStr("age").append(':').appendNum(30).append(',');
+        sb.appendStr("tel").append(':').appendNull().append(',');
+        sb.appendStr("note").append(':').appendStr("\r\n");
+        sb.append('}');
 
-        var obj = (JsonObject) p.parse();
-        assertTrue(obj.get("key1") instanceof JsonString);
-        assertEquals("val1", obj.get("key1").toString());
-
-        assertTrue(obj.get("key2") instanceof JsonNumber);
-        assertEquals(100, ((NumberSource) obj.get("key2")).getInt());
-
+        assertEquals("""
+            {"name":"2022-11-07","age":30,"tel":null,"note":"\\r\\n"}""", appendable.toString());
     }
 
 }

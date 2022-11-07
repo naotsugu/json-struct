@@ -51,11 +51,11 @@ public class BackingCode {
     /**
      * Create a new BackingCode with given arguments.
      * @param code the code
-     * @param backingMethods the backing code
+     * @param backingCodes the backing code
      * @return BackingCode
      */
-    public static BackingCode of(Code code, Code backingMethods) {
-        return new BackingCode(code, backingMethods);
+    public static BackingCode of(Code code, Code backingCodes) {
+        return new BackingCode(code, backingCodes);
     }
 
 

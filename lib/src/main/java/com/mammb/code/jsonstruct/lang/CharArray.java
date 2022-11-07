@@ -119,7 +119,7 @@ public class CharArray implements Serializable {
      * @param index index of the element to return
      * @return the element at the specified position in this array
      */
-    public int get(char index) {
+    public int get(int index) {
         return elements[index];
     }
 

@@ -19,7 +19,6 @@ import com.mammb.code.jsonstruct.JsonStruct;
 import com.mammb.code.jsonstruct.JsonStructIgnore;
 import com.mammb.code.jsonstruct.lang.Iterate;
 import com.mammb.code.jsonstruct.JsonStructException;
-import com.mammb.code.jsonstruct.parser.JsonPointer;
 import com.mammb.code.jsonstruct.processor.LangUtil;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
@@ -52,8 +51,8 @@ public class Objectify {
     /** The stack of handling type fqcn. */
     private final Deque<Name> stack;
 
-    /** The processed pointer names. */
-    private final Set<String> processedPointers;
+    /** Already defined names. */
+    private final Set<String> definedNames;
 
 
     /**
@@ -69,7 +68,7 @@ public class Objectify {
         this.backingCodes = Objects.requireNonNull(backingCodes);
         this.cyclicDepth = cyclicDepth;
         this.stack = new ArrayDeque<>();
-        this.processedPointers = new HashSet<>();
+        this.definedNames = new HashSet<>();
     }
 
 
@@ -160,7 +159,7 @@ public class Objectify {
         }
 
         return Code.of("""
-            ((JsonStructure) json).as(#{pointerName}, convert.to(#{type}.class))""")
+            json.as(#{pointerName}, convert.to(#{type}.class))""")
             .interpolate("#{pointerName}", createPointer(path))
             .interpolateType("#{type}", type.toString())
             .add(Imports.of("com.mammb.code.jsonstruct.parser.JsonStructure"));
@@ -176,7 +175,7 @@ public class Objectify {
         }
 
         return Code.of("""
-                #{enumType}.valueOf(((JsonStructure) json).as(#{pointerName}, convert.to(String.class)))""")
+                #{enumType}.valueOf(json.as(#{pointerName}, convert.to(String.class)))""")
             .interpolate("#{pointerName}", createPointer(path))
             .interpolateType("#{enumType}", type.toString());
     }
@@ -185,7 +184,7 @@ public class Objectify {
     private Code list(TypeMirror type, Path path) {
 
         TypeMirror entryType = lang.entryType(type);
-        String methodName = path.camelJoin() + "ObjectifyList";
+        String methodName = uniqueName(path.camelJoin() + "ObjectifyList");
 
         backingCodes.addEmptyLine().add(Code.of("""
             private List<#{type}> #{methodName}(JsonArray array) {
@@ -202,7 +201,7 @@ public class Objectify {
             .interpolate("#{entry}", toCode(entryType, Path.of())));
 
         return Code.of("""
-            #{methodName}((JsonArray) ((JsonStructure) json).at(#{pointerName}))""")
+            #{methodName}((JsonArray) json.at(#{pointerName}))""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{pointerName}", createPointer(path));
     }
@@ -211,7 +210,7 @@ public class Objectify {
     private Code set(TypeMirror type, Path path) {
 
         TypeMirror entryType = lang.entryType(type);
-        String methodName = path.camelJoin() + "ObjectifySet";
+        String methodName = uniqueName(path.camelJoin() + "ObjectifySet");
 
         backingCodes.addEmptyLine().add(Code.of("""
             private Set<#{type}> #{methodName}(JsonArray array) {
@@ -228,7 +227,7 @@ public class Objectify {
             .interpolate("#{entry}", toCode(entryType, Path.of())));
 
         return Code.of("""
-            #{methodName}((JsonArray) ((JsonStructure) json).at(#{pointerName}))""")
+            #{methodName}((JsonArray) json.at(#{pointerName}))""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{pointerName}", createPointer(path));
     }
@@ -237,7 +236,7 @@ public class Objectify {
     private Code array(TypeMirror type, Path path) {
 
         TypeMirror compType = lang.entryType(type);
-        String methodName = path.camelJoin() + "ObjectifyArray";
+        String methodName = uniqueName(path.camelJoin() + "ObjectifyArray");
 
         backingCodes.addEmptyLine().add(Code.of("""
             private #{type}[] #{methodName}(JsonArray array) {
@@ -254,7 +253,7 @@ public class Objectify {
             .interpolate("#{entry}", toCode(compType, Path.of())));
 
         return Code.of("""
-            #{methodName}((JsonArray) ((JsonStructure) json).at(#{pointerName}))""")
+            #{methodName}((JsonArray) json.at(#{pointerName}))""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{pointerName}", createPointer(path));
     }
@@ -263,7 +262,7 @@ public class Objectify {
     private Code map(TypeMirror type, Path path) {
 
         TypeMirror[] entryTypes = lang.mapEntryTypes(type);
-        String methodName = path.camelJoin() + "ObjectifyMap";
+        String methodName = uniqueName(path.camelJoin() + "ObjectifyMap");
 
         backingCodes.addEmptyLine().add(Code.of("""
             private Map<#{keyType}, #{valType}> #{methodName}(JsonStructure str) {
@@ -308,7 +307,7 @@ public class Objectify {
                 """)));
 
         return Code.of("""
-            #{methodName}((JsonStructure) ((JsonStructure) json).at(#{pointerName}))""")
+            #{methodName}((JsonStructure) json.at(#{pointerName}))""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{pointerName}", createPointer(path));
     }
@@ -316,14 +315,15 @@ public class Objectify {
 
     private String createPointer(Path path) {
         String pointerName = path.camelJoin() + "Pointer";
-        if (processedPointers.contains(pointerName)) {
+        if (definedNames.contains(pointerName)) {
+            // reuse if duplicate
             return pointerName;
         }
         backingCodes.addHead(Code.of("""
             private static final JsonPointer #{pointerName} = JsonPointer.of("#{name}");""")
             .interpolate("#{pointerName}", pointerName)
             .interpolate("#{name}", path.pointerJoin()));
-        processedPointers.add(pointerName);
+        definedNames.add(pointerName);
         return pointerName;
     }
 
@@ -332,8 +332,20 @@ public class Objectify {
         Code ret = backingCodes;
         backingCodes = Code.of();
         stack.clear();
-        processedPointers.clear();
+        definedNames.clear();
         return ret;
+    }
+
+
+    private String uniqueName(String candidate) {
+        for(int i = 1; ; i++) {
+            if (definedNames.contains(candidate)) {
+                candidate = candidate + i;
+            } else {
+                definedNames.add(candidate);
+                return candidate;
+            }
+        }
     }
 
 

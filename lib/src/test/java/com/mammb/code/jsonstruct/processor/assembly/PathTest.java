@@ -13,34 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.parser;
+package com.mammb.code.jsonstruct.processor.assembly;
 
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test for {@link Parser}.
- *
+ * Test for {@link Path}.
  * @author Naotsugu Kobayashi
  */
-class ParserTest {
+class PathTest {
 
     @Test
-    void testParse() {
-        var p = Parser.of("""
-        {
-          "key1" : "val1",
-          "key2" : 100
-        }
-        """);
+    void testPath() {
 
-        var obj = (JsonObject) p.parse();
-        assertTrue(obj.get("key1") instanceof JsonString);
-        assertEquals("val1", obj.get("key1").toString());
+        var path = Path.of("aa", "bb");
+        assertFalse(path.isEmpty());
+        assertEquals("aaBb", path.camelJoin());
+        assertEquals("/aa/bb", path.pointerJoin());
+        assertEquals("Optional.ofNullable(aa).map(e -> e.bb())", path.elvisJoin());
 
-        assertTrue(obj.get("key2") instanceof JsonNumber);
-        assertEquals(100, ((NumberSource) obj.get("key2")).getInt());
+        path.add("cc");
+        assertEquals("aaBbCc", path.camelJoin());
+        assertEquals("/aa/bb/cc", path.pointerJoin());
+        assertEquals("Optional.ofNullable(aa).map(e -> e.bb()).map(e -> e.cc())", path.elvisJoin());
 
     }
 

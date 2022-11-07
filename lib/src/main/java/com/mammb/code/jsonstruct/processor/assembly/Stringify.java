@@ -25,10 +25,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -52,6 +49,9 @@ public class Stringify {
     /** The stack of handling type fqcn. */
     private final Deque<Name> stack;
 
+    /** Already defined names. */
+    private final Set<String> definedNames;
+
 
     /**
      * Constructor.
@@ -66,6 +66,7 @@ public class Stringify {
         this.backingMethods = Objects.requireNonNull(backingMethods);
         this.stack = new ArrayDeque<>();
         this.cyclicDepth = cyclicDepth;
+        this.definedNames = new HashSet<>();
     }
 
 
@@ -150,7 +151,7 @@ public class Stringify {
     private Code array(TypeMirror type, Path path) {
 
         TypeMirror entryType = lang.entryType(type);
-        String methodName = path.camelJoin() + "Stringify";
+        String methodName = uniqueName(path.camelJoin() + "Stringify");
         buildIterableMethod(entryType, methodName);
 
         return Code.of("""
@@ -166,7 +167,7 @@ public class Stringify {
     private Code collection(TypeMirror type, Path path) {
 
         TypeMirror entryType = lang.entryType(type);
-        String methodName = path.camelJoin() + "Stringify";
+        String methodName = uniqueName(path.camelJoin() + "Stringify");
         buildIterableMethod(entryType, methodName);
 
         return Code.of("""
@@ -197,7 +198,7 @@ public class Stringify {
     private Code map(TypeMirror type, Path path) {
 
         TypeMirror[] entryTypes = lang.mapEntryTypes(type);
-        String methodName = path.camelJoin() + "Stringify";
+        String methodName = uniqueName(path.camelJoin() + "Stringify");
 
         TypeMirror key = entryTypes[0];
         TypeMirror val = entryTypes[1];
@@ -262,6 +263,18 @@ public class Stringify {
     }
 
 
+    private String uniqueName(String candidate) {
+        for(int i = 1; ; i++) {
+            if (definedNames.contains(candidate)) {
+                candidate = candidate + i;
+            } else {
+                definedNames.add(candidate);
+                return candidate;
+            }
+        }
+    }
+
+
     private Code withStack(Element element, Function<TypeElement, Code> function) {
         if (!element.getKind().isClass()) {
             throw new JsonStructException("element must be type.[{}]", element);
@@ -275,6 +288,5 @@ public class Stringify {
         stack.pop();
         return ret;
     }
-
 
 }

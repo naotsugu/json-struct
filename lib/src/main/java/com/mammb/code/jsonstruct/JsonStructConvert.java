@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mammb.code.jsonstruct.testdata;
+package com.mammb.code.jsonstruct;
 
-import com.mammb.code.jsonstruct.JsonStruct;
-import java.util.List;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Food.
+ * Specify the target class custom conversion.
  * @author Naotsugu Kobayashi
  */
-@JsonStruct
-public record Food(String name, List<String> materials) {
+@Documented
+@Target({ ElementType.FIELD })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface JsonStructConvert {
 }

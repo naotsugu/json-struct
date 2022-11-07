@@ -15,13 +15,25 @@
  */
 package com.mammb.code.jsonstruct.testdata;
 
-import com.mammb.code.jsonstruct.JsonStruct;
-import java.util.List;
+import com.mammb.code.jsonstruct.JsonStructConvert;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.function.Function;
 
 /**
- * Food.
+ * CustomConverts.
  * @author Naotsugu Kobayashi
  */
-@JsonStruct
-public record Food(String name, List<String> materials) {
+public class CustomConverts {
+
+    public static final DateTimeFormatter dtFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+
+    @JsonStructConvert
+    public static final Function<LocalDateTime, CharSequence> localDateTimeStringify = value ->
+        value.format(dtFormatter);
+
+    @JsonStructConvert
+    public static final Function<String, LocalDateTime> localDateTimeObjectify = str ->
+        LocalDateTime.parse(str, dtFormatter);
+
 }

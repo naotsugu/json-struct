@@ -19,7 +19,6 @@ import com.mammb.code.jsonstruct.JsonStruct;
 
 /**
  * Book.
- *
  * @author Naotsugu Kobayashi
  */
 public class Book {

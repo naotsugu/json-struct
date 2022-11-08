@@ -17,9 +17,7 @@ package com.mammb.code.jsonstruct.processor;
 
 import com.mammb.code.jsonstruct.JsonStructException;
 import com.mammb.code.jsonstruct.processor.assembly.Code;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 
@@ -58,10 +56,11 @@ public class JsonStructConvertEntity {
      */
     public static Optional<JsonStructConvertEntity> of(Context ctx, Element element) {
 
-        if (!isInTarget(ctx, element)) {
+        LangUtil lang = LangUtil.of(ctx.getElementUtils(), ctx.getTypeUtils());
+        if (!isInTarget(ctx, lang, element)) {
             return Optional.empty();
         }
-        LangUtil lang = LangUtil.of(ctx.getElementUtils(), ctx.getTypeUtils());
+
         return Optional.of(new JsonStructConvertEntity(lang, (VariableElement) element));
 
     }
@@ -73,13 +72,10 @@ public class JsonStructConvertEntity {
      */
     public Code build() {
 
-        TypeMirror typeMirror = element.asType();
-        if (!lang.isAssignable(typeMirror, "java.util.function.Function")) {
-            throw new JsonStructException();
-        }
+        TypeMirror[] typeArgs = lang.biEntryTypes(element.asType());
 
-        TypeMirror[] typeArgs = lang.biEntryTypes(typeMirror);
         if (lang.isAssignable(typeArgs[0], "java.lang.String")) {
+
             return Code.of("""
                 converts.addObjectify(#{className}.class, #{converterClass}.#{converterName});""")
                 .interpolateType("#{className}", typeArgs[1].toString())
@@ -87,11 +83,13 @@ public class JsonStructConvertEntity {
                 .interpolate("#{converterName}", element.getSimpleName().toString());
 
         } else if (lang.isAssignable(typeArgs[1], "java.lang.CharSequence")) {
+
             return Code.of("""
                 converts.addStringify(#{className}.class, #{converterClass}.#{converterName});""")
                 .interpolateType("#{className}", typeArgs[0].toString())
                 .interpolateType("#{converterClass}", element.getEnclosingElement().toString())
                 .interpolate("#{converterName}", element.getSimpleName().toString());
+
         } else {
             throw new JsonStructException();
         }
@@ -102,16 +100,36 @@ public class JsonStructConvertEntity {
     /**
      * Gets whether the element is subject to this Entity.
      * @param ctx the context of processing
+     * @param lang the utility of java lang model
      * @param element the element
      * @return {@code true} if whether the element is subject to this Entity
      */
-    private static boolean isInTarget(Context ctx, Element element) {
+    private static boolean isInTarget(Context ctx, LangUtil lang, Element element) {
+
         long count = element.getAnnotationMirrors().stream()
             .map(AnnotationMirror::getAnnotationType)
             .map(Object::toString)
             .filter(ANNOTATION_TYPE::equals)
             .count();
-        return count == 1;
+        if (count != 1) {
+            ctx.logError("Illegal annotation count.[{}]", element);
+            return false;
+        }
+
+        if (element.getKind() != ElementKind.FIELD ||
+            !element.getModifiers().contains(Modifier.PUBLIC) ||
+            !element.getModifiers().contains(Modifier.STATIC)) {
+            ctx.logError("Illegal modifier.[{}]", element);
+            return false;
+        }
+
+        TypeMirror typeMirror = element.asType();
+        if (!lang.isAssignable(typeMirror, "java.util.function.Function")) {
+            ctx.logError("Illegal annotation declaration.[{}]", element);
+            return false;
+        }
+
+        return true;
     }
 
 }

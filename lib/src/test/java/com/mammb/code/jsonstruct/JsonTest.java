@@ -18,6 +18,7 @@ package com.mammb.code.jsonstruct;
 import com.mammb.code.jsonstruct.testdata.*;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -101,6 +102,11 @@ class JsonTest {
         assertEquals("d", n2.getValue().familyName());
 
         assertEquals(jsonStr.trim(), json.stringify(pet));
+    }
+
+    @Test
+    void testCustomConvert() {
+
     }
 
 }

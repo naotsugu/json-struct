@@ -157,15 +157,6 @@ public class Converts {
 
 
     /**
-     * Add optional mapping
-     * @param map the optional map
-     */
-    public void addObjectify(Map<Class<?> , Function<String, ?>> map) {
-        map.forEach(this::addObjectify);
-    }
-
-
-    /**
      * Add optional stringify mapping
      * @param clazz the Class
      * @param conv the convert
@@ -176,22 +167,13 @@ public class Converts {
 
 
     /**
-     * Add optional stringify mapping
-     * @param map the optional map
-     */
-    public void addStringify(Map<Class<?>, Function<?, CharSequence>> map) {
-        map.forEach(this::addStringify);
-    }
-
-
-    /**
      * Gets the predefined classes fqcn.
      * @return the predefined classes fqcn
      */
     public Set<String> typeClasses() {
         Set<String> set = new HashSet<>();
         objectifyMap.keySet().forEach(k -> set.add(k.getCanonicalName()));
-        set.addAll(BuiltinObjectify.typeNames());
+        set.addAll(BuiltinObjectify.typeNames);
         return set;
     }
 
@@ -203,7 +185,7 @@ public class Converts {
     public Set<String> stringifyClasses() {
         Set<String> set = new HashSet<>();
         stringifyMap.keySet().forEach(k -> set.add(k.getCanonicalName()));
-        set.addAll(BuiltinStringify.typeNames());
+        set.addAll(BuiltinStringify.typeNames);
         return set;
     }
 

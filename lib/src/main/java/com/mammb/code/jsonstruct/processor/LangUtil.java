@@ -82,14 +82,27 @@ public class LangUtil {
 
 
     /**
+     * Gets whether the given {@link Element} is an inner class.
+     * @param element the {@link Element}
+     * @return {@code true} if whether the given {@link Element} is an inner class
+     */
+    public boolean isInnerClass(Element element) {
+        return isClass(element) && isClass(element.getEnclosingElement());
+    }
+
+
+    /**
      * Gets whether the given {@link Element} is a Class.
      * An enum is not considered a class.
      * @param element the {@link Element}
      * @return {@code true} if whether the given {@link Element} is a Class
      */
     public boolean isClass(Element element) {
+        if (element == null) {
+            return false;
+        }
         return element.getKind() == ElementKind.CLASS ||
-            element.getKind() == ElementKind.RECORD;
+               element.getKind() == ElementKind.RECORD;
     }
 
 
@@ -101,7 +114,7 @@ public class LangUtil {
      */
     public boolean isConstructor(Element element) {
         return element.getKind() == ElementKind.CONSTRUCTOR &&
-            element.getModifiers().contains(Modifier.PUBLIC);
+               element.getModifiers().contains(Modifier.PUBLIC);
     }
 
 
@@ -137,9 +150,9 @@ public class LangUtil {
 
 
     /**
-     * Gets whether the given {@link TypeMirror} is a Enum type.
+     * Gets whether the given {@link TypeMirror} is an Enum type.
      * @param typeMirror the {@link TypeMirror}
-     * @return {@code true} if whether the given {@link TypeMirror} is a Enum type
+     * @return {@code true} if whether the given {@link TypeMirror} is an Enum type
      */
     public boolean isEnum(TypeMirror typeMirror) {
         if (typeMirror.getKind() != TypeKind.DECLARED) {

@@ -17,7 +17,6 @@ package com.mammb.code.jsonstruct.testdata;
 
 /**
  * FullName.
- *
  * @author Naotsugu Kobayashi
  */
 public record FullName(String givenName, String familyName) {

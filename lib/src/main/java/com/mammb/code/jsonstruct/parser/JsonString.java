@@ -84,7 +84,7 @@ public interface JsonString extends JsonValue, CharSource {
 
         @Override
         public String toString() {
-            return source.toString();
+            return source;
         }
 
     }

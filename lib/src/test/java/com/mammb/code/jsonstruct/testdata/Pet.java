@@ -21,7 +21,6 @@ import java.util.Map;
 
 /**
  * Pet.
- *
  * @author Naotsugu Kobayashi
  */
 public class Pet {

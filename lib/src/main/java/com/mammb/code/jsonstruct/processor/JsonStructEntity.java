@@ -88,7 +88,7 @@ public class JsonStructEntity {
      */
     public Code build() {
 
-        Converts convert = Converts.of(); // TODO addon convert
+        Converts convert = Converts.of();
 
         BackingCode objectifyCode = Objectify.of(lang, convert.typeClasses(), cyclicDepth).build(element);
         BackingCode stringifyCode = Stringify.of(lang, convert.stringifyClasses(), cyclicDepth).build(element);
@@ -131,8 +131,8 @@ public class JsonStructEntity {
                 }
                 """)
             .interpolateType("#{processorName}", JsonStructProcessor.class.getName())
-            .interpolateType("#{className}", getEntityClassName())
-            .interpolateType("#{entityName}", getClassName())
+            .interpolate("#{className}", getEntityClassName())
+            .interpolate("#{entityName}", getClassName())
             .interpolate("#{objectifyCode}", objectifyCode.code())
             .interpolate("#{stringifyCode}", stringifyCode.code())
             .interpolate("#{backingCodes}", objectifyCode.backingCodes().add(stringifyCode.backingCodes()))

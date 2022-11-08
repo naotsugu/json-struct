@@ -17,7 +17,6 @@ package com.mammb.code.jsonstruct.testdata;
 
 /**
  * Gender.
- *
  * @author Naotsugu Kobayashi
  */
 public enum Gender {

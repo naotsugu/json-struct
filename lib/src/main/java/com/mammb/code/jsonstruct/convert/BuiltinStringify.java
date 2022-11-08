@@ -38,14 +38,14 @@ public class BuiltinStringify {
     private static final ZoneId UTC = ZoneId.of("UTC");
 
     /** the name of builtin classes. */
-    private static final Set<String> typeNames = typeNames();
+    public static final Set<String> typeNames = typeNames();
 
 
     /**
      * Gets the builtin class names.
      * @return the builtin class names
      */
-    public static Set<String> typeNames() {
+    private static Set<String> typeNames() {
         Set<String> set = new HashSet<>();
         // java.lang.*
         set.add(String.class.getCanonicalName());
@@ -95,7 +95,8 @@ public class BuiltinStringify {
         set.add(ZonedDateTime.class.getCanonicalName());
         set.add(ZoneId.class.getCanonicalName());
         set.add(ZoneOffset.class.getCanonicalName());
-        return set;
+
+        return Collections.unmodifiableSet(set);
     }
 
 

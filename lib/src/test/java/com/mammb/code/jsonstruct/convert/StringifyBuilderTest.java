@@ -31,14 +31,14 @@ class StringifyBuilderTest {
         Appendable appendable = new StringBuilder();
         var sb = StringifyBuilder.of(appendable, Converts.of());
         sb.append('{');
-        sb.appendStr("name").append(':').appendObj(LocalDate.now()).append(',');
+        sb.appendStr("name").append(':').appendObj(LocalDate.parse("2022-11-01")).append(',');
         sb.appendStr("age").append(':').appendNum(30).append(',');
         sb.appendStr("tel").append(':').appendNull().append(',');
         sb.appendStr("note").append(':').appendStr("\r\n");
         sb.append('}');
 
         assertEquals("""
-            {"name":"2022-11-07","age":30,"tel":null,"note":"\\r\\n"}""", appendable.toString());
+            {"name":"2022-11-01","age":30,"tel":null,"note":"\\r\\n"}""", appendable.toString());
     }
 
 }

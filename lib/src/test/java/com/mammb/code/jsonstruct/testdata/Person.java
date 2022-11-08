@@ -19,7 +19,6 @@ import com.mammb.code.jsonstruct.JsonStruct;
 
 /**
  * Person.
- *
  * @author Naotsugu Kobayashi
  */
 @JsonStruct

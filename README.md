@@ -21,8 +21,8 @@ Add dependencies.
 
 ```kotlin
 dependencies {
-  implementation("com.mammb:json-struct:0.1.0")
-  annotationProcessor("com.mammb:json-struct:0.1.0")
+  implementation("com.mammb:json-struct:0.2.0")
+  annotationProcessor("com.mammb:json-struct:0.2.0")
 }
 ```
 

@@ -132,7 +132,7 @@ public class JsonStructEntity {
                 """)
             .interpolateType("#{processorName}", JsonStructProcessor.class.getName())
             .interpolate("#{className}", getEntityClassName())
-            .interpolate("#{entityName}", getClassName())
+            .interpolateType("#{entityName}", getQualifiedName())
             .interpolate("#{objectifyCode}", objectifyCode.code())
             .interpolate("#{stringifyCode}", stringifyCode.code())
             .interpolate("#{backingCodes}", objectifyCode.backingCodes().add(stringifyCode.backingCodes()))
@@ -165,7 +165,21 @@ public class JsonStructEntity {
      * @return simple name of the entity
      */
     public String getEntityClassName() {
-        return getClassName() + "_";
+        return lang.isInnerClass(element)
+            ? element.getEnclosingElement().getSimpleName() + "$" + getClassName() + "_"
+            : getClassName() + "_";
+    }
+
+
+    /**
+     * Get qualified name of the entity.
+     * e.g. {@code foo.bar.Person_}
+     * @return qualified name of the entity
+     */
+    public String getEntityQualifiedName() {
+        return lang.isInnerClass(element)
+            ? element.getEnclosingElement().toString() + "$" + getClassName() + "_"
+            : getQualifiedName() + "_";
     }
 
 

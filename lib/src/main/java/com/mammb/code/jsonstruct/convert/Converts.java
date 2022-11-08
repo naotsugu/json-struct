@@ -86,7 +86,11 @@ public class Converts {
         } else if (object instanceof Enum<?> en) {
             sb.appendStr(en.name());
         } else if (!stringifyMap.isEmpty() && stringifyMap.containsKey(object.getClass())) {
-            sb.append(((Function<T, CharSequence>) stringifyMap.get(object.getClass())).apply(object));
+            if (object instanceof Number) {
+                sb.append(((Function<T, CharSequence>) stringifyMap.get(object.getClass())).apply(object));
+            } else {
+                sb.appendStr(((Function<T, CharSequence>) stringifyMap.get(object.getClass())).apply(object));
+            }
         } else {
             BuiltinStringify.apply(object, sb);
         }

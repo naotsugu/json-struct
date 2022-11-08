@@ -120,7 +120,7 @@ public class JsonClassWriter {
             code.add(Code.of("""
                     case "#{qualifiedName}" -> (Json<T>) new #{type}(converts);""")
                     .interpolate("#{qualifiedName}", entity.getQualifiedName())
-                    .interpolateType("#{type}", entity.getQualifiedName() + "_"));
+                    .interpolateType("#{type}", entity.getEntityQualifiedName()));
         }
         return code;
     }

@@ -106,7 +106,16 @@ class JsonTest {
 
     @Test
     void testCustomConvert() {
-
+        var json = Json.of(Data1.class);
+        var jsonStr = """
+            {"dateTime":"2022/10/20 12:34:56"}""";
+        var d = json.from(jsonStr);
+        assertEquals("2022-10-20T12:34:56", d.dateTime.toString());
+        assertEquals(jsonStr.trim(), json.stringify(d));
     }
+
+
+    @JsonStruct
+    public record Data1(LocalDateTime dateTime) {}
 
 }

@@ -6,5 +6,4 @@ export default defineConfig({
 		preact(),
 	],
 	site: `https://naotsugu.github.io`,
-	base: '/json-struct',
 });

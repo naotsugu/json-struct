@@ -5,5 +5,6 @@ export default defineConfig({
 	integrations: [
 		preact(),
 	],
-	site: `https://naotsugu.github.io/json-struct/`,
+	site: `https://naotsugu.github.io`,
+	base: '/json-struct',
 });

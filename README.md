@@ -1,7 +1,9 @@
 
-<span style="display:block;text-align:center">
-![Json Struct](docs/public/logo.svg)
-</span>
+<p align="center" width="100%">
+    <img src="https://raw.githubusercontent.com/naotsugu/json-struct/main/docs/public/logo.svg"> 
+</p>
+
+
 
 # json-struct
 

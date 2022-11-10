@@ -1,13 +1,10 @@
 
-<p align="center" width="100%">
-    <img src="https://raw.githubusercontent.com/naotsugu/json-struct/main/docs/public/logo.svg"> 
-</p>
-
-
-
 # json-struct
 
 [![Build](https://github.com/naotsugu/json-struct/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/naotsugu/jpa-fluent-query/actions/workflows/gradle-build.yml)
+
+
+See [User Guide](https://naotsugu.github.io/json-struct/)
 
 
 ## What is this
@@ -20,6 +17,7 @@ json-struct provides a standard binding layer between Java classes and JSON docu
 * No Dependency Libraries
 * Constructor binding (for immutable)
 * Java 17+
+
 
 
 ## Usage

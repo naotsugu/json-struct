@@ -30,10 +30,10 @@ And in most cases, only simple JSON transformations are needed.
 Since the annotation processor generates the inter-conversion code at build time, the output at runtime is a simple object generation/JSON string, providing both excellent footprint and execution speed.
 
 
-### Quickstart
+## Quickstart
 
 
-#### Adding Dependencies
+### Adding Dependencies
 
 Add dependencies and specify annotation processors.
 
@@ -67,7 +67,7 @@ dependencies {
 
 
 
-#### Specify model
+### Specify model
 
 Annotate the model to be mapped with the `@JsonStruct` annotation.
 
@@ -83,7 +83,7 @@ Constructors are used to create objects, and accessor methods are used to genera
 
 
 
-#### Serialization / Deserialization
+### Serialization / Deserialization
 
 Given the following JSON string
 

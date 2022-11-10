@@ -1,6 +1,9 @@
 ---
 import '../styles/theme.css';
 import '../styles/index.css';
+
+const faviconUrl = import.meta.env.BASE_URL + 'favicon.svg';
+const scrollable = import.meta.env.BASE_URL + 'make-scrollable-code-focusable.js';
 ---
 
 <!-- Global Metadata -->
@@ -8,7 +11,7 @@ import '../styles/index.css';
 <meta name="viewport" content="width=device-width" />
 <meta name="generator" content={Astro.generator} />
 
-<link rel="icon" type="image/svg+xml" href="/json-struct/favicon.svg" />
+<link rel="icon" type="image/svg+xml" href={faviconUrl} />
 
 <link rel="sitemap" href="/sitemap.xml" />
 
@@ -21,7 +24,7 @@ import '../styles/index.css';
 />
 
 <!-- Scrollable a11y code helper -->
-<script src="/json-struct/make-scrollable-code-focusable.js" is:inline>
+<script src={scrollable} is:inline>
 
 </script>
 

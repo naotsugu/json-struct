@@ -4,7 +4,7 @@
 [![Build](https://github.com/naotsugu/json-struct/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/naotsugu/jpa-fluent-query/actions/workflows/gradle-build.yml)
 
 
-See [User Guide](https://naotsugu.github.io/json-struct/)
+[User Guide](https://naotsugu.github.io/json-struct/)
 
 
 ## What is this

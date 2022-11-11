@@ -29,12 +29,15 @@ import static java.util.function.Predicate.not;
  */
 public class Path {
 
-    /** The list of path. */
+    /**
+     * The list of path.
+     */
     private final List<String> paths;
 
 
     /**
      * Constructor.
+     *
      * @param paths The list of path
      */
     private Path(List<String> paths) {
@@ -44,6 +47,7 @@ public class Path {
 
     /**
      * Create a new empty path.
+     *
      * @return a new empty path
      */
     public static Path of() {
@@ -53,6 +57,7 @@ public class Path {
 
     /**
      * Create a new path with given paths.
+     *
      * @param paths The list of path
      * @return a new path
      */
@@ -63,6 +68,7 @@ public class Path {
 
     /**
      * Create a new path with given path added.
+     *
      * @param path the path
      * @return a new path added
      */
@@ -76,6 +82,7 @@ public class Path {
 
     /**
      * Gets whether this list contains no elements.
+     *
      * @return {@code true} if this list contains no elements.
      */
     public boolean isEmpty() {
@@ -85,6 +92,7 @@ public class Path {
 
     /**
      * Add a path.
+     *
      * @param path path
      */
     public void add(String path) {
@@ -102,6 +110,7 @@ public class Path {
 
     /**
      * Join the paths as elvis operation.
+     *
      * @return the joined string
      */
     public String elvisJoin() {
@@ -126,6 +135,7 @@ public class Path {
 
     /**
      * Join the paths as pointer.
+     *
      * @return the joined string
      */
     public String pointerJoin() {
@@ -137,16 +147,36 @@ public class Path {
 
     /**
      * Join the paths as camel case.
+     *
      * @return the joined string
      */
     public String camelJoin() {
 
         String ret = paths.stream()
             .filter(Objects::nonNull).filter(not(String::isBlank))
-            .map(s -> Character.toUpperCase(s.charAt(0)) + s.substring(1))
+            .map(s -> Character.toUpperCase(s.charAt(0)) +
+                ((s.length() > 1) ? s.substring(1) : ""))
             .collect(Collectors.joining());
 
-        return Character.toLowerCase(ret.charAt(0)) + ret.substring(1);
+        if (ret.isBlank()) {
+            return "";
+        } else if (ret.length() == 1) {
+            return Character.toLowerCase(ret.charAt(0)) + "";
+        } else {
+            return Character.toLowerCase(ret.charAt(0)) + ret.substring(1);
+        }
+    }
+
+
+    /**
+     * Join the paths as camel case.
+     * if paths is blank, then return default value.
+     * @param defaultValue the default value
+     * @return the joined string
+     */
+    public String camelJoinOr(String defaultValue) {
+        var ret = camelJoin();
+        return ret.isBlank() ? defaultValue : ret;
     }
 
 }

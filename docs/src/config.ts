@@ -35,14 +35,14 @@ export type Sidebar = Record<
 export const SIDEBAR: Sidebar = {
 	en: {
 		'Table of Contents': [
-			{ text: 'User Guide', link: import.meta.env.BASE_URL.slice(1) + 'en/guide' },
-			{ text: 'Release notes', link: import.meta.env.BASE_URL.slice(1) + 'en/release-notes' },
+			{ text: 'User Guide', link: 'en/guide' },
+			{ text: 'Release notes', link: 'en/release-notes' },
 		]
 	},
 	ja: {
 		'Table of Contents': [
-			{ text: 'User Guide', link: import.meta.env.BASE_URL.slice(1) + 'ja/guide' },
-			{ text: 'Release notes', link: import.meta.env.BASE_URL.slice(1) + 'ja/release-notes' },
+			{ text: 'User Guide', link: 'ja/guide' },
+			{ text: 'Release notes', link: 'ja/release-notes' },
 		]
 	},
 };

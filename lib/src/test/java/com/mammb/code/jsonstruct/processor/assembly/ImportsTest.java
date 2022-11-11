@@ -41,4 +41,18 @@ class ImportsTest {
            import java.util.function.Consumer;
            import java.util.function.Function;""", str);
     }
+
+    @Test
+    void testGenericsImport() {
+        var imports = Imports.of();
+        var ret = imports.apply("java.util.Map<java.util.List<java.lang.String>,java.util.List<java.lang.Integer>>");
+
+        assertEquals("Map<List<String>,List<Integer>>", ret);
+
+        var str = imports.toString();
+        assertEquals("""
+           import java.util.List;
+           import java.util.Map;""", str);
+    }
+
 }

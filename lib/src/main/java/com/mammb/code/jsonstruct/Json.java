@@ -18,6 +18,7 @@ package com.mammb.code.jsonstruct;
 import java.io.IOException;
 import java.io.Reader;
 
+import com.mammb.code.jsonstruct.lang.CharBufferReader;
 import com.mammb.code.jsonstruct.lang.CharReader;
 import com.mammb.code.jsonstruct.lang.StringReader;
 
@@ -29,10 +30,20 @@ public interface Json<T> {
 
     /**
      * Construct the given class instance from json.
-     * @param reader Reader
+     * @param reader CharReader
      * @return the class instance
      */
     T from(CharReader reader);
+
+
+    /**
+     * Construct the given class instance from json.
+     * @param reader Reader
+     * @return the class instance
+     */
+    default T from(Reader reader) {
+        return from(CharBufferReader.of(reader));
+    }
 
 
     /**
@@ -46,6 +57,30 @@ public interface Json<T> {
 
 
     /**
+     * Construct the given class instance from json.
+     * @param cs the char sequence of json
+     * @param clazz the type of model
+     * @param <T> type of class
+     * @return the class instance
+     */
+    static <T> T from(CharSequence cs, Class<T> clazz) {
+        return of(clazz).from(new StringReader(cs.toString()));
+    }
+
+
+    /**
+     * Construct the given class instance from json.
+     * @param reader Reader
+     * @param clazz the type of model
+     * @param <T> type of class
+     * @return the class instance
+     */
+    static <T> T from(Reader reader, Class<T> clazz) {
+        return of(clazz).from(reader);
+    }
+
+
+    /**
      * Writes the object content tree to a {@link Appendable}.
      * @param object the object content tree to be serialized.
      * @param writer destination of json data where serialized from java content tree
@@ -55,9 +90,9 @@ public interface Json<T> {
 
 
     /**
-     * Serializes the object content tree to a {@link CharSequence}.
+     * Serializes the object content tree to a Json string.
      * @param object the object content tree to be serialized.
-     * @return the {@link CharSequence} serialized from java content tree.
+     * @return the String serialized from java content tree.
      */
     default String stringify(T object) {
         try {
@@ -67,6 +102,19 @@ public interface Json<T> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    /**
+     * Serializes the object content tree to a Json string.
+     * @param object the object content tree to be serialized.
+     * @param <T> type of class
+     * @return the String serialized from java content tree.
+     */
+    static <T> String stringifyOf(T object) {
+        @SuppressWarnings("unchecked")
+        Class<T> clazz = (Class<T>) object.getClass();
+        return of(clazz).stringify(object);
     }
 
 

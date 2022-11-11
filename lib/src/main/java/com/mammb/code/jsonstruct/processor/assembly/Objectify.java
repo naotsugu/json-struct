@@ -145,8 +145,8 @@ public class Objectify {
 
     private Code defaults(TypeMirror type) {
         return Code.of("""
-                json.as(convert.defaults(#{type}.class))""")
-            .interpolateType("#{type}", type.toString());
+                convert.defaults(#{type}.class)""")
+            .interpolateType("#{type}", lang.erasure(type).toString());
     }
 
 
@@ -184,7 +184,7 @@ public class Objectify {
     private Code list(TypeMirror type, Path path) {
 
         TypeMirror entryType = lang.entryType(type);
-        String methodName = uniqueName(path.camelJoin() + "ObjectifyList");
+        String methodName = uniqueName(path.camelJoinOr("self") + "ObjectifyList");
 
         backingCodes.addEmptyLine().add(Code.of("""
             private List<#{type}> #{methodName}(JsonArray array) {
@@ -210,7 +210,7 @@ public class Objectify {
     private Code set(TypeMirror type, Path path) {
 
         TypeMirror entryType = lang.entryType(type);
-        String methodName = uniqueName(path.camelJoin() + "ObjectifySet");
+        String methodName = uniqueName(path.camelJoinOr("self") + "ObjectifySet");
 
         backingCodes.addEmptyLine().add(Code.of("""
             private Set<#{type}> #{methodName}(JsonArray array) {
@@ -236,7 +236,7 @@ public class Objectify {
     private Code array(TypeMirror type, Path path) {
 
         TypeMirror compType = lang.entryType(type);
-        String methodName = uniqueName(path.camelJoin() + "ObjectifyArray");
+        String methodName = uniqueName(path.camelJoinOr("self") + "ObjectifyArray");
 
         backingCodes.addEmptyLine().add(Code.of("""
             private #{type}[] #{methodName}(JsonArray array) {
@@ -262,7 +262,7 @@ public class Objectify {
     private Code map(TypeMirror type, Path path) {
 
         TypeMirror[] entryTypes = lang.biEntryTypes(type);
-        String methodName = uniqueName(path.camelJoin() + "ObjectifyMap");
+        String methodName = uniqueName(path.camelJoinOr("self") + "ObjectifyMap");
 
         backingCodes.addEmptyLine().add(Code.of("""
             private Map<#{keyType}, #{valType}> #{methodName}(JsonStructure str) {
@@ -314,7 +314,7 @@ public class Objectify {
 
 
     private String createPointer(Path path) {
-        String pointerName = path.camelJoin() + "Pointer";
+        String pointerName = path.camelJoinOr("self") + "Pointer";
         if (definedNames.contains(pointerName)) {
             // reuse if duplicate
             return pointerName;

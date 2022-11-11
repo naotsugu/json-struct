@@ -15,6 +15,7 @@
  */
 package com.mammb.code.jsonstruct.processor.assembly;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -92,7 +93,7 @@ public class Imports {
      * @return the type name applied import
      */
     public String apply(String fqcn) {
-        return applySingle(fqcn);
+        return applyImport(strip(fqcn));
     }
 
 
@@ -101,7 +102,34 @@ public class Imports {
      * @param imports the import subjects
      */
     public void add(String imports) {
-        imports.lines().filter(not(String::isBlank)).forEach(this::applySingle);
+        imports.lines().filter(not(String::isBlank)).map(Imports::strip).forEach(this::applyImport);
+    }
+
+
+    /**
+     * Apply import with generics.
+     * <p>
+     * {@code java.util.Map<java.util.List<java.lang.String>,java.util.List<java.lang.Integer>>}
+     *
+     * Import types are
+     * {@code java.util.Map}
+     * {@code java.util.List}
+     * {@code java.util.String}
+     * {@code java.lang.Integer}
+     *
+     * Return string are
+     * {@code Map<List<String>,List<Integer>>}
+     *
+     * @param fqcn the type fqcn
+     * @return the type name applied import
+     */
+    private String applyImport(String fqcn) {
+        final String withDelimiterRe = "((?<=%1$s)|(?=%1$s))".formatted("[<>,]");
+        return Arrays.stream(fqcn.split(withDelimiterRe))
+            .map(String::trim)
+            .filter(not(String::isBlank))
+            .map(s -> s.matches("[<>,]") ? s : applySingle(s))
+            .collect(Collectors.joining());
     }
 
 
@@ -112,10 +140,9 @@ public class Imports {
      */
     private String applySingle(String fqcn) {
 
-        fqcn = strip(fqcn);
-
         if (fqcn.isBlank() || fqcn.contains(" ") ||
-            fqcn.contains(";") || fqcn.contains("\n")) {
+            fqcn.contains(";") || fqcn.contains("\n") ||
+            fqcn.contains("<") || fqcn.contains(">") || fqcn.contains(",")) {
             throw new IllegalArgumentException(fqcn);
         }
         if (countDot(fqcn) == 0) {
@@ -147,6 +174,7 @@ public class Imports {
 
     /**
      * Strip import statement.
+     * remove {@code "import "} and {@code ";"}
      * @param string the import statement
      * @return the simple name
      */

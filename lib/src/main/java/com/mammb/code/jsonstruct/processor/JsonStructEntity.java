@@ -20,6 +20,7 @@ import com.mammb.code.jsonstruct.convert.Converts;
 import com.mammb.code.jsonstruct.processor.assembly.*;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.Optional;
 
@@ -66,6 +67,11 @@ public class JsonStructEntity {
 
         LangUtil lang = LangUtil.of(ctx.getElementUtils(), ctx.getTypeUtils());
 
+        if (lang.isInnerClass(element) && !element.getModifiers().contains(Modifier.STATIC)) {
+            ctx.logError("inner class must be static. [{}]", element);
+            return Optional.empty();
+        }
+
         int cyclicDepth = lang.attributeIntValue(element, ANNOTATION_TYPE, "cyclicDepth");
 
         if (lang.isClass(element) &&
@@ -104,6 +110,7 @@ public class JsonStructEntity {
             """);
 
         return Code.of("""
+                @SuppressWarnings("unchecked")
                 @Generated(value = "#{processorName}")
                 public class #{className} implements Json<#{entityName}> {
 

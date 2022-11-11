@@ -41,6 +41,7 @@ class JsonPointerTest {
         assertEquals("aa", pointer.token(1));
         assertEquals("bb", pointer.token(2));
         assertEquals("", pointer.token(3));
+
     }
 
 }

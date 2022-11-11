@@ -206,6 +206,16 @@ public class LangUtil {
 
 
     /**
+     * Gets the erasure of a type
+     * @param typeMirror the type to be erased
+     * @return the erasure of a type
+     */
+    public TypeMirror erasure(TypeMirror typeMirror) {
+        return typeUtils.erasure(typeMirror);
+    }
+
+
+    /**
      * Gets whether the given {@link TypeMirror} is an Array type.
      * @param typeMirror the {@link TypeMirror}
      * @return {@code true} if whether the given {@link TypeMirror} is an Array type

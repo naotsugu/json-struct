@@ -17,11 +17,8 @@ package com.mammb.code.jsonstruct;
 
 import com.mammb.code.jsonstruct.testdata.*;
 import org.junit.jupiter.api.Test;
-
-import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -103,19 +100,5 @@ class JsonTest {
 
         assertEquals(jsonStr.trim(), json.stringify(pet));
     }
-
-    @Test
-    void testCustomConvert() {
-        var json = Json.of(Data1.class);
-        var jsonStr = """
-            {"dateTime":"2022/10/20 12:34:56"}""";
-        var d = json.from(jsonStr);
-        assertEquals("2022-10-20T12:34:56", d.dateTime.toString());
-        assertEquals(jsonStr.trim(), json.stringify(d));
-    }
-
-
-    @JsonStruct
-    public record Data1(LocalDateTime dateTime) {}
 
 }

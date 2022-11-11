@@ -21,7 +21,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * JsonPointer.
+ * Representation of a JSON Pointer as specified in RFC 6901.
+ * A JSON Pointer, when applied to a target {@link JsonValue},
+ * defines a reference location in the target.
+ *
  * @author Naotsugu Kobayashi
  */
 public class JsonPointer {
@@ -102,7 +105,7 @@ public class JsonPointer {
      * @return the referenced value in the target
      */
     public Optional<JsonValue> asValue(JsonValue structure) {
-        if (tokens.size() == 1) {
+        if (isSelf()) {
             return Optional.of(structure);
         }
         JsonValue value = structure;
@@ -148,9 +151,9 @@ public class JsonPointer {
      * @param token the token
      * @return parsed index
      */
-    private static int asIndex(String token) {
+    private int asIndex(String token) {
         if (token == null || token.isBlank()) {
-            throw new JsonParseException();
+            throw new JsonParseException("parse index error.[{}]{}", token, tokens);
         }
         if (token.equals("-")) {
             return -1;
@@ -178,6 +181,16 @@ public class JsonPointer {
         return (str.indexOf('~') != -1)
             ? str.replace("~1", "/").replace("~0", "~")
             : str;
+    }
+
+
+    /**
+     * Gets whether if this pointer has root path.
+     * @return {@code true} if this pointer has root path.
+     */
+    private boolean isSelf() {
+        return tokens.size() <= 1 ||
+            (tokens.size() == 2 && tokens.get(0).isBlank() && tokens.get(1).isBlank());
     }
 
 

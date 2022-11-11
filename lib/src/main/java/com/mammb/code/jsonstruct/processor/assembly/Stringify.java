@@ -151,7 +151,7 @@ public class Stringify {
     private Code array(TypeMirror type, Path path) {
 
         TypeMirror entryType = lang.entryType(type);
-        String methodName = uniqueName(path.camelJoin() + "Stringify");
+        String methodName = uniqueName(path.camelJoinOr("self") + "Stringify");
         buildIterableMethod(entryType, methodName);
 
         return Code.of("""
@@ -167,7 +167,7 @@ public class Stringify {
     private Code collection(TypeMirror type, Path path) {
 
         TypeMirror entryType = lang.entryType(type);
-        String methodName = uniqueName(path.camelJoin() + "Stringify");
+        String methodName = uniqueName(path.camelJoinOr("self") + "Stringify");
         buildIterableMethod(entryType, methodName);
 
         return Code.of("""
@@ -198,7 +198,7 @@ public class Stringify {
     private Code map(TypeMirror type, Path path) {
 
         TypeMirror[] entryTypes = lang.biEntryTypes(type);
-        String methodName = uniqueName(path.camelJoin() + "Stringify");
+        String methodName = uniqueName(path.camelJoinOr("self") + "Stringify");
 
         TypeMirror key = entryTypes[0];
         TypeMirror val = entryTypes[1];

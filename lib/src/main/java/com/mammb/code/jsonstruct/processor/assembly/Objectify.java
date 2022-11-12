@@ -187,10 +187,10 @@ public class Objectify {
         String methodName = uniqueName(path.camelJoinOr("self") + "ObjectifyList");
 
         backingCodes.addEmptyLine().add(Code.of("""
-            private List<#{type}> #{methodName}(JsonArray array) {
-                if (array == null) return List.of();
+            private List<#{type}> #{methodName}(JsonValue array) {
+                if (array instanceof JsonValue.JsonNull) return null;
                 List<#{type}> list = new ArrayList<>();
-                for (JsonValue json : array) {
+                for (JsonValue json : (JsonArray) array) {
                     list.add(#{entry});
                 }
                 return list;
@@ -201,7 +201,7 @@ public class Objectify {
             .interpolate("#{entry}", toCode(entryType, Path.of())));
 
         return Code.of("""
-            #{methodName}((JsonArray) json.at(#{pointerName}))""")
+            #{methodName}(json.at(#{pointerName}))""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{pointerName}", createPointer(path));
     }
@@ -213,10 +213,10 @@ public class Objectify {
         String methodName = uniqueName(path.camelJoinOr("self") + "ObjectifySet");
 
         backingCodes.addEmptyLine().add(Code.of("""
-            private Set<#{type}> #{methodName}(JsonArray array) {
-                if (array == null) return Set.of();
+            private Set<#{type}> #{methodName}(JsonValue array) {
+                if (array instanceof JsonValue.JsonNull) return null;
                 Set<#{type}> set = new LinkedHashSet<>();
-                for (JsonValue json : array) {
+                for (JsonValue json : (JsonArray) array) {
                     set.add(#{entry});
                 }
                 return set;
@@ -227,7 +227,7 @@ public class Objectify {
             .interpolate("#{entry}", toCode(entryType, Path.of())));
 
         return Code.of("""
-            #{methodName}((JsonArray) json.at(#{pointerName}))""")
+            #{methodName}(json.at(#{pointerName}))""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{pointerName}", createPointer(path));
     }
@@ -239,10 +239,10 @@ public class Objectify {
         String methodName = uniqueName(path.camelJoinOr("self") + "ObjectifyArray");
 
         backingCodes.addEmptyLine().add(Code.of("""
-            private #{type}[] #{methodName}(JsonArray array) {
-                if (array == null) return new #{typeNew}[0];
+            private #{type}[] #{methodName}(JsonValue array) {
+                if (array instanceof JsonValue.JsonNull) return null;
                 List<#{type}> list = new ArrayList<>();
-                for (JsonValue json : array) {
+                for (JsonValue json : (JsonArray) array) {
                     list.add(#{entry});
                 }
                 return list.toArray(new #{typeNew}[0]);
@@ -254,7 +254,7 @@ public class Objectify {
             .interpolate("#{entry}", toCode(compType, Path.of())));
 
         return Code.of("""
-            #{methodName}((JsonArray) json.at(#{pointerName}))""")
+            #{methodName}(json.at(#{pointerName}))""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{pointerName}", createPointer(path));
     }
@@ -266,8 +266,8 @@ public class Objectify {
         String methodName = uniqueName(path.camelJoinOr("self") + "ObjectifyMap");
 
         backingCodes.addEmptyLine().add(Code.of("""
-            private Map<#{keyType}, #{valType}> #{methodName}(JsonStructure str) {
-                if (str == null) return Map.of();
+            private Map<#{keyType}, #{valType}> #{methodName}(JsonValue str) {
+                if (str instanceof JsonValue.JsonNull) return null;
                 Map<#{keyType}, #{valType}> map = new LinkedHashMap<>();
                 if (str instanceof JsonObject obj) {
                     for (Map.Entry<String, JsonValue> e : obj.entrySet()) {
@@ -308,7 +308,7 @@ public class Objectify {
                 """)));
 
         return Code.of("""
-            #{methodName}((JsonStructure) json.at(#{pointerName}))""")
+            #{methodName}(json.at(#{pointerName}))""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{pointerName}", createPointer(path));
     }

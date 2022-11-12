@@ -32,7 +32,6 @@ public class Converts {
     /** The Optional stringify map. */
     private final Map<Class<?>, Function<?, CharSequence>> stringifyMap;
 
-
     /**
      * Constructor.
      */
@@ -59,17 +58,16 @@ public class Converts {
      */
     @SuppressWarnings("unchecked")
     public <T> Function<JsonValue, T> to(Class<?> clazz) {
-        if (clazz == null) {
-            return v -> null;
-        }
+        Function<JsonValue, T> ret;
         if (CharSequence.class.isAssignableFrom(clazz)) {
             // bypass
-            return v -> (T) v.toString();
+            ret = v -> (T) v.toString();
+        } else if (!objectifyMap.isEmpty() && objectifyMap.containsKey(clazz)) {
+            ret = (Function<JsonValue, T>) objectifyMap.get(clazz);
+        } else {
+            ret = (Function<JsonValue, T>) BuiltinObjectify.to(clazz);
         }
-        if (!objectifyMap.isEmpty() && objectifyMap.containsKey(clazz)) {
-            return (Function<JsonValue, T>) objectifyMap.get(clazz);
-        }
-        return (Function<JsonValue, T>) BuiltinObjectify.to(clazz);
+        return v -> (v instanceof JsonValue.JsonNull) ? null : ret.apply(v);
     }
 
 

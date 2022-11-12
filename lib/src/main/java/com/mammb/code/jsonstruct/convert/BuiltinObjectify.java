@@ -111,7 +111,7 @@ public class BuiltinObjectify {
      * @return the converter
      */
     public static Function<JsonValue, ?> to(Class<?> clazz) {
-        Function<JsonValue, ?> fun = switch (clazz.getCanonicalName()) {
+        return switch (clazz.getCanonicalName()) {
             case "java.lang.String"             -> v -> v.toString();
             case "byte", "java.lang.Byte"       -> v -> Byte.parseByte(v.toString());
             case "boolean", "java.lang.Boolean" -> v -> v.equals(JsonValue.TRUE);
@@ -148,7 +148,6 @@ public class BuiltinObjectify {
             case "java.util.UUID"               -> v -> UUID.fromString(v.toString());
             default                             -> v -> null;
         };
-        return v -> (v == null) ? null : fun.apply(v);
     }
 
 

@@ -34,13 +34,22 @@ public interface JsonValue {
     JsonValue FALSE = new JsonFalse();
 
     /** json null instance. */
-    record JsonNull() implements JsonValue { }
+    record JsonNull() implements JsonValue {
+        @Override
+        public String toString() { return "null"; }
+    }
 
     /** json true instance. */
-    record JsonTrue() implements JsonValue { }
+    record JsonTrue() implements JsonValue {
+        @Override
+        public String toString() { return "true"; }
+    }
 
     /** json false instance. */
-    record JsonFalse() implements JsonValue { }
+    record JsonFalse() implements JsonValue {
+        @Override
+        public String toString() { return "false"; }
+    }
 
 
     @Override

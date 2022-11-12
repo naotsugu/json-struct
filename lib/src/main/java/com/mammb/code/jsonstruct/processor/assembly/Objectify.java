@@ -170,12 +170,12 @@ public class Objectify {
 
         if (path.isEmpty()) {
             return Code.of("""
-                #{enumType}.valueOf(json.as(convert.to(String.class)))""")
+                Optional.<String>ofNullable(json.as(convert.to(String.class))).map(#{enumType}::valueOf).orElse(null)""")
                 .interpolateType("#{enumType}", type.toString());
         }
 
         return Code.of("""
-                #{enumType}.valueOf(json.as(#{pointerName}, convert.to(String.class)))""")
+                Optional.<String>ofNullable(json.as(#{pointerName}, convert.to(String.class))).map(#{enumType}::valueOf).orElse(null)""")
             .interpolate("#{pointerName}", createPointer(path))
             .interpolateType("#{enumType}", type.toString());
     }
@@ -188,7 +188,7 @@ public class Objectify {
 
         backingCodes.addEmptyLine().add(Code.of("""
             private List<#{type}> #{methodName}(JsonValue array) {
-                if (array instanceof JsonValue.JsonNull) return null;
+                if (array == null || array instanceof JsonValue.JsonNull) return null;
                 List<#{type}> list = new ArrayList<>();
                 for (JsonValue json : (JsonArray) array) {
                     list.add(#{entry});
@@ -214,7 +214,7 @@ public class Objectify {
 
         backingCodes.addEmptyLine().add(Code.of("""
             private Set<#{type}> #{methodName}(JsonValue array) {
-                if (array instanceof JsonValue.JsonNull) return null;
+                if (array == null || array instanceof JsonValue.JsonNull) return null;
                 Set<#{type}> set = new LinkedHashSet<>();
                 for (JsonValue json : (JsonArray) array) {
                     set.add(#{entry});
@@ -240,7 +240,7 @@ public class Objectify {
 
         backingCodes.addEmptyLine().add(Code.of("""
             private #{type}[] #{methodName}(JsonValue array) {
-                if (array instanceof JsonValue.JsonNull) return null;
+                if (array == null || array instanceof JsonValue.JsonNull) return null;
                 List<#{type}> list = new ArrayList<>();
                 for (JsonValue json : (JsonArray) array) {
                     list.add(#{entry});
@@ -267,7 +267,7 @@ public class Objectify {
 
         backingCodes.addEmptyLine().add(Code.of("""
             private Map<#{keyType}, #{valType}> #{methodName}(JsonValue str) {
-                if (str instanceof JsonValue.JsonNull) return null;
+                if (str == null || str instanceof JsonValue.JsonNull) return null;
                 Map<#{keyType}, #{valType}> map = new LinkedHashMap<>();
                 if (str instanceof JsonObject obj) {
                     for (Map.Entry<String, JsonValue> e : obj.entrySet()) {

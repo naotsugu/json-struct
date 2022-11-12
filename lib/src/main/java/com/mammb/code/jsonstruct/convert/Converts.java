@@ -67,7 +67,7 @@ public class Converts {
         } else {
             ret = (Function<JsonValue, T>) BuiltinObjectify.to(clazz);
         }
-        return v -> (v instanceof JsonValue.JsonNull) ? null : ret.apply(v);
+        return v -> (v == null || v instanceof JsonValue.JsonNull) ? null : ret.apply(v);
     }
 
 

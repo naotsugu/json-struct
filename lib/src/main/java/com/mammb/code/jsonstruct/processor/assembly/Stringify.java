@@ -122,7 +122,7 @@ public class Stringify {
 
     private Code basic(Path path) {
         return Code.of("""
-            .appendObj(#{path}.orElse(null))""")
+            .appendObj(#{path})""")
             .interpolate("#{path}", path.elvisJoin());
     }
 
@@ -158,12 +158,9 @@ public class Stringify {
         buildIterableMethod(entryType, methodName);
 
         return Code.of("""
-            .append("[")
-                .appendFun(b -> #{methodName}(Arrays.asList(#{path}.orElse(new #{type}[0])), b))
-            .append("]")""")
+            .appendFun(b -> #{methodName}(Arrays.asList(#{path}), b))""")
             .interpolate("#{methodName}", methodName)
-            .interpolate("#{path}", path.elvisJoin())
-            .interpolateType("#{type}", entryType.toString().replace("[]", "[0]"));
+            .interpolate("#{path}", path.elvisJoin());
     }
 
 
@@ -174,9 +171,7 @@ public class Stringify {
         buildIterableMethod(entryType, methodName);
 
         return Code.of("""
-            .append("[")
-                .appendFun(b -> #{methodName}(#{path}.orElse(List.of()), b))
-            .append("]")""")
+            .appendFun(b -> #{methodName}(#{path}, b))""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{path}", path.elvisJoin());
     }
@@ -189,9 +184,7 @@ public class Stringify {
         buildIterableMethod(entryType, methodName);
 
         return Code.of("""
-            .append("[")
-                .appendFun(b -> #{methodName}(#{path}.orElse(Set.of()), b))
-            .append("]")""")
+            .appendFun(b -> #{methodName}(#{path}, b))""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{path}", path.elvisJoin());
     }
@@ -200,10 +193,16 @@ public class Stringify {
     private void buildIterableMethod(TypeMirror entryType, String methodName) {
         Code backingMethod = Code.of("""
             private void #{methodName}(Iterable<#{type}> iterable, StringifyBuilder sb) {
+                if (iterable == null) {
+                    sb.appendNull();
+                    return;
+                }
+                sb.append("[");
                 for (Iterate.Entry<#{type}> entry : Iterate.of(iterable)) {
                     if (!entry.isFirst()) sb.append(',');
                     sb#{entry};
                 }
+                sb.append("]");
             }
             """)
             .interpolateType("#{type}", entryType.toString())
@@ -223,12 +222,18 @@ public class Stringify {
 
         if (basicClasses.contains(key.toString())) {
             Code backingMethod = Code.of("""
-            private void #{methodName}(Iterable<Map.Entry<#{keyType}, #{valType}>> iterable, StringifyBuilder sb) {
-                for (Iterate.Entry<Map.Entry<#{keyType}, #{valType}>> entry : Iterate.of(iterable)) {
+            private void #{methodName}(Map<#{keyType}, #{valType}> map, StringifyBuilder sb) {
+                if (map == null) {
+                    sb.appendNull();
+                    return;
+                }
+                sb.append("{");
+                for (Iterate.Entry<Map.Entry<#{keyType}, #{valType}>> entry : Iterate.of(map.entrySet())) {
                     if (!entry.isFirst()) sb.append(',');
                     sb#{keyEntry}.append(":")
                         #{valEntry};
                 }
+                sb.append("}");
             }
             """)
                 .interpolateType("#{keyType}", key.toString())
@@ -239,20 +244,24 @@ public class Stringify {
             backingMethods.addEmptyLine().add(backingMethod);
 
             return Code.of("""
-            .append("{")
-                .appendFun(b -> #{methodName}(#{path}.orElse(Map.of()).entrySet(), b))
-            .append("}")""")
+            .appendFun(b -> #{methodName}(#{path}, b))""")
                 .interpolate("#{methodName}", methodName)
                 .interpolate("#{path}", path.elvisJoin());
 
         } else {
             Code backingMethod = Code.of("""
-            private void #{methodName}(Iterable<Map.Entry<#{keyType}, #{valType}>> iterable, StringifyBuilder sb) {
-                for (Iterate.Entry<Map.Entry<#{keyType}, #{valType}>> entry : Iterate.of(iterable)) {
+            private void #{methodName}(Map<#{keyType}, #{valType}> map, StringifyBuilder sb) {
+                if (map == null) {
+                    sb.appendNull();
+                    return;
+                }
+                sb.append("[");
+                for (Iterate.Entry<Map.Entry<#{keyType}, #{valType}>> entry : Iterate.of(map.entrySet())) {
                     if (!entry.isFirst()) sb.append(',');
                     sb#{keyEntry}.append(",")
                         #{valEntry};
                 }
+                sb.append("]");
             }
             """)
                 .interpolateType("#{keyType}", key.toString())
@@ -263,9 +272,7 @@ public class Stringify {
             backingMethods.addEmptyLine().add(backingMethod);
 
             return Code.of("""
-            .append("[")
-                .appendFun(b -> #{methodName}(#{path}.orElse(Map.of()).entrySet(), b))
-            .append("]")""")
+                .appendFun(b -> #{methodName}(#{path}, b))""")
                 .interpolate("#{methodName}", methodName)
                 .interpolate("#{path}", path.elvisJoin());
         }

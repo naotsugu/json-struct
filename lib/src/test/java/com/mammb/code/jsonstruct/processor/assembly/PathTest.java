@@ -31,12 +31,12 @@ class PathTest {
         assertFalse(path.isEmpty());
         assertEquals("aaBb", path.camelJoin());
         assertEquals("/aa/bb", path.pointerJoin());
-        assertEquals("Optional.ofNullable(aa).map(e -> e.bb())", path.elvisJoin());
+        assertEquals("Optional.ofNullable(aa).map(e -> e.bb()).orElse(null)", path.elvisJoin());
 
         path.add("cc");
         assertEquals("aaBbCc", path.camelJoin());
         assertEquals("/aa/bb/cc", path.pointerJoin());
-        assertEquals("Optional.ofNullable(aa).map(e -> e.bb()).map(e -> e.cc())", path.elvisJoin());
+        assertEquals("Optional.ofNullable(aa).map(e -> e.bb()).map(e -> e.cc()).orElse(null)", path.elvisJoin());
 
     }
 

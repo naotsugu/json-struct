@@ -109,7 +109,7 @@ public class StringifyBuilder {
      * Append null string to this builder.
      * @return this builder
      */
-    StringifyBuilder appendNull() {
+    public StringifyBuilder appendNull() {
         appendOn("null");
         return this;
     }

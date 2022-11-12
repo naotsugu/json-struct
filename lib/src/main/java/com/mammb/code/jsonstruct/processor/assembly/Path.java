@@ -128,7 +128,7 @@ public class Path {
                 sb.append(").map(e -> e.");
             }
         }
-        sb.append(")");
+        sb.append(").orElse(null)");
         return sb.toString();
     }
 

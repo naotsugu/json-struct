@@ -17,6 +17,7 @@ package com.mammb.code.jsonstruct;
 
 import com.mammb.code.jsonstruct.testdata.Book;
 import com.mammb.code.jsonstruct.testdata.Food;
+import com.mammb.code.jsonstruct.testdata.Person;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class JsonEmptyTest {
 
     @Test
-    void testEmpty() {
+    void testNull() {
         var jsonStr = """
             {"name":null}""";
         var d = Json.from(jsonStr, Book.class);
@@ -42,6 +43,33 @@ public class JsonEmptyTest {
         var jsonStr = """
             {"name":null,"materials":[]}""";
         var d = Json.from(jsonStr, Food.class);
+        assertEquals(jsonStr, Json.stringifyOf(d));
+    }
+
+
+    @Test
+    void testNullList() {
+        var jsonStr = """
+            {"name":null,"materials":null}""";
+        var d = Json.from(jsonStr, Food.class);
+        assertEquals(jsonStr, Json.stringifyOf(d));
+    }
+
+
+//    @Test
+//    void testNullObject() {
+//        var jsonStr = """
+//            {"fullName":null,"age":null,"gender":"FEMALE"}""";
+//        var d = Json.from(jsonStr, Person.class);
+//        assertEquals(jsonStr, Json.stringifyOf(d));
+//    }
+
+
+    @Test
+    void testNullEnum() {
+        var jsonStr = """
+            {"fullName":{"givenName":"a","familyName":"b"},"age":20,"gender":null}""";
+        var d = Json.from(jsonStr, Person.class);
         assertEquals(jsonStr, Json.stringifyOf(d));
     }
 

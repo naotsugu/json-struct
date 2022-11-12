@@ -101,8 +101,11 @@ public class Stringify {
         if (lang.isArrayLike(type)) {
             return array(type, path);
         }
-        if (lang.isListLike(type) || lang.isSetLike(type)) {
-            return collection(type, path);
+        if (lang.isListLike(type)) {
+            return list(type, path);
+        }
+        if (lang.isSetLike(type)) {
+            return set(type, path);
         }
         if (lang.isMapLike(type)) {
             return map(type, path);
@@ -164,7 +167,7 @@ public class Stringify {
     }
 
 
-    private Code collection(TypeMirror type, Path path) {
+    private Code list(TypeMirror type, Path path) {
 
         TypeMirror entryType = lang.entryType(type);
         String methodName = uniqueName(path.camelJoinOr("self") + "Stringify");
@@ -173,6 +176,21 @@ public class Stringify {
         return Code.of("""
             .append("[")
                 .appendFun(b -> #{methodName}(#{path}.orElse(List.of()), b))
+            .append("]")""")
+            .interpolate("#{methodName}", methodName)
+            .interpolate("#{path}", path.elvisJoin());
+    }
+
+
+    private Code set(TypeMirror type, Path path) {
+
+        TypeMirror entryType = lang.entryType(type);
+        String methodName = uniqueName(path.camelJoinOr("self") + "Stringify");
+        buildIterableMethod(entryType, methodName);
+
+        return Code.of("""
+            .append("[")
+                .appendFun(b -> #{methodName}(#{path}.orElse(Set.of()), b))
             .append("]")""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{path}", path.elvisJoin());

@@ -17,56 +17,57 @@ package com.mammb.code.jsonstruct;
 
 import com.mammb.code.jsonstruct.testdata.FullName;
 import org.junit.jupiter.api.Test;
+
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * JsonListTest.
+ * JsonArrayTest.
  *
  * @author Naotsugu Kobayashi
  */
-public class JsonListTest {
+public class JsonArrayTest {
 
     @Test
-    void testSimpleList() {
+    void testSimpleArray() {
 
         var jsonStr = """
-            {"id":10,"list":[1,2,3]}""";
+            {"id":10,"array":["a","b"]}""";
 
         var d = Json.from(jsonStr, Data1.class);
         assertEquals(jsonStr, Json.stringifyOf(d));
     }
 
     @JsonStruct
-    public record Data1(Long id, List<Integer> list) {}
+    public record Data1(Long id, String[] array) {}
 
 
     @Test
-    void testObjectList() {
+    void testObjectArray() {
 
         var jsonStr = """
-            {"id":10,"list":[{"givenName":"g1","familyName":"f1"},{"givenName":"g2","familyName":"f2"}]}""";
+            {"id":10,"array":[{"givenName":"g1","familyName":"f1"},{"givenName":"g2","familyName":"f2"}]}""";
 
         var d = Json.from(jsonStr, Data2.class);
         assertEquals(jsonStr, Json.stringifyOf(d));
     }
 
     @JsonStruct
-    public record Data2(Long id, List<FullName> list) {}
+    public record Data2(Long id, FullName[] array) {}
 
 
     @Test
-    void testNestList() {
+    void testNestArray() {
 
         var jsonStr = """
-            {"id":10,"list":[["a","b"],["c","d"]]}""";
+            {"id":10,"array":[["a","b"],["c","d"]]}""";
 
         var d = Json.from(jsonStr, Data3.class);
         assertEquals(jsonStr, Json.stringifyOf(d));
     }
 
     @JsonStruct
-    public record Data3(Long id, List<List<String>> list) {}
+    public record Data3(Long id, String[][] array) {}
 
 }

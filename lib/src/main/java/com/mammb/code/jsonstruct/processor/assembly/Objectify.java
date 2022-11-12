@@ -240,15 +240,16 @@ public class Objectify {
 
         backingCodes.addEmptyLine().add(Code.of("""
             private #{type}[] #{methodName}(JsonArray array) {
-                if (array == null) return new #{type}[0];
+                if (array == null) return new #{typeNew}[0];
                 List<#{type}> list = new ArrayList<>();
                 for (JsonValue json : array) {
                     list.add(#{entry});
                 }
-                return list.toArray(new #{type}[0]);
+                return list.toArray(new #{typeNew}[0]);
             }
             """)
             .interpolateType("#{type}", compType.toString())
+            .interpolateType("#{typeNew}", compType.toString().replace("[]", "[0]"))
             .interpolate("#{methodName}", methodName)
             .interpolate("#{entry}", toCode(compType, Path.of())));
 

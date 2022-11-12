@@ -160,7 +160,7 @@ public class Stringify {
             .append("]")""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{path}", path.elvisJoin())
-            .interpolateType("#{type}", entryType.toString());
+            .interpolateType("#{type}", entryType.toString().replace("[]", "[0]"));
     }
 
 

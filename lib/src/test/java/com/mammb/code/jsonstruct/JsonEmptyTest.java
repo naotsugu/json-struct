@@ -56,15 +56,6 @@ public class JsonEmptyTest {
     }
 
 
-//    @Test
-//    void testNullObject() {
-//        var jsonStr = """
-//            {"fullName":null,"age":null,"gender":"FEMALE"}""";
-//        var d = Json.from(jsonStr, Person.class);
-//        assertEquals(jsonStr, Json.stringifyOf(d));
-//    }
-
-
     @Test
     void testNullEnum() {
         var jsonStr = """
@@ -72,5 +63,14 @@ public class JsonEmptyTest {
         var d = Json.from(jsonStr, Person.class);
         assertEquals(jsonStr, Json.stringifyOf(d));
     }
+
+
+//    @Test
+//    void testNullObject() {
+//        var jsonStr = """
+//            {"fullName":null,"age":30,"gender":"FEMALE"}""";
+//        var d = Json.from(jsonStr, Person.class);
+//        assertEquals(jsonStr, Json.stringifyOf(d));
+//    }
 
 }

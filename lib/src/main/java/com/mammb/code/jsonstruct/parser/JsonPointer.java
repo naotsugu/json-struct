@@ -110,15 +110,21 @@ public class JsonPointer {
         }
         JsonValue value = structure;
         for (int i = 1; i < tokens.size(); i++) {
+
             if (value instanceof JsonObject object) {
                 value = object.get(tokens.get(i));
 
             } else if (value instanceof JsonArray array) {
                 int index = asIndex(tokens.get(i));
                 value = array.get(index);
+
+            } else if(value instanceof JsonValue.JsonNull) {
+                return Optional.empty();
+
             } else {
                 throw new RuntimeException();
             }
+
             if (value == null) {
                 return Optional.empty();
             }

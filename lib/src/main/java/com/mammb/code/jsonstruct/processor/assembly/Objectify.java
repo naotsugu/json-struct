@@ -271,9 +271,8 @@ public class Objectify {
                 Map<#{keyType}, #{valType}> map = new LinkedHashMap<>();
                 if (str instanceof JsonObject obj) {
                     for (Map.Entry<String, JsonValue> e : obj.entrySet()) {
-                        JsonValue json = JsonString.of(e.getKey());
-                        #{keyType} key = #{key};
-                        json = e.getValue();
+                        #{keyType} key = Optional.ofNullable(JsonString.of(e.getKey())).<#{keyType}>map(json -> #{key}).orElse(null);
+                        JsonValue json = e.getValue();
                         #{valType} val = #{val};
                         map.put(key, val);
                     }
@@ -284,9 +283,8 @@ public class Objectify {
                             prev = e.value();
                             continue;
                         }
-                        JsonValue json = prev;
-                        #{keyType} key = #{key};
-                        json = e.value();
+                        #{keyType} key = Optional.ofNullable(prev).<#{keyType}>map(json -> #{key}).orElse(null);
+                        JsonValue json = e.value();
                         #{valType} val = #{val};
                         map.put(key, val);
                     }

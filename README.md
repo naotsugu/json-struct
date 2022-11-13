@@ -78,22 +78,20 @@ $ ./gradlew benchmark:jmh
 ```
 
 
-##### Serialize and Deserialize
-
-```
-Benchmark            Mode  Cnt     Score     Error  Units
-MicroBench2.gson     avgt    3   4219.603 ±  348.076  ns/op
-MicroBench2.jackson  avgt    3   2693.410 ± 1076.516  ns/op
-MicroBench2.struct   avgt    3   2556.213 ±   66.621  ns/op
-```
-
-
-##### Instantiation and Serialize, Deserialize 
+##### Instantiation and Serialize, Deserialize
 
 ```
 Benchmark            Mode  Cnt      Score      Error  Units
-MicroBench.gson      avgt    3  13860.379 ± 3700.307  ns/op
-MicroBench.jackson   avgt    3  45937.932 ± 3149.854  ns/op
-MicroBench.struct    avgt    3   2600.124 ±   50.123  ns/op
+MicroBench.gson      avgt    3  13227.451 ±  463.189  ns/op
+MicroBench.jackson   avgt    3  46689.023 ± 1464.963  ns/op
+MicroBench.struct    avgt    3   2591.424 ±   11.675  ns/op
 ```
 
+##### Serialize and Deserialize
+
+```
+Benchmark            Mode  Cnt      Score      Error  Units
+MicroBench2.gson     avgt    3   4139.815 ±  101.674  ns/op
+MicroBench2.jackson  avgt    3   2578.517 ±   55.212  ns/op
+MicroBench2.struct   avgt    3   2483.299 ±   30.564  ns/op
+```

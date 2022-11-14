@@ -110,10 +110,27 @@ public class Path {
 
     /**
      * Join the paths as elvis operation.
-     *
      * @return the joined string
      */
     public String elvisJoin() {
+        return elvis().append(".orElse(null)").toString();
+    }
+
+
+    /**
+     * Join the paths as elvis isPresent operation.
+     * @return the joined string
+     */
+    public String elvisIsPresentJoin() {
+        return elvis().append(".isPresent()").toString();
+    }
+
+
+    /**
+     * Join the paths as elvis operation.
+     * @return the joined string builder
+     */
+    private StringBuilder elvis() {
         StringBuilder sb = new StringBuilder("Optional.ofNullable(");
         for (Iterate.Entry<String> entry : Iterate.of(paths)) {
             String path = entry.value();
@@ -128,14 +145,13 @@ public class Path {
                 sb.append(").map(e -> e.");
             }
         }
-        sb.append(").orElse(null)");
-        return sb.toString();
+        sb.append(")");
+        return sb;
     }
 
 
     /**
      * Join the paths as pointer.
-     *
      * @return the joined string
      */
     public String pointerJoin() {
@@ -147,7 +163,6 @@ public class Path {
 
     /**
      * Join the paths as camel case.
-     *
      * @return the joined string
      */
     public String camelJoin() {

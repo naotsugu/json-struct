@@ -125,7 +125,7 @@ public class Objectify {
         Code params = Code.of();
 
         ExecutableElement constructorLike = lang.selectConstructorLike(element, JsonStruct.class).orElseThrow();
-        for (Iterate.Entry<? extends VariableElement> param : Iterate.of(constructorLike.getParameters())) {
+        for (var param : Iterate.of(constructorLike.getParameters())) {
             Code paramCode = (lang.isAnnotated(param.value(), JsonStructIgnore.class))
                 ? defaults(param.value().asType())
                 : toCode(param.value().asType(), path.with(param.value().getSimpleName().toString()));
@@ -134,10 +134,12 @@ public class Objectify {
         }
 
         return Code.of("""
-            #{newMethod}(
+            !(json.at(#{pointerName}) instanceof JsonStructure) ? null
+            : #{newMethod}(
                 #{params}
             )
             """)
+            .interpolate("#{pointerName}", createPointer(path))
             .interpolate("#{newMethod}", instantiation(constructorLike, lang))
             .interpolate("#{params}", params);
     }
@@ -354,7 +356,7 @@ public class Objectify {
         }
         TypeElement type = (TypeElement) element;
         if (stack.stream().filter(type.getQualifiedName()::equals).count() > cyclicDepth) {
-            return Code.of();
+            return Code.of("null");
         }
         stack.push(type.getQualifiedName());
         Code ret = function.apply(type);

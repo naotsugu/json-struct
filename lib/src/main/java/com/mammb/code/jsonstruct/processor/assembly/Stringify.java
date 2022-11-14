@@ -122,7 +122,7 @@ public class Stringify {
 
     private Code basic(Path path) {
         return Code.of("""
-            .appendObj(#{path})""")
+            sb.appendObj(#{path});""")
             .interpolate("#{path}", path.elvisJoin());
     }
 
@@ -131,22 +131,27 @@ public class Stringify {
 
         Code props = Code.of();
 
-        for (Iterate.Entry<ExecutableElement> accessor : Iterate.of(
-                lang.selectAccessors(type, JsonStructIgnore.class))) {
+        for (var accessor : Iterate.of(lang.selectAccessors(type, JsonStructIgnore.class))) {
             Code prop = Code.of("""
-                .append("\\"#{name}\\":")
-                    #{value}""")
+                sb.append("\\"#{name}\\":");
+                #{value}""")
                 .interpolate("#{name}", lang.getPropertyName(accessor.value()))
                 .interpolate("#{value}", toCode(accessor.value(), path))
-                .append(accessor.hasNext() ? ".append(',')" : "");
+                .add(accessor.hasNext() ? Code.of("sb.append(',');") : Code.of());
             props.add(prop);
         }
 
         return Code.of("""
-            .append("{")
-                #{props}
-            .append("}")
-            """).interpolate("#{props}", props);
+            if (#{isPresent}) {
+                sb.append("{");
+                    #{props}
+                sb.append("}");
+            } else {
+                sb.appendNull();
+            }
+            """)
+            .interpolate("#{isPresent}", path.elvisIsPresentJoin())
+            .interpolate("#{props}", props);
 
     }
 
@@ -158,7 +163,7 @@ public class Stringify {
         buildIterableMethod(entryType, methodName);
 
         return Code.of("""
-            .appendFun(b -> #{methodName}(Arrays.asList(#{path}), b))""")
+            sb.appendFun(b -> #{methodName}(Arrays.asList(#{path}), b));""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{path}", path.elvisJoin());
     }
@@ -171,7 +176,7 @@ public class Stringify {
         buildIterableMethod(entryType, methodName);
 
         return Code.of("""
-            .appendFun(b -> #{methodName}(#{path}, b))""")
+            sb.appendFun(b -> #{methodName}(#{path}, b));""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{path}", path.elvisJoin());
     }
@@ -184,7 +189,7 @@ public class Stringify {
         buildIterableMethod(entryType, methodName);
 
         return Code.of("""
-            .appendFun(b -> #{methodName}(#{path}, b))""")
+            sb.appendFun(b -> #{methodName}(#{path}, b));""")
             .interpolate("#{methodName}", methodName)
             .interpolate("#{path}", path.elvisJoin());
     }
@@ -200,7 +205,7 @@ public class Stringify {
                 sb.append("[");
                 for (Iterate.Entry<#{type}> entry : Iterate.of(iterable)) {
                     if (!entry.isFirst()) sb.append(',');
-                    sb#{entry};
+                    #{entry}
                 }
                 sb.append("]");
             }
@@ -230,8 +235,9 @@ public class Stringify {
                 sb.append("{");
                 for (Iterate.Entry<Map.Entry<#{keyType}, #{valType}>> entry : Iterate.of(map.entrySet())) {
                     if (!entry.isFirst()) sb.append(',');
-                    sb#{keyEntry}.append(":")
-                        #{valEntry};
+                    #{keyEntry}
+                    sb.append(":");
+                    #{valEntry};
                 }
                 sb.append("}");
             }
@@ -244,7 +250,7 @@ public class Stringify {
             backingMethods.addEmptyLine().add(backingMethod);
 
             return Code.of("""
-            .appendFun(b -> #{methodName}(#{path}, b))""")
+            sb.appendFun(b -> #{methodName}(#{path}, b));""")
                 .interpolate("#{methodName}", methodName)
                 .interpolate("#{path}", path.elvisJoin());
 
@@ -258,8 +264,9 @@ public class Stringify {
                 sb.append("[");
                 for (Iterate.Entry<Map.Entry<#{keyType}, #{valType}>> entry : Iterate.of(map.entrySet())) {
                     if (!entry.isFirst()) sb.append(',');
-                    sb#{keyEntry}.append(",")
-                        #{valEntry};
+                    #{keyEntry}
+                    sb.append(",");
+                    #{valEntry}
                 }
                 sb.append("]");
             }
@@ -272,7 +279,7 @@ public class Stringify {
             backingMethods.addEmptyLine().add(backingMethod);
 
             return Code.of("""
-                .appendFun(b -> #{methodName}(#{path}, b))""")
+                sb.appendFun(b -> #{methodName}(#{path}, b));""")
                 .interpolate("#{methodName}", methodName)
                 .interpolate("#{path}", path.elvisJoin());
         }
@@ -306,7 +313,7 @@ public class Stringify {
         }
         TypeElement type = (TypeElement) element;
         if (stack.stream().filter(type.getQualifiedName()::equals).count() > cyclicDepth) {
-            return Code.of();
+            return Code.of("sb.appendNull();");
         }
         stack.push(type.getQualifiedName());
         Code ret = function.apply(type);

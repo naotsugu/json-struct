@@ -26,8 +26,8 @@ Add dependencies.
 
 ```kotlin
 dependencies {
-  implementation("com.mammb:json-struct:0.2.0")
-  annotationProcessor("com.mammb:json-struct:0.2.0")
+  implementation("com.mammb:json-struct:0.3.0")
+  annotationProcessor("com.mammb:json-struct:0.3.0")
 }
 ```
 
@@ -40,31 +40,35 @@ public record Person(FullName fullName, int age) {
 }
 ```
 
+Serialization / Deserialization would be as follows
 
 ```java
-var json = Json.of(Person.class);
-var person = json.from("""
-    {
-        "fullName": {
-             "givenName": "Bob",
-             "familyName": "Dylan"
-        },
-        "age": 81,
-        "gender": "MALE"
-    }
-    """;
+String string = json.from("""
+{
+    "fullName": {
+         "givenName": "Bob",
+         "familyName": "Dylan"
+    },
+    "age": 81,
+    "gender": "MALE"
+}""";
 
+Person person = Json.objectify(string, Person.class);
 person.fullName().givenName();  // Bob
 person.fullName().familyName(); // Dylan
 person.age();                   // 81
 person.gender();                // Gender.MALE
+
+String serialized = json.stringify(person);
+// {"fullName":{"givenName":"Bob","familyName":"Dylan"},"age":81,"gender":"MALE"}
 ```
 
-Similarly, the stringify would be as follows
+The following is equivalent.
 
 ```java
-json.stringify(person);
-// {"fullName":{"givenName":"Bob","familyName":"Dylan"},"age":81,"gender":"MALE"}
+Json json = Json.of(Person.class);
+Person person = json.fromJson(string);
+String serialized = json.toJson(person);
 ```
 
 

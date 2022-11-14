@@ -34,8 +34,8 @@ public class JsonMapTest {
         var jsonStr = """
             {"id":10,"map":{"k1":10,"k2":20}}""";
 
-        var d = Json.from(jsonStr, Data1.class);
-        assertEquals(jsonStr, Json.stringifyOf(d));
+        var d = Json.objectify(jsonStr, Data1.class);
+        assertEquals(jsonStr, Json.stringify(d));
     }
 
     @JsonStruct
@@ -47,8 +47,8 @@ public class JsonMapTest {
 
         var jsonStr = """
             {"id":10,"map":{"k1":{"givenName":"g1","familyName":"f1"},"k2":{"givenName":"g2","familyName":"f2"}}}""";
-        var d = Json.from(jsonStr, Data2.class);
-        assertEquals(jsonStr, Json.stringifyOf(d));
+        var d = Json.objectify(jsonStr, Data2.class);
+        assertEquals(jsonStr, Json.stringify(d));
     }
 
     @JsonStruct
@@ -60,8 +60,8 @@ public class JsonMapTest {
 
         var jsonStr = """
             {"id":10,"map":{"k1":{"givenName":"g1","familyName":"f1"},"k2":{"givenName":"g2","familyName":"f2"}}}""";
-        var d = Json.from(jsonStr, Data3.class);
-        assertEquals(jsonStr, Json.stringifyOf(d));
+        var d = Json.objectify(jsonStr, Data3.class);
+        assertEquals(jsonStr, Json.stringify(d));
     }
 
     @JsonStruct
@@ -73,8 +73,8 @@ public class JsonMapTest {
 
         var jsonStr = """
             {"id":9,"map":[{"givenName":"g1","familyName":"f1"},1,{"givenName":"g2","familyName":"f2"},2]}""";
-        var d = Json.from(jsonStr, Data4.class);
-        assertEquals(jsonStr, Json.stringifyOf(d));
+        var d = Json.objectify(jsonStr, Data4.class);
+        assertEquals(jsonStr, Json.stringify(d));
     }
 
     @JsonStruct

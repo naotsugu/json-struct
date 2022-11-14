@@ -30,12 +30,12 @@ public class JsonStructIgnoreTest {
     @Test
     void testIgnorePrimitive() {
 
-        var d = Json.from("""
+        var d = Json.objectify("""
             {"str":"a1","ignore":true}""", Data1.class);
         assertEquals("a1", d.str);
         assertFalse(d.ignore); // ignore -> default value
 
-        var str = Json.stringifyOf(new Data1("a1", true));
+        var str = Json.stringify(new Data1("a1", true));
         assertEquals("""
             {"str":"a1"}""", str);
 
@@ -47,12 +47,12 @@ public class JsonStructIgnoreTest {
     @Test
     void testIgnoreObject() {
 
-        var d2 = Json.from("""
+        var d2 = Json.objectify("""
             {"str":"a1","ignore":"ignore"}""", Data2.class);
         assertEquals("a1", d2.str);
         assertNull(d2.ignore); // ignore -> default value
 
-        var str = Json.stringifyOf(
+        var str = Json.stringify(
             new Data2("a1", "ignore"));
         assertEquals("""
             {"str":"a1"}""", str);
@@ -65,13 +65,13 @@ public class JsonStructIgnoreTest {
     @Test
     void testIgnoreCollection() {
 
-        var d3 = Json.from("""
+        var d3 = Json.objectify("""
             {"str":"a1","ignore":["11","12"],"list2":["21","22"]}""", Data3.class);
         assertEquals("a1", d3.str);
         assertNull(d3.ignore); // ignore -> default value
         assertIterableEquals(List.of("21", "22"), d3.list2);
 
-        var str = Json.stringifyOf(
+        var str = Json.stringify(
             new Data3("a1", List.of("11", "12"), List.of("21", "22")));
         assertEquals("""
             {"str":"a1","list2":["21","22"]}""", str);
@@ -84,12 +84,12 @@ public class JsonStructIgnoreTest {
     @Test
     void testIgnoreClass() {
 
-        var d4 = Json.from("""
+        var d4 = Json.objectify("""
             {"str1":"a","str2":"b"}""", Data4.class);
         assertNull(d4.getStr1()); // ignore -> default value
         assertEquals("b", d4.getStr2());
 
-        var str = Json.stringifyOf(new Data4("a", "b"));
+        var str = Json.stringify(new Data4("a", "b"));
         assertEquals("""
             {"str1":"a"}""", str);
     }

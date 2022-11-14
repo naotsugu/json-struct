@@ -33,8 +33,8 @@ public class JsonArrayTest {
         var jsonStr = """
             {"id":10,"array":["a","b"]}""";
 
-        var d = Json.from(jsonStr, Data1.class);
-        assertEquals(jsonStr, Json.stringifyOf(d));
+        var d = Json.objectify(jsonStr, Data1.class);
+        assertEquals(jsonStr, Json.stringify(d));
     }
 
     @JsonStruct
@@ -47,8 +47,8 @@ public class JsonArrayTest {
         var jsonStr = """
             {"id":10,"array":[{"givenName":"g1","familyName":"f1"},{"givenName":"g2","familyName":"f2"}]}""";
 
-        var d = Json.from(jsonStr, Data2.class);
-        assertEquals(jsonStr, Json.stringifyOf(d));
+        var d = Json.objectify(jsonStr, Data2.class);
+        assertEquals(jsonStr, Json.stringify(d));
     }
 
     @JsonStruct
@@ -61,8 +61,8 @@ public class JsonArrayTest {
         var jsonStr = """
             {"id":10,"array":[["a","b"],["c","d"]]}""";
 
-        var d = Json.from(jsonStr, Data3.class);
-        assertEquals(jsonStr, Json.stringifyOf(d));
+        var d = Json.objectify(jsonStr, Data3.class);
+        assertEquals(jsonStr, Json.stringify(d));
     }
 
     @JsonStruct

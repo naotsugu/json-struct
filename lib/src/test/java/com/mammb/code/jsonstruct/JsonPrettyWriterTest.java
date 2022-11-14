@@ -16,28 +16,35 @@
 package com.mammb.code.jsonstruct;
 
 import org.junit.jupiter.api.Test;
-import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * JsonStructConvertTest.
- * @see com.mammb.code.jsonstruct.testdata.CustomConverts
+ * JsonPrettyWriterTest.
+ *
  * @author Naotsugu Kobayashi
  */
-public class JsonStructConvertTest {
+class JsonPrettyWriterTest {
 
     @Test
-    void testCustomConvert() {
-        var json = Json.of(Data1.class);
-        var jsonStr = """
-            {"dateTime":"2022/10/20 12:34:56"}""";
-        var d = json.fromJson(jsonStr);
-        assertEquals("2022-10-20T12:34:56", d.dateTime.toString());
-        assertEquals(jsonStr.trim(), json.toJson(d));
+    void toPrettyString() {
+        var ret = JsonPrettyWriter.toPrettyString("""
+            {"str":"a\\"1","obj":{"n1":"v1","n2":"v2"},"list1":["11","12"],"list2":["21","22"]}""");
+        assertEquals("""
+            {
+              "str": "a\\"1",
+              "obj": {
+                "n1": "v1",
+                "n2": "v2"
+              },
+              "list1": [
+                "11",
+                "12"
+              ],
+              "list2": [
+                "21",
+                "22"
+              ]
+            }""", ret);
     }
-
-    @JsonStruct
-    public record Data1(LocalDateTime dateTime) {}
-
 }

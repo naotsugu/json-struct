@@ -33,8 +33,8 @@ public class JsonEmptyTest {
     void testNull() {
         var jsonStr = """
             {"name":null}""";
-        var d = Json.from(jsonStr, Book.class);
-        assertEquals(jsonStr, Json.stringifyOf(d));
+        var d = Json.objectify(jsonStr, Book.class);
+        assertEquals(jsonStr, Json.stringify(d));
     }
 
 
@@ -42,8 +42,8 @@ public class JsonEmptyTest {
     void testEmptyList() {
         var jsonStr = """
             {"name":null,"materials":[]}""";
-        var d = Json.from(jsonStr, Food.class);
-        assertEquals(jsonStr, Json.stringifyOf(d));
+        var d = Json.objectify(jsonStr, Food.class);
+        assertEquals(jsonStr, Json.stringify(d));
     }
 
 
@@ -51,8 +51,8 @@ public class JsonEmptyTest {
     void testNullList() {
         var jsonStr = """
             {"name":null,"materials":null}""";
-        var d = Json.from(jsonStr, Food.class);
-        assertEquals(jsonStr, Json.stringifyOf(d));
+        var d = Json.objectify(jsonStr, Food.class);
+        assertEquals(jsonStr, Json.stringify(d));
     }
 
 
@@ -60,17 +60,17 @@ public class JsonEmptyTest {
     void testNullEnum() {
         var jsonStr = """
             {"fullName":{"givenName":"a","familyName":"b"},"age":20,"gender":null}""";
-        var d = Json.from(jsonStr, Person.class);
-        assertEquals(jsonStr, Json.stringifyOf(d));
+        var d = Json.objectify(jsonStr, Person.class);
+        assertEquals(jsonStr, Json.stringify(d));
     }
 
 
-//    @Test
-//    void testNullObject() {
-//        var jsonStr = """
-//            {"fullName":null,"age":30,"gender":"FEMALE"}""";
-//        var d = Json.from(jsonStr, Person.class);
-//        assertEquals(jsonStr, Json.stringifyOf(d));
-//    }
+    @Test
+    void testNullObject() {
+        var jsonStr = """
+            {"fullName":null,"age":30,"gender":"FEMALE"}""";
+        var d = Json.objectify(jsonStr, Person.class);
+        assertEquals(jsonStr, Json.stringify(d));
+    }
 
 }

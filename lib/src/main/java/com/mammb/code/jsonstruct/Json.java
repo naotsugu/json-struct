@@ -41,7 +41,7 @@ public interface Json<T> {
      * @param reader Reader
      * @return the class instance
      */
-    default T from(Reader reader) {
+    default T fromJson(Reader reader) {
         return from(CharBufferReader.of(reader));
     }
 
@@ -51,7 +51,7 @@ public interface Json<T> {
      * @param cs the char sequence of json
      * @return the class instance
      */
-    default T from(CharSequence cs) {
+    default T fromJson(CharSequence cs) {
         return from(new StringReader(cs.toString()));
     }
 
@@ -63,8 +63,8 @@ public interface Json<T> {
      * @param <T> type of class
      * @return the class instance
      */
-    static <T> T from(CharSequence cs, Class<T> clazz) {
-        return of(clazz).from(new StringReader(cs.toString()));
+    static <T> T objectify(CharSequence cs, Class<T> clazz) {
+        return of(clazz).fromJson(cs);
     }
 
 
@@ -75,8 +75,8 @@ public interface Json<T> {
      * @param <T> type of class
      * @return the class instance
      */
-    static <T> T from(Reader reader, Class<T> clazz) {
-        return of(clazz).from(reader);
+    static <T> T objectify(Reader reader, Class<T> clazz) {
+        return of(clazz).fromJson(reader);
     }
 
 
@@ -86,7 +86,7 @@ public interface Json<T> {
      * @param writer destination of json data where serialized from java content tree
      * @throws IOException if io error occurred
      */
-    void stringify(T object, Appendable writer) throws IOException;
+    void toJson(T object, Appendable writer) throws IOException;
 
 
     /**
@@ -94,10 +94,10 @@ public interface Json<T> {
      * @param object the object content tree to be serialized.
      * @return the String serialized from java content tree.
      */
-    default String stringify(T object) {
+    default String toJson(T object) {
         try {
             StringBuilder sb = new StringBuilder(256);
-            stringify(object, sb);
+            toJson(object, sb);
             return sb.toString();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -108,13 +108,27 @@ public interface Json<T> {
     /**
      * Serializes the object content tree to a Json string.
      * @param object the object content tree to be serialized.
+     * @param writer destination of json data where serialized from java content tree
+     * @param <T> type of class
+     * @throws IOException if io error occurred
+     */
+    static <T> void stringify(T object, Appendable writer) throws IOException {
+        @SuppressWarnings("unchecked")
+        Class<T> clazz = (Class<T>) object.getClass();
+        of(clazz).toJson(object, writer);
+    }
+
+
+    /**
+     * Serializes the object content tree to a Json string.
+     * @param object the object content tree to be serialized.
      * @param <T> type of class
      * @return the String serialized from java content tree.
      */
-    static <T> String stringifyOf(T object) {
+    static <T> String stringify(T object) {
         @SuppressWarnings("unchecked")
         Class<T> clazz = (Class<T>) object.getClass();
-        return of(clazz).stringify(object);
+        return of(clazz).toJson(object);
     }
 
 

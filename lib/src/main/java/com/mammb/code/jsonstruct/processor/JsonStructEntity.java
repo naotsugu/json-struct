@@ -129,9 +129,9 @@ public class JsonStructEntity {
                     }
 
                     @Override
-                    public void stringify(#{entityName} object, Appendable writer) throws IOException {
-                        StringifyBuilder.of(writer, convert)
-                            #{stringifyCode};
+                    public void toJson(#{entityName} object, Appendable writer) throws IOException {
+                        StringifyBuilder sb = StringifyBuilder.of(writer, convert);
+                        #{stringifyCode}
                     }
 
                     #{backingCodes}

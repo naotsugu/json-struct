@@ -37,10 +37,10 @@ class JsonTest {
             {"name":"bookName"}
             """;
 
-        var book = json.from(jsonStr);
+        var book = json.fromJson(jsonStr);
         assertEquals("bookName", book.getName());
 
-        assertEquals(jsonStr.trim(), json.stringify(book));
+        assertEquals(jsonStr.trim(), json.toJson(book));
     }
 
 
@@ -52,12 +52,12 @@ class JsonTest {
             {"name":"foodName","materials":["material0","material1"]}
             """;
 
-        var food = json.from(jsonStr);
+        var food = json.fromJson(jsonStr);
         assertEquals("foodName", food.name());
         assertEquals("material0", food.materials().get(0));
         assertEquals("material1", food.materials().get(1));
 
-        assertEquals(jsonStr.trim(), json.stringify(food));
+        assertEquals(jsonStr.trim(), json.toJson(food));
     }
 
 
@@ -69,13 +69,13 @@ class JsonTest {
             {"fullName":{"givenName":"Bob","familyName":"Dylan"},"age":81,"gender":"MALE"}
             """;
 
-        var person = json.from(jsonStr);
+        var person = json.fromJson(jsonStr);
         assertEquals("Bob", person.fullName().givenName());
         assertEquals("Dylan", person.fullName().familyName());
         assertEquals(81, person.age());
         assertEquals(Gender.MALE, person.gender());
 
-        assertEquals(jsonStr.trim(), json.stringify(person));
+        assertEquals(jsonStr.trim(), json.toJson(person));
 
     }
 
@@ -86,7 +86,7 @@ class JsonTest {
         var jsonStr = """
             {"name":"Bob","owners":{"owner1":{"givenName":"a","familyName":"b"},"owner2":{"givenName":"c","familyName":"d"}}}
             """;
-        var pet = json.from(jsonStr);
+        var pet = json.fromJson(jsonStr);
         assertEquals("Bob", pet.getName());
         Iterator<Map.Entry<String, FullName>> iterator =  pet.getOwners().entrySet().iterator();
         var n1 = iterator.next();
@@ -98,7 +98,7 @@ class JsonTest {
         assertEquals("c", n2.getValue().givenName());
         assertEquals("d", n2.getValue().familyName());
 
-        assertEquals(jsonStr.trim(), json.stringify(pet));
+        assertEquals(jsonStr.trim(), json.toJson(pet));
     }
 
 }

@@ -98,8 +98,12 @@ public class Code {
      * @return this code
      */
     public Code append(String literal) {
-        int index = lines.size() - 1;
-        lines.set(index, lines.get(index) + literal);
+        if (lines.isEmpty()) {
+            lines.add(literal);
+        } else {
+            int index = lines.size() - 1;
+            lines.set(index, lines.get(index) + literal);
+        }
         return this;
     }
 

@@ -93,6 +93,7 @@ public class JsonStructIgnoreTest {
         assertEquals("""
             {"str1":"a"}""", str);
     }
+
     @JsonStruct
     public static class Data4 {
         private final String str1;

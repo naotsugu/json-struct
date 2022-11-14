@@ -43,7 +43,7 @@ public record Person(FullName fullName, int age) {
 Serialization / Deserialization would be as follows
 
 ```java
-String string = json.from("""
+String string = """
 {
     "fullName": {
          "givenName": "Bob",
@@ -53,12 +53,15 @@ String string = json.from("""
     "gender": "MALE"
 }""";
 
+
 Person person = Json.objectify(string, Person.class);
+
 person.fullName().givenName();  // Bob
 person.fullName().familyName(); // Dylan
 person.age();                   // 81
 person.gender();                // Gender.MALE
 
+    
 String serialized = json.stringify(person);
 // {"fullName":{"givenName":"Bob","familyName":"Dylan"},"age":81,"gender":"MALE"}
 ```

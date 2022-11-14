@@ -41,8 +41,8 @@ Add dependencies and specify annotation processors.
 
 ```kotlin
 dependencies {
-  implementation("com.mammb:json-struct:0.2.0")
-  annotationProcessor("com.mammb:json-struct:0.2.0")
+  implementation("com.mammb:json-struct:0.3.0")
+  annotationProcessor("com.mammb:json-struct:0.3.0")
 }
 ```
 
@@ -50,8 +50,8 @@ dependencies {
 
 ```groovy
 dependencies {
-    testImplementation 'com.mammb:json-struct:0.2.0'
-    annotationProcessor 'com.mammb:json-struct:0.2.0'
+    testImplementation 'com.mammb:json-struct:0.3.0'
+    annotationProcessor 'com.mammb:json-struct:0.3.0'
 }
 ```
 
@@ -61,7 +61,7 @@ dependencies {
 <dependency>
     <groupId>com.mammb</groupId>
     <artifactId>json-struct</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
 </dependency>
 ```
 
@@ -89,30 +89,38 @@ Given the following JSON string
 
 ```java
 var str = """
-    {
-        "fullName": {
-            "givenName": "Bob",
-            "familyName": "Dylan"
-        },
-        "age": 81,
-        "gender": "MALE"
-    }
-    """;
+{
+    "fullName": {
+        "givenName": "Bob",
+        "familyName": "Dylan"
+    },
+    "age": 81,
+    "gender": "MALE"
+}
+""";
 ```
 Deserialization is performed as follows
 
 ```java
 var json = Json.of(Person.class);
-var person = json.from(str);
+var person = json.fromJson(str);
 ```
 
 Serialization is performed as follows
 
 ```java
-var serialized = json.stringify(person);
+var serialized = json.toJson(person);
 ```
 
 The creation of Json objects by `Json.of()` has a very small creation cost, so instantiating them each time is not a problem.
+
+
+Using the Static method, you can also write the following
+
+```java
+Person person = Json.objectify(string, Person.class);
+String serialized = Json.stringify(person);
+```
 
 
 

@@ -62,7 +62,7 @@ person.age();                   // 81
 person.gender();                // Gender.MALE
 
     
-String serialized = json.stringify(person);
+String serialized = Json.stringify(person);
 // {"fullName":{"givenName":"Bob","familyName":"Dylan"},"age":81,"gender":"MALE"}
 ```
 

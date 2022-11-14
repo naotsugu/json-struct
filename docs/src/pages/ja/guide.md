@@ -41,8 +41,8 @@ Json Struct は、単純なJSON変換において、最適なフットプリン�
 
 ```kotlin
 dependencies {
-  implementation("com.mammb:json-struct:0.2.0")
-  annotationProcessor("com.mammb:json-struct:0.2.0")
+  implementation("com.mammb:json-struct:0.3.0")
+  annotationProcessor("com.mammb:json-struct:0.3.0")
 }
 ```
 
@@ -50,8 +50,8 @@ dependencies {
 
 ```groovy
 dependencies {
-    testImplementation 'com.mammb:json-struct:0.2.0'
-    annotationProcessor 'com.mammb:json-struct:0.2.0'
+    testImplementation 'com.mammb:json-struct:0.3.0'
+    annotationProcessor 'com.mammb:json-struct:0.3.0'
 }
 ```
 
@@ -61,7 +61,7 @@ dependencies {
 <dependency>
     <groupId>com.mammb</groupId>
     <artifactId>json-struct</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
 </dependency>
 ```
 
@@ -89,32 +89,39 @@ public record Person(FullName fullName, int age) { }
 
 ```java
 var str = """
-    {
-        "fullName": {
-            "givenName": "Bob",
-            "familyName": "Dylan"
-        },
-        "age": 81,
-        "gender": "MALE"
-    }
-    """;
+{
+    "fullName": {
+        "givenName": "Bob",
+        "familyName": "Dylan"
+    },
+    "age": 81,
+    "gender": "MALE"
+}
+""";
 ```
 
 デシリアライズは以下のように行います。
 
 ```java
 var json = Json.of(Person.class);
-var person = json.from(str);
+var person = json.fromJson(str);
 ```
 
 シリアライズは以下のように行います。
 
 ```java
-var serialized = json.stringify(person);
+var serialized = json.toJson(person);
 ```
 
 `Json.of()` によるJsonオブジェクトの生成は、生成コストが非常に小さいため、都度インスタンス化しても問題になることはありません。
 
+以下のように書くこともできます。
+
+
+```java
+Person person = Json.objectify(string, Person.class);
+String serialized = Json.stringify(person);
+```
 
 
 

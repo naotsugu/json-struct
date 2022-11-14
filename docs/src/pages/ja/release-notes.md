@@ -6,10 +6,13 @@ layout: ../../layouts/MainLayout.astro
 
 ## Release notes
 
+### v0.2.0
+
+ ベータ版公開
 
 ### v0.2.0
 
- ベータ公開
+ アルファ版公開
 
 ### v0.1.0
 

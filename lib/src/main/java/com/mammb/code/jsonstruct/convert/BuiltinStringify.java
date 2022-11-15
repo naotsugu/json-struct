@@ -131,16 +131,16 @@ public class BuiltinStringify {
             case "java.util.OptionalLong"  -> sb.appendNum(((OptionalLong) object).isPresent() ? String.valueOf(((OptionalLong) object).getAsLong()) : "null");
 
             case "char"                    -> sb.appendStr(String.valueOf((char) object));
-            case "java.util.Date"          -> sb.appendStr(DateTimeFormatter.ISO_DATE_TIME.withZone(UTC).withLocale(locale).format(((Date) object).toInstant()));
+            case "java.util.Date"          -> sb.appendStr(DATE_TIME.withLocale(locale).format(((Date) object).toInstant()));
             case "java.util.Calendar"      -> sb.appendStr(str((Calendar) object));
             case "java.util.TimeZone"      -> sb.appendStr(((TimeZone) object).getID());
-            case "java.time.Instant"       -> sb.appendStr(DateTimeFormatter.ISO_INSTANT.withLocale(locale).format((Instant) object));
-            case "java.time.LocalDateTime" -> sb.appendStr(DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale).format((LocalDateTime) object));
-            case "java.time.LocalDate"     -> sb.appendStr(DateTimeFormatter.ISO_LOCAL_DATE.withZone(UTC).withLocale(locale).format((LocalDate) object));
-            case "java.time.LocalTime"     -> sb.appendStr(DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale).format((LocalTime) object));
-            case "java.time.OffsetDateTime"-> sb.appendStr(DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale).format((OffsetDateTime) object));
-            case "java.time.OffsetTime"    -> sb.appendStr(DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale).format((OffsetTime) object));
-            case "java.time.ZonedDateTime" -> sb.appendStr(DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(locale).format((ZonedDateTime) object));
+            case "java.time.Instant"       -> sb.appendStr(INSTANT.format((Instant) object));
+            case "java.time.LocalDateTime" -> sb.appendStr(LOCAL_DATE_TIME.format((LocalDateTime) object));
+            case "java.time.LocalDate"     -> sb.appendStr(LOCAL_DATE.format((LocalDate) object));
+            case "java.time.LocalTime"     -> sb.appendStr(LOCAL_TIME.format((LocalTime) object));
+            case "java.time.OffsetDateTime"-> sb.appendStr(OFFSET_DATE_TIME.format((OffsetDateTime) object));
+            case "java.time.OffsetTime"    -> sb.appendStr(OFFSET_TIME.format((OffsetTime) object));
+            case "java.time.ZonedDateTime" -> sb.appendStr(ZONED_DATE_TIME.format((ZonedDateTime) object));
             case "java.time.ZoneId"        -> sb.appendStr(((ZoneId) object).getId());
             case "java.time.ZoneOffset"    -> sb.appendStr(((ZoneOffset) object).getId());
             default -> sb.appendStr(object);
@@ -161,5 +161,15 @@ public class BuiltinStringify {
             .format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(value.getTimeInMillis()),
                 value.getTimeZone().toZoneId()));
     }
+
+
+    private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ISO_DATE_TIME.withZone(UTC).withLocale(locale);
+    private static final DateTimeFormatter INSTANT = DateTimeFormatter.ISO_INSTANT.withLocale(locale);
+    private static final DateTimeFormatter LOCAL_DATE_TIME = DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale);
+    private static final DateTimeFormatter LOCAL_DATE = DateTimeFormatter.ISO_LOCAL_DATE.withZone(UTC).withLocale(locale);
+    private static final DateTimeFormatter LOCAL_TIME = DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale);
+    private static final DateTimeFormatter OFFSET_DATE_TIME = DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale);
+    private static final DateTimeFormatter OFFSET_TIME = DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale);
+    private static final DateTimeFormatter ZONED_DATE_TIME = DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(locale);
 
 }

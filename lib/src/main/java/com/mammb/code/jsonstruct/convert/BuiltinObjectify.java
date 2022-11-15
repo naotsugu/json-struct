@@ -128,16 +128,16 @@ public class BuiltinObjectify {
             case "java.util.OptionalLong"       -> v -> v.equals(JsonValue.NULL) ? OptionalLong.empty() : OptionalLong.of(asNs(v).getLong());
 
             case "char", "java.lang.Character"  -> v -> asCs(v).chars()[0];
-            case "java.util.Date"               -> v -> asDate(v.toString());
+            case "java.util.Date"               -> v -> Date.from(ZonedDateTime.parse(v.toString(), DATE_TIME).toInstant());
             case "java.util.Calendar"           -> v -> asCalendar(v.toString());
             case "java.util.TimeZone"           -> v -> asTimeZone(v.toString());
-            case "java.time.Instant"            -> v -> Instant.from(DateTimeFormatter.ISO_INSTANT.withZone(UTC).withLocale(locale).parse(v.toString()));
-            case "java.time.LocalDateTime"      -> v -> LocalDateTime.parse(v.toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale));
-            case "java.time.LocalDate"          -> v -> LocalDate.parse(v.toString(), DateTimeFormatter.ISO_LOCAL_DATE.withLocale(locale));
-            case "java.time.LocalTime"          -> v -> LocalTime.parse(v.toString(), DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale));
-            case "java.time.OffsetDateTime"     -> v -> OffsetDateTime.parse(v.toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale));
-            case "java.time.OffsetTime"         -> v -> OffsetTime.parse(v.toString(), DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale));
-            case "java.time.ZonedDateTime"      -> v -> ZonedDateTime.parse(v.toString(), DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(locale));
+            case "java.time.Instant"            -> v -> Instant.from(INSTANT.parse(v.toString()));
+            case "java.time.LocalDateTime"      -> v -> LocalDateTime.parse(v.toString(), LOCAL_DATE_TIME);
+            case "java.time.LocalDate"          -> v -> LocalDate.parse(v.toString(), LOCAL_DATE);
+            case "java.time.LocalTime"          -> v -> LocalTime.parse(v.toString(), LOCAL_TIME);
+            case "java.time.OffsetDateTime"     -> v -> OffsetDateTime.parse(v.toString(), OFFSET_DATE_TIME);
+            case "java.time.OffsetTime"         -> v -> OffsetTime.parse(v.toString(), OFFSET_TIME);
+            case "java.time.ZonedDateTime"      -> v -> ZonedDateTime.parse(v.toString(), ZONED_DATE_TIME);
             case "java.time.ZoneId"             -> v -> ZoneId.of(v.toString());
             case "java.time.ZoneOffset"         -> v -> ZoneOffset.of(v.toString());
             case "java.time.Duration"           -> v -> Duration.parse(v.toString());
@@ -202,15 +202,6 @@ public class BuiltinObjectify {
     }
 
 
-    private static Date asDate(String str) {
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withLocale(locale);
-        ZonedDateTime parsed = (formatter.getZone() == null)
-            ? ZonedDateTime.parse(str, formatter.withZone(UTC))
-            : ZonedDateTime.parse(str, formatter);
-        return Date.from(parsed.toInstant());
-    }
-
-
     private static TimeZone asTimeZone(String str) {
         try {
             final ZoneId zoneId = ZoneId.of(str);
@@ -220,5 +211,15 @@ public class BuiltinObjectify {
             throw new JsonStructException("zone parse error.", e);
         }
     }
+
+
+    private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ISO_DATE_TIME.withZone(UTC).withLocale(locale);
+    private static final DateTimeFormatter INSTANT = DateTimeFormatter.ISO_INSTANT.withZone(UTC).withLocale(locale);
+    private static final DateTimeFormatter LOCAL_DATE_TIME = DateTimeFormatter.ISO_LOCAL_DATE_TIME.withLocale(locale);
+    private static final DateTimeFormatter LOCAL_DATE = DateTimeFormatter.ISO_LOCAL_DATE.withLocale(locale);
+    private static final DateTimeFormatter LOCAL_TIME = DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale);
+    private static final DateTimeFormatter OFFSET_DATE_TIME = DateTimeFormatter.ISO_OFFSET_DATE_TIME.withLocale(locale);
+    private static final DateTimeFormatter OFFSET_TIME = DateTimeFormatter.ISO_OFFSET_TIME.withLocale(locale);
+    private static final DateTimeFormatter ZONED_DATE_TIME = DateTimeFormatter.ISO_ZONED_DATE_TIME.withLocale(locale);
 
 }

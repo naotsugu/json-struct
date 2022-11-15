@@ -63,6 +63,16 @@ public class JsonPrettyWriter implements Appendable {
 
 
     /**
+     * Create a new JsonPrettyWriter.
+     * @param writer the appendable would be written to
+     * @return a new JsonPrettyWriter
+     */
+    public static JsonPrettyWriter of(Appendable writer) {
+        return new JsonPrettyWriter(writer, 2);
+    }
+
+
+    /**
      * Generate pretty json string.
      * @param csq the source CharSequence
      * @return pretty json string

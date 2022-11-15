@@ -15,7 +15,13 @@
  */
 package com.mammb.code.jsonstruct;
 
+import com.mammb.code.jsonstruct.testdata.FullName;
+import com.mammb.code.jsonstruct.testdata.Pet;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,12 +33,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class JsonPrettyWriterTest {
 
     @Test
-    void toPrettyString() {
+    void testPrettyString() {
         var ret = JsonPrettyWriter.toPrettyString("""
-            {"str":"a\\"1","obj":{"n1":"v1","n2":"v2"},"list1":["11","12"],"list2":["21","22"]}""");
+            {"str":"a\\",1","obj":{"n1":"v1","n2":"v2"},"list1":["11","12"],"list2":["21","22"]}""");
         assertEquals("""
             {
-              "str": "a\\"1",
+              "str": "a\\",1",
               "obj": {
                 "n1": "v1",
                 "n2": "v2"
@@ -47,4 +53,25 @@ class JsonPrettyWriterTest {
               ]
             }""", ret);
     }
+
+
+    @Test
+    void testPrettyWriter() throws IOException {
+
+        var pet = Pet.of("a", Map.of("1", new FullName("a", "b")));
+        var writer = new StringWriter();
+        Json.stringify(pet, JsonPrettyWriter.of(writer));
+
+        assertEquals("""
+            {
+              "name": "a",
+              "owners": {
+                "1": {
+                  "givenName": "a",
+                  "familyName": "b"
+                }
+              }
+            }""", writer.toString());
+    }
+
 }

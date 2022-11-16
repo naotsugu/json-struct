@@ -312,3 +312,35 @@ public static final Function<String, LocalDateTime> localDateTimeObjectify = str
 
 ※`java.sql.Date`, `java.sql.Timestamp` には組み込みの変換処理を提供しません
 
+
+## JsonPrettyWriter
+
+整形されたJsonを取得する場合は、`JsonPrettyWriter` を使い以下のようにします。
+
+```java
+var bob = new Person(new FullName("Bob", "Dylan"), 81, Gender.FEMALE);
+var writer = new StringWriter();
+Json.stringify(bob, JsonPrettyWriter.of(writer));
+```
+
+以下の出力が得られます。
+
+```java
+assertEquals("""
+    {
+      "fullName": {
+        "givenName": "Bob",
+        "familyName": "Dylan"
+      },
+      "age": 81,
+      "gender": "FEMALE"
+    }""", writer.toString());
+```
+
+直接Json文字列を整形することもできます。
+
+```java
+var ret = JsonPrettyWriter.toPrettyString("""
+    {"fullName":{"givenName":"Bob","familyName":"Dylan"},"age": 81,"gender": "FEMALE"}""");
+```
+

@@ -16,9 +16,10 @@
 package com.mammb.code.jsonstruct;
 
 import com.mammb.code.jsonstruct.testdata.FullName;
+import com.mammb.code.jsonstruct.testdata.Gender;
+import com.mammb.code.jsonstruct.testdata.Person;
 import com.mammb.code.jsonstruct.testdata.Pet;
 import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
@@ -58,19 +59,18 @@ class JsonPrettyWriterTest {
     @Test
     void testPrettyWriter() throws IOException {
 
-        var pet = Pet.of("a", Map.of("1", new FullName("a", "b")));
+        var bob = new Person(new FullName("Bob", "Dylan"), 81, Gender.FEMALE);
         var writer = new StringWriter();
-        Json.stringify(pet, JsonPrettyWriter.of(writer));
+        Json.stringify(bob, JsonPrettyWriter.of(writer));
 
         assertEquals("""
             {
-              "name": "a",
-              "owners": {
-                "1": {
-                  "givenName": "a",
-                  "familyName": "b"
-                }
-              }
+              "fullName": {
+                "givenName": "Bob",
+                "familyName": "Dylan"
+              },
+              "age": 81,
+              "gender": "FEMALE"
             }""", writer.toString());
     }
 

@@ -314,3 +314,34 @@ The following classes provide built-in conversion processing.
 `java.sql.Date`, `java.sql.Timestamp` do not provide built-in conversion handling
 
 
+## JsonPrettyWriter
+
+To get a formatted Json, use `JsonPrettyWriter` as follows
+
+```java
+var bob = new Person(new FullName("Bob", "Dylan"), 81, Gender.FEMALE);
+var writer = new StringWriter();
+Json.stringify(bob, JsonPrettyWriter.of(writer));
+```
+
+The output would be as follows
+
+```java
+assertEquals("""
+    {
+      "fullName": {
+        "givenName": "Bob",
+        "familyName": "Dylan"
+      },
+      "age": 81,
+      "gender": "FEMALE"
+    }""", writer.toString());
+```
+
+You can also format Json strings directly.
+
+```java
+var ret = JsonPrettyWriter.toPrettyString("""
+    {"fullName":{"givenName":"Bob","familyName":"Dylan"},"age": 81,"gender": "FEMALE"}""");
+```
+

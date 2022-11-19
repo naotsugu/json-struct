@@ -19,7 +19,7 @@ See below for the repository.
 
 ### What is Json Struct ?
 
-A library for inter-conversion between JSON and Java objects.
+Json Struct is a library for interconversion between JSON and Java objects.
 
 Numerous similar libraries tend to have a high runtime footprint due to heavy use of reflection and excessive functionality.
 In many cases, this high footprint is not appropriate if you simply want to perform a simple JSON conversion.
@@ -27,7 +27,7 @@ In many cases, this high footprint is not appropriate if you simply want to perf
 Json Struct has an optimal footprint and speed for simple JSON conversions.
 And in most cases, only simple JSON transformations are needed.
 
-Since the annotation processor generates the inter-conversion code at build time, the output at runtime is a simple object generation/JSON string, providing both excellent footprint and execution speed.
+Since the annotation processor generates the interconversion code at build time, the output at runtime is a simple object generation/JSON string, providing both excellent footprint and execution speed.
 
 
 ## Quickstart
@@ -134,7 +134,7 @@ Classes to which `@JsonStruct` is assigned will have their JSON conversion codes
 
 
 
-### Record Class
+### Using record Class
 
 The case for giving `@JsonStruct` to record classes is recommended in many cases.
 
@@ -149,7 +149,7 @@ The target class also functions as an inner class.
 
 
 
-### Class
+### Using class
 
 If `@JsonStruct` is given to a class, the constructor with the highest number of arguments in that class is selected for instantiation.
 
@@ -168,7 +168,7 @@ An accessor(getter) is used for serialization.
 A mutator(setter) is not required.
 
 
-### Constructor
+### Using constructor
 
 If `@JsonStruct` is given to a constructor, that constructor is used for instantiation.
 
@@ -189,7 +189,7 @@ public class Book {
 ```
 
 
-### Static factory methods
+### Using static factory methods
 
 If `@JsonStruct` is given to a static factory method, that static factory method will be used for instantiation.
 

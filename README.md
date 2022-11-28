@@ -1,15 +1,40 @@
 
+
+<div align="center">
+  <img src="docs/public/default-og-image.png"/>
+  <h1>Json Struct</h1>
+  <strong>Json mapper without reflection</strong>
+</div>
+
+<br />
+
+<div align="center">
+  <!-- Github Actions -->
+  <img src="https://github.com/naotsugu/json-struct/actions/workflows/gradle-build.yml/badge.svg" alt="actions status" />
+</div>
+
+<div align="center">
+  <h4>
+    <a href="#usage">
+      Usage
+    </a>
+    <span> | </span>
+    <a href="https://naotsugu.github.io/json-struct/">
+      Docs
+    </a>
+  </h4>
+</div>
+<br />
+
+
+
+
 # json-struct
 
-[![Build](https://github.com/naotsugu/json-struct/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/naotsugu/jpa-fluent-query/actions/workflows/gradle-build.yml)
-
-
-[User Guide](https://naotsugu.github.io/json-struct/)
-
-
-## What is this
-
 json-struct provides a standard binding layer between Java classes and JSON documents.
+
+
+## Features
 
 * No reflection is used
 * Annotation processor resolves bindings at build time

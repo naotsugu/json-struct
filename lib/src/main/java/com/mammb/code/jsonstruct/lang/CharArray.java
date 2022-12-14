@@ -82,7 +82,7 @@ public class CharArray implements Serializable {
     public void add(char[] values) {
         int len = values.length;
         if (length + len > elements.length) {
-            elements = grow(values.length);
+            elements = grow(length + len);
         }
         System.arraycopy(values, 0, elements, length, len);
         length += len;
@@ -108,7 +108,7 @@ public class CharArray implements Serializable {
      */
     public void add(CharReader reader, int len) {
         if (length + len > elements.length) {
-            elements = grow(len);
+            elements = grow(length + len);
         }
         length += Math.max(0, reader.read(elements, length, len));
     }
